@@ -10,18 +10,20 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>gateway-common</module>
+        <module>gateway-config-center</module>
     </modules>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <lombok.version>1.18.26</lombok.version>
         <netty.version>4.1.51.Final</netty.version>
         <async-http-client.version>2.10.0</async-http-client.version>
         <slf4j.version>1.7.25</slf4j.version>
         <log4j2.version>2.11.1</log4j2.version>
-
+        <fastjson.verson>1.2.76</fastjson.verson>
     </properties>
 
     <dependencies>
@@ -69,6 +71,12 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j2.version}</version>
+        </dependency>
+        <!-- fastjson依赖 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.verson}</version>
         </dependency>
     </dependencies>
     
