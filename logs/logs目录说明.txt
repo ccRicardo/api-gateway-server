@@ -1,0 +1,4 @@
+logs目录是用来存放各种日志文件的目录，其中：
+access.log存放访问日志
+gateway-core.log存放网关系统的应用日志
+gc.log存放jvm的垃圾回收日志
