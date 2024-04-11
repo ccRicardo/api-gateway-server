@@ -26,6 +26,7 @@
         <apm-toolkit-trace.version>8.15.0</apm-toolkit-trace.version>
         <apm-toolkit-log4j-2.x>8.15.0</apm-toolkit-log4j-2.x>
         <jjwt.version>0.6.0</jjwt.version>
+        <hystrix-core.version>1.5.12</hystrix-core.version>
 
     </properties>
     <dependencies>
@@ -89,6 +90,12 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
+        </dependency>
+        <!-- Netflix Hystrix依赖，用于做服务熔断 -->
+        <dependency>
+            <groupId>com.netflix.hystrix</groupId>
+            <artifactId>hystrix-core</artifactId>
+            <version>${hystrix-core.version}</version>
         </dependency>
     </dependencies>
 
