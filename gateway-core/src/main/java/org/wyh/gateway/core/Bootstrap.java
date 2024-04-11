@@ -80,7 +80,7 @@ public class Bootstrap {
      * @description: 初始化注册中心，并注册网关服务，然后监听服务的变更
                      （网关服务也需要注册到注册中心）
      * @Param config:
-     * @return: org.wyh.register.center.api.RegisterCenter
+     * @return: org.wyh.gateway.register.api.RegisterCenter
      */
     private static RegisterCenter registerAndSubscribe(Config config){
         /*

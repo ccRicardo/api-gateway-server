@@ -1,0 +1,155 @@
+本文件主要是对该api网关系统的各个模块以及它们的业务流程做一个简单的总结
+
+一、整体流程
+该网关系统的整体运行流程体现在Bootstrap类中，具体描述如下：
+（一）加载本地的静态配置信息。
+配置加载的优先级是：运行参数 > jvm参数 > 系统环境变量 > 配置文件 > 默认值
+（二）初始化配置中心
+先通过spi机制来创建配置中心的实例，然后调用init方法完成初始化。最后，传入一个RulesChangeListener实例，订阅规则的变更。
+（三）启动网关核心容器
+核心容器封装了网关系统的三个核心通信类：NettyHttpServer，NettyProcessor和NettyHttpClient。
+这三个类的启动又会实例化其他的核心功能类。因此，网关系统中的绝大部分核心功能类都是在这个阶段完成实例化的。
+（四）初始化注册中心
+先通过spi机制来创建注册中心的实例，然后将api网关服务也注册到注册中心。最后，传入一个RegisterCenterListener实例，订阅所有的服务。
+（五）服务优雅关机
+在网关系统关闭之前，在注册中心中注销掉网关服务。
+
+二、模块详情
+该系统可以分为五个模块：通信模块，过滤组件模块，客户端（服务接入）模块，注册配置模块，以及云平台（暂未实现）
+（一）通信模块
+
+Q：服务端中BIO的缺点，NIO的优点
+A：BIO是一个线程负责处理一个连接。在连接释放之前，该线程不能处理其他连接的请求。
+因此，即使该连接处于空闲状态，没有任何事件发生，线程仍然需要阻塞等待，直到发生事件，或者达到空闲超时时间，服务端自动释放连接资源。
+可见，这种方式会导致服务端的线程资源在大部分时候都处于空闲等待状态，无法充分利用服务器的硬件资源。
+此外，在面临高并发场景，连接数量比较多的情况，很容易出现线程池耗尽，导致大量请求来不及处理就丢失了。
+NIO则是通过一个selector来管理多个channel上的IO事件，即实现一个线程处理多个连接的请求。
+selector会轮询每个channel。当其中某个channel上发生IO事件时，selector便会定位到该channel，并调用相应的channel pipeline处理该IO事件。
+（需要注意的是，在netty中，selector会和一个装有非IO任务的任务队列绑定，封装成一个event loop）
+这种方式充分利用了服务端的线程资源，使之能够同时管理大量的连接对象，提高了系统的抗压能力和可用性。
+
+1、服务端（请求接入）
+服务端的主要作用是监听端口，接收客户端的请求。
+服务端的主要类是NettyHttpServer，其本质就是配置并启动netty服务端的引导程序ServerBootstrap
+netty服务端的启动过程和接收请求过程在这里就不再赘述，可以参考相关的源码解析
+channel pipeline上的Handler其实都属于处理端
+
+2、处理端（请求处理）
+处理端的主要作用是解析请求，并将解析后的包装对象放入缓冲队列。
+然后再从缓冲队列中取出包装对象，构建上下文对象，再交给过滤组件链进行处理。
+处理端的主要类及其作用如下：
+HttpServerCodec：解析http GET请求
+HttpObjectAggregator：解析http POST请求，并将分块的请求体聚合成一个完整的http请求
+NettyServerConnectManagerHandler：定义了channel在各种事件发生时应该进行的操作（主要是打印日志）
+NettyHttpServerHandler：构造请求的包装类对象，并交给请求处理器进行处理
+NettyCoreProcessor：请求处理器的基本实现，主要作用是构造上下文对象，交给过滤组件链处理，并进行异常处理
+DisruptorNettyCoreProcessor：在基本实现上加了缓冲队列。其核心过程如下：
+NettyHttpServerHandler将包装类对象放入队列（生产者）。NettyCoreProcessor从中取出包装类对象进行处理（消费者）
+
+3、客户端（服务调用）
+客户端的主要作用是进行请求转发/服务调用，并返回响应结果。
+（
+目前，客户端只支持发送http请求，调用http后台服务，暂不支持RPC泛化调用。理由大致如下：
+http协议更加简单通用，并且功能丰富，对服务的提供方和调用方没有过多的技术限定，自由灵活。
+而且实习团队中的物联网业务实际上是ai加物联网，而ai模型通常都是提供的restful接口。
+而RPC的典型特点是速度快，性能好。但是物联网业务对于高并发，高性能的需求并没有互联网那么大，所以不是一定要使用
+）
+客户端的主要类就是NettyHttpClient，其本质就是对AsyncHttpClient的封装。
+AsyncHttpClient能够发送异步http请求，也就是工作线程不需要阻塞等待后台服务返回响应数据，而是可以继续执行，发送其他的http请求。
+当某个请求的响应数据返回后，工作线程就会调用其中已经预设好的异步回调函数，完成接下来的处理操作。
+AsyncHttpClient的实现类是DefaultAsyncHttpClient，其主要类和作用如下：
+AsyncHttpClientConfig：配置类
+ChannelManager：管理channel池，并负责创建客户端的bootstrap等
+NettyRequestSender：发送http异步请求
+
+（二）过滤组件模块：
+1、过滤组件链工厂
+过滤组件链工厂类的主要作用是通过spi机制加载各组件的实例，然后根据请求上下文中携带的规则信息，构建相应的过滤器链实例，并保存到缓存中。
+过滤组件链工厂类的主要类是GatewayFilterChainFactory
+
+2、会话/用户鉴权
+用户鉴权的主要作用是从请求中获取jwt cookie，然后解析出相应的用户信息
+用户鉴权的主要类是UserAuthFilter
+该类使用了Jwts库
+
+3、流量控制/限流
+流量控制的主要作用是在限制一段时间内的最大访问次数
+流量控制的策略/类型分为两种：根据访问路径和根据服务id进行限流
+流量控制的模式也分为两种：如果使用单机网关系统，则通过Guava库实现单机限流器；如果使用集群网关系统，则通过redis实现分布式限流器。
+流量控制的主要类及其作用如下：
+FlowCtrlFilter：从上下文规则中获取流量控制配置项，然后调用相应的限流策略实例
+FlowCtrlByPathRule：根据路径进行限流，
+FlowCtrlByServiceRule：根据服务id进行限流，
+GuavaCountLimiter：基于Guava库中的RateLimiter实现的单机版限流器
+RedisCountLimiter：通过在redis中运行指定的lua脚本来实现的分布式限流器
+
+4、灰度分流
+灰度分流的主要作用是对访问流量进行分流，在部分流量中打上灰度标签，使其访问灰度服务实例。
+灰度分流的策略分为两种：基于http请求头中携带的灰度标记（主要用于测试人员测试灰度服务），和基于客户端ip进行分流。
+灰度分流的主要类是GrayFilter
+
+5、负载均衡
+负载均衡的主要作用是根据指定的均衡策略，从对应的服务实例集合中选择一个服务实例，作为后续真正的服务调用对象。
+负载均衡策略分为两种：随机和轮询
+负载均衡的主要类及其作用如下：
+LoadBalanceFilter：从上下文规则中获取负载均衡配置项，调用相应的负载均衡策略实例，最后设置真正的服务实例地址
+RandomLoadBalanceRule：随机
+RoundRobinLoadBalanceRule：轮询
+
+6、mock
+mock的主要作用是解析规则中的mock配置。若请求的api是个mock接口，则直接返回配置中的预设信息。
+因此，mock实际上是在模拟一个假/虚拟的功能实现，返回用于测试的“假数据”，便于在api开发过程中提前与前端或者其他依赖api进行联调测试。
+mock的主要类是MockFilter
+
+7、监控
+监控的主要作用是实时记录和反馈请求处理过程中的一些度量/统计指标。
+监控的主要类及其作用如下：
+MonitorFilter：前置监控，用于开启计时器
+MonitorEndFilter：后置监控，用于结束计时并记录结果。此外，还会开启一个http服务器线程，供Prometheus拉取数据。
+本类中通过Micrometer的Prometheus实现来收集请求处理过程中的统计数据，并使用Prometheus处理数据，Grafana展示数据。
+
+8、路由
+路由的主要作用是调用AsyncHttpClient的executeRequest方法发送异步http请求。
+在此基础上，还可以配置Hystrix断路器实现熔断降级
+todo 感觉还可以利用ServiceDefinition中的patternPath属性，进行一次路径匹配。若匹配失败，则直接返回相关异常。
+路由的主要类是RouterFilter
+
+（三）服务接入/客户端模块
+Q：为什么需要开发一个客户端模块，为什么只开发了spring boot的客户端模块？
+A：为了使后台服务能够更加方便，简洁地使用该网关系统，需要开发一套可以实现自动配置，自动扫描和自动注册的客户端模块。
+虽然后台服务使用的web框架可能并不一致，但是对应的客户端模块的整体设计思路，软件架构和实现流程是非常相似的。
+因此，此处以web框架中占比最大的spring boot为例，开发了一套针对spring boot应用的客户端系统，其他web框架客户端均可以此为参考，就不再赘述。
+
+客户端模块的完整工作流程：
+在实际应用中，客户端模块会作为外部依赖被使用到网关系统的spring boot后台服务所引入。
+在spring boot应用中，@SpringBootApplication会开启自动装配机制，扫描resources/META-INF/spring.factories文件，将其中配置的ApiClientAutoConfiguration类注册到ioc容器中。
+由于该类使用了@EnableConfigurationProperties(ApiProperties.class)，所以会将application.properties中以api开头的属性值绑定到ApiProperties相应字段中，并注册Bean实例。
+此外，由于该类还使用了@Configuration，所以@Bean修饰的HttpClientRegisterManager方法也会注册到ioc容器中。
+当spring boot应用启动时，便会发布ApplicationStartedEvent事件，调用HttpClientRegisterManager中的onApplicationEvent方法（过程中还会调用ApiAnnotationScanner），完成服务注册。
+
+1、自动配置
+自动配置的主要作用是利用spring boot的自动装配机制，注册ApiProperties和HttpClientRegisterManager的bean实例。
+自动配置的主要类是ApiClientAutoConfiguration
+
+2、注解扫描
+注解扫描的主要作用是扫描类/方法上的@ApiService/@ApiInvoker注解，然后构建相应的服务定义实例。
+注解扫描的主要类是ApiAnnotationScanner
+
+3、自动注册
+自动注册的主要作用是在spring boot服务启动时，将该服务自动注册到注册中心。
+自动注册的主要类是HttpClientRegisterManager
+
+（四）配置和注册模块
+配置中心和注册中心都是基于nacos实现的，因为其提供了简洁方便的可视化操作界面。
+
+1、配置中心
+配置中心的主要作用是存储网关系统的动态规则配置。
+当规则配置发生变更时，便会调用RulesChangeListener监听器实例，传递更新后的规则配置信息。
+配置中心的主要类是NacosConfigCenter
+
+2、注册中心
+注册中心的主要作用是完成服务的注册，注销和订阅
+其中，订阅指的是监控服务变更。当注册新服务，或者增/减服务实例时，便会调用RegisterCenterListener，传递最新的服务定义和服务实例集合。
+注册中心的主要类是NacosRegisterCenter
+
+

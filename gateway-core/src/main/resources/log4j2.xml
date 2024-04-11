@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--api网关系统的日志配置文件-->
+<!--
+    该api网关系统的日志分为三种类型：应用日志，访问日志和gc日志
+    应用日志：记录api网关应用在运行时的一些系统信息。日志输出位置分布于系统的各个模块，类中。
+    访问日志：记录所有进入api网关的请求信息。日志输出位置在核心模块中的路由过滤器中。
+    gc日志：记录jvm的垃圾回收信息，用于后续的性能调优。通过设置jvm的相关启动参数实现。
+-->
+<!--
+    status表示信息输出级别
+    schema表示log4j2配置文件的xml约束
+    monitorInterval表示监测间隔时间（每隔600s会检查一次日志配置文件的修改）
+-->
+<Configuration status="INFO" schema="Log4J-V2.0.xsd" monitorInterval="600">
+
+    <!--日志级别：TRACE < DEBUG < INFO < WARN < ERROR < FATAL-->
+    <Properties>
+        <!--配置日志文件输出目录，此处为项目根目录下的logs文件夹-->
+        <Property name="LOG_HOME">logs</Property>
+        <!--以下两个属性分别是应用日志和访问日志的日期输出格式-->
+        <!--其中，traceId是skywalking跟踪id，必须启用skywalking agent后才有效-->
+        <property name="patternLayout">%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%traceId] [%20.20t] %40.40c{1.} : %m%n</property>
+        <property name="accessPatternLayout">%d{yyyy-MM-dd HH:mm:ss.SSS} %m %n</property>
+    </Properties>
+    <!--配置日志的输出源-->
+	<Appenders>
+        <!--控制台输出-->
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="${patternLayout}"/>
+        </Console>	
+        <!--应用日志的文件输出-->
+	    <RollingRandomAccessFile name="RandomAccessFile" fileName="${LOG_HOME}/gateway-core.log" filePattern="${LOG_HOME}/gateway-core-%d{yyyy-MM-dd}-%i.log" >
+	      <PatternLayout pattern="${patternLayout}" />
+          <Policies>
+              <TimeBasedTriggeringPolicy interval="1"/>
+              <SizeBasedTriggeringPolicy size="500MB"/>
+          </Policies>
+          <DefaultRolloverStrategy max="20"/>	      
+	    </RollingRandomAccessFile>
+        <!--访问日志的文件输出-->
+        <RollingRandomAccessFile name="AccessLogFile" fileName="${LOG_HOME}/access.log" filePattern="${LOG_HOME}/access-%d{yyyy-MM-dd}-%i.log" >
+            <PatternLayout pattern="${accessPatternLayout}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="500MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+        <!--异步日志记录器，作用是在一个单独的线程中处理日志事件，并发送给相应的日志输出器/源-->
+		<Async name="Async" shutdownTimeout="10000">
+            <Appender-Ref ref="CONSOLE"/>
+            <Appender-Ref ref="RandomAccessFile"/>
+            <Appender-Ref ref="AccessLogFile"/>
+        </Async>
+	  </Appenders>
+    <!--配置日志记录器-->
+	<Loggers>
+        <!--应用日志的日志记录器-->
+	    <Logger name="org.wyh.core.*" level="info" includeLocation="true">
+	      <AppenderRef ref="RandomAccessFile"/>
+	    </Logger>
+        <!--访问日志的日志记录器-->
+        <Logger name="accessLog" level="info" includeLocation="false">
+            <AppenderRef ref="AccessLogFile"/>
+        </Logger>
+        <!--配置根记录器-->
+        <Root level="info">
+            <Appender-Ref ref="CONSOLE"/>
+            <Appender-Ref ref="accessLog"/>
+            <Appender-Ref ref="RandomAccessFile"/>
+        </Root>         
+	</Loggers>
+</Configuration>

@@ -1,0 +1,16 @@
+本文件主要是对api网关系统中jvm启动参数的作用进行一些说明：
+（1）-Xlog:gc*=info:file=logs/gc.log:time,tags
+作用是配置jvm的垃圾回收日志，其中：
+-Xlog:gc*：表示启用gc日志，并且gc*表示记录所有与gc相关的信息
+info：表示日志级别是info
+file=logs/gc.log:time：将日志信息输出到logs/gc.log文件中，并在每条日志前面添加时间戳和标签
+（2）-XX:+UseZGC
+作用是启用ZGC垃圾回收器，这是一种低延迟的垃圾回收器。
+（3）-javaagent:"D:\Tools\SkyWalkingJavaAgent\skywalking-agent\skywalking-agent.jar"
+作用是加载指定路径下的SkyWalking Agent
+SkyWalking是一个应用性能监控（APM）工具，在本系统中主要负责调用链路跟踪。
+SkyWalking与Prometheus不同，它不需要手工埋点，而是通过Java Agent方式，在jvm运行时，将监控代码插入到应用中
+（具体来说，就是在jvm加载类文件时，动态地修改字节码文件，从而对应用进行增强和监控）
+SkyWalking Agent会将服务运行过程中获得的监控数据通过rpc发送给SkyWalking OAP服务器，来进行数据的分析和存储
+（4）-Dskywalking.agent.service_name=api-gateway
+作用是设置本网关系统在Skywalking中的名称
