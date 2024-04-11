@@ -12,6 +12,7 @@
         <module>gateway-common</module>
         <module>gateway-config-center</module>
         <module>gateway-register-center</module>
+        <module>gateway-core</module>
     </modules>
 
     <properties>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>api-gateway-server</artifactId>
+        <groupId>org.wyh</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>gateway-core</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <gateway-common.version>1.0-SNAPSHOT</gateway-common.version>
+        <gateway-config-center.version>1.0-SNAPSHOT</gateway-config-center.version>
+        <gateway-register-center.version>1.0-SNAPSHOT</gateway-register-center.version>
+        <jaxb-api.version>2.3.0</jaxb-api.version>
+        <disruptor.version>3.3.6</disruptor.version>
+        <caffeine.version>3.1.5</caffeine.version>
+        <micrometer-registry-prometheus.version>1.10.2</micrometer-registry-prometheus.version>
+        <apm-toolkit-trace.version>8.15.0</apm-toolkit-trace.version>
+        <apm-toolkit-log4j-2.x>8.15.0</apm-toolkit-log4j-2.x>
+        <jjwt.version>0.6.0</jjwt.version>
+
+    </properties>
+    <dependencies>
+        <!-- 依赖于gateway-common模块 -->
+        <dependency>
+            <groupId>org.wyh</groupId>
+            <artifactId>gateway-common</artifactId>
+            <version>${gateway-common.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- 依赖于gateway-config-center模块 -->
+        <dependency>
+            <groupId>org.wyh</groupId>
+            <artifactId>gateway-config-center</artifactId>
+            <version>${gateway-config-center.version}</version>
+        </dependency>
+        <!-- 依赖于gateway-register-center模块 -->
+        <dependency>
+            <groupId>org.wyh</groupId>
+            <artifactId>gateway-register-center</artifactId>
+            <version>${gateway-register-center.version}</version>
+        </dependency>
+        <!-- 负责xml与java对象的相互转换。不知道为什么，若不加上该依赖，有些后台服务会报错 -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb-api.version}</version>
+        </dependency>
+        <!-- Disruptor框架，用于做缓冲队列 -->
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>${disruptor.version}</version>
+        </dependency>
+        <!-- caffeine缓存依赖 -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
+        </dependency>
+        <!-- micrometer prometheus依赖。负责收集应用中的统计数据，并将其转换为Prometheus可使用的格式 -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer-registry-prometheus.version}</version>
+        </dependency>
+        <!-- skywalking跟踪工具包，用于提供跟踪相关的api，例如使用@Trace来跟踪某个方法的调用信息 -->
+        <dependency>
+            <groupId>org.apache.skywalking</groupId>
+            <artifactId>apm-toolkit-trace</artifactId>
+            <version>${apm-toolkit-trace.version}</version>
+        </dependency>
+        <!-- skywalking log4j2增强工具包，主要作用是增强log4j2的功能，使之能够打印skywalking跟踪id -->
+        <dependency>
+            <groupId>org.apache.skywalking</groupId>
+            <artifactId>apm-toolkit-log4j-2.x</artifactId>
+            <version>${apm-toolkit-log4j-2.x}</version>
+        </dependency>
+        <!--  java的jwt工具库 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

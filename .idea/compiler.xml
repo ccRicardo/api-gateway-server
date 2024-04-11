@@ -6,9 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="gateway-config-center" />
+        <module name="gateway-core" />
         <module name="gateway-common" />
         <module name="gateway-register-center" />
-        <module name="gateway-config-center" />
       </profile>
     </annotationProcessing>
   </component>
