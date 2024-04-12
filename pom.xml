@@ -23,8 +23,9 @@
         <lombok.version>1.18.26</lombok.version>
         <netty.version>4.1.51.Final</netty.version>
         <async-http-client.version>2.10.0</async-http-client.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <log4j2.version>2.11.1</log4j2.version>
+<!--        <log4j2.version>2.11.1</log4j2.version>-->
+        <logback-classic.version>1.2.3</logback-classic.version>
+        <slf4j-api.version>1.7.25</slf4j-api.version>
         <fastjson.verson>1.2.76</fastjson.verson>
     </properties>
 
@@ -54,10 +55,21 @@
             <version>${async-http-client.version}</version>
         </dependency>
         <!-- log4j日志相关依赖 -->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.logging.log4j</groupId>-->
+<!--            <artifactId>log4j-slf4j-impl</artifactId>-->
+<!--            <version>${log4j2.version}</version>-->
+<!--        </dependency>-->
+        <!-- logback日志相关依赖 -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j2.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-classic.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
         </dependency>
         <!-- fastjson依赖 -->
         <dependency>
