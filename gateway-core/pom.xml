@@ -27,6 +27,7 @@
         <apm-toolkit-log4j-2.x>8.15.0</apm-toolkit-log4j-2.x>
         <jjwt.version>0.6.0</jjwt.version>
         <hystrix-core.version>1.5.12</hystrix-core.version>
+        <maven-assembly-plugin.version>3.5.0</maven-assembly-plugin.version>
 
     </properties>
     <dependencies>
