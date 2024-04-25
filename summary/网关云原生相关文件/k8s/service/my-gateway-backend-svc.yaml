@@ -1,0 +1,16 @@
+# my gateway backend service的配置文件
+# 网关pod实例访问后台pod实例实际上并不需要用到service（因为网关的注册中心已经保存了各后台pod实例的ip和port）
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels: 
+    app: my-gateway-backend
+  name: my-gateway-backend-svc
+spec:
+  selector: 
+    app: my-gateway-backend
+  ports:
+  - port: 8083
+    targetPort: 8083
+  type: NodePort

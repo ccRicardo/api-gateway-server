@@ -1,0 +1,19 @@
+Docker部署：
+1、制作镜像
+gateway-server和gateway-backend部分，需要将jar包与对应Dockerfile放在同一目录下，然后通过docker build -t xxx . 命令即可制作相应镜像。
+Nacos-server部分，只需切换到对应Dockerfile所在目录，然后运行上述命令即可制作镜像。Dockerfile中，主要是在官方v1.4.4基础上，通过命令创建了/home/nacos/init.d目录，以及在/home/nacos/conf/application.properties中将server.tomcat.basedir属性注释掉。
+2、运行命令
+推荐使用host网络，这样就不必修改gateway-server和gateway-backend的配置。命令如下：
+docker run -it --name=xxx --net=host xxx 
+如果是nacos-server，需要设置环境变量：-e MODE=standalone
+如果使用bridge网络，需要设置端口映射，并且gateway-server和gateway-backend还需要通过环境变量的方式设置注册/配置中心的地址。
+
+K8s部署：
+1、上传镜像
+使用docker save将镜像打包成tar文件，然后通过xftp传到其他节点/主机上，再使用docker load将其上传到本地镜像仓库。
+注意：k8s每个node节点的本地镜像仓库都应该包含my-nacos-server，my-gateway-server和my-gateway-backend镜像。
+2、编写service yaml
+3、编写deployment yaml
+4、创建相应资源对象
+先创建service对象，然后通过命令kubectl get svc获取nacos-server-service的clusterIP和port
+修改gateway-server和gateway-backend的deployment yaml文件，将环境变量中的注册和配置中心地址改为clusterIP:port，然后创建deployment对象

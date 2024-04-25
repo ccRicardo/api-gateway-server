@@ -1,0 +1,36 @@
+# my gateway backend deployment的配置文件
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  labels: 
+    app: my-gateway-backend
+  name: my-gateway-backend-deploy
+  namespace: default
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: my-gateway-backend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata: 
+      labels:
+        app: my-gateway-backend
+    spec:
+      containers:
+      - image: my-gateway-backend:1.0
+        imagePullPolicy: IfNotPresent
+        name: my-gateway-backend
+        ports:
+        - containerPort: 8083
+        # 此处环境变量的值是my-nacos-server-service的clusterIP:port
+        env: 
+        - name: api.registerAddress
+          value: 
+      restartPolicy: Always
+

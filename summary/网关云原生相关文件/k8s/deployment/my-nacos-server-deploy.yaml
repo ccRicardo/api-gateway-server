@@ -1,0 +1,34 @@
+# my nacos server deployment的配置文件
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  labels: 
+    app: my-nacos-server
+  name: my-nacos-server-deploy
+  namespace: default
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: my-nacos-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata: 
+      labels:
+        app: my-nacos-server
+    spec:
+      containers:
+      - image: my-nacos/nacos-server:v1.4.4
+        imagePullPolicy: IfNotPresent
+        name: my-nacos-server
+        ports:
+        - containerPort: 8848
+        env:
+        - name: MODE
+          value: standalone
+      restartPolicy: Always

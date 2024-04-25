@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-gateway-all
+  labels: 
+    type: app
+    version: v1.0
+  namespace: default
+spec:
+  containers: 
+  - name: my-nacos-server
+    image: my-nacos/nacos-server:v1.4.4
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8848
+    env:
+    - name: MODE
+      value: standalone
+  - name: my-gateway-server
+    image: my-gateway-server:1.0
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8888
+  - name: my-gateway-backend
+    image: my-gateway-backend:1.0
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8083
+  restartPolicy: Always
+
+
+
+      
