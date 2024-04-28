@@ -1,8 +1,8 @@
 # my gateway server deployment的配置文件
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
-  labels: 
+metadata:
+  labels:
     app: my-gateway-server
   name: my-gateway-server-deploy
   namespace: default
@@ -18,20 +18,23 @@ spec:
       maxUnavailable: 25%
     type: RollingUpdate
   template:
-    metadata: 
+    metadata:
       labels:
         app: my-gateway-server
     spec:
       containers:
-      - image: my-gateway-server:1.0
-        imagePullPolicy: IfNotPresent
-        name: my-gateway-server
-        ports:
-        - containerPort: 8888
-        # 此处环境变量的值是my-nacos-server-service的clusterIP:port
-        env:
-        - name: GATEWAY_registryAddress
-          value: 
-        - name: GATEWAY_configAddress
-          value:
+        - image: my-gateway-server:1.0
+          imagePullPolicy: IfNotPresent
+          name: my-gateway-server
+          ports:
+            # 网关入口
+            - containerPort: 8888
+            # Prometheus数据拉取端口
+            - containerPort: 17777
+          # 此处环境变量的值是my-nacos-server-service的clusterIP:port
+          env:
+            - name: GATEWAY_registryAddress
+              value: 10.97.4.70:8848
+            - name: GATEWAY_configAddress
+              value: 10.97.4.70:8848
       restartPolicy: Always
