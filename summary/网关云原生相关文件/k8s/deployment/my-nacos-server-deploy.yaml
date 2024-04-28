@@ -1,8 +1,8 @@
 # my nacos server deployment的配置文件
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
-  labels: 
+metadata:
+  labels:
     app: my-nacos-server
   name: my-nacos-server-deploy
   namespace: default
@@ -18,17 +18,25 @@ spec:
       maxUnavailable: 25%
     type: RollingUpdate
   template:
-    metadata: 
+    metadata:
       labels:
         app: my-nacos-server
     spec:
       containers:
-      - image: my-nacos/nacos-server:v1.4.4
-        imagePullPolicy: IfNotPresent
-        name: my-nacos-server
-        ports:
-        - containerPort: 8848
-        env:
-        - name: MODE
-          value: standalone
+        - image: my-nacos/nacos-server:v1.4.4
+          imagePullPolicy: IfNotPresent
+          name: my-nacos-server
+          ports:
+            - containerPort: 8848
+          env:
+            - name: MODE
+              value: standalone
+          volumeMounts:
+            - mountPath: /home/nacos/data
+              name: nacos-data-volume
+      volumes:
+        - name: nacos-data-volume
+          # 注意在相应node节点上事先拷贝好my-nacos-server容器/home/nacos/data中的内容
+          hostPath:
+            path: /root/nacos/data
       restartPolicy: Always
