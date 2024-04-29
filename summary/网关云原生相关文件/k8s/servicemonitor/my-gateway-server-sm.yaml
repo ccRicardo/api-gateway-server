@@ -1,0 +1,19 @@
+# 此资源的作用是向Prometheus暴露网关系统的监控指标
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: my-gateway-server-monitor
+  labels:
+    app: my-gateway-server
+spec:
+  endpoints:
+  - interval: 30s
+    # 此处是对应service中定义的端口名称
+    port: prometheus-pull-port
+    path: /prometheus
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app: my-gateway-server
