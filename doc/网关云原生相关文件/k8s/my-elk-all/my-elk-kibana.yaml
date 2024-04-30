@@ -15,7 +15,6 @@ spec:
   type: NodePort #采用nodeport方式进行暴露，端口默认为25601
   ports:
     - port: 5601
-      nodePort: 25601
       protocol: TCP
       targetPort: ui
   selector:
@@ -64,7 +63,7 @@ spec:
               mountPath: /usr/share/kibana/config/kibana.yml
               readOnly: true
               subPath: kibana.yml
-      volume:
+      volumes:
         - name: config
           configMap:
             name: kibana-config
