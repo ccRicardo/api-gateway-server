@@ -12,7 +12,7 @@ metadata:
     kubernetes.io/name: "Kibana"
     srv: srv-kibana
 spec:
-  type: NodePort #采用nodeport方式进行暴露，端口默认为25601
+  type: NodePort #采用nodeport方式进行暴露
   ports:
     - port: 5601
       protocol: TCP
