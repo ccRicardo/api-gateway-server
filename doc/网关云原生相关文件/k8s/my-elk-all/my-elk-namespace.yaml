@@ -1,0 +1,5 @@
+# elk命名空间配置
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-logging
