@@ -96,7 +96,7 @@ LoadBalanceFilter：从上下文规则中获取负载均衡配置项，调用相
 RandomLoadBalanceRule：随机
 RoundRobinLoadBalanceRule：轮询
 
-6、mock
+6、mock（此功能过于简单，计划去除）
 mock的主要作用是解析规则中的mock配置。若请求的api是个mock接口，则直接返回配置中的预设信息。
 因此，mock实际上是在模拟一个假/虚拟的功能实现，返回用于测试的“假数据”，便于在api开发过程中提前与前端或者其他依赖api进行联调测试。
 mock的主要类是MockFilter
