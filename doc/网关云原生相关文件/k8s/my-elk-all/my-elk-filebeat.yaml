@@ -128,7 +128,7 @@ spec:
             - name: data #持久化filebeat数据到宿主机上
               mountPath: /usr/share/filebeat/data
             - name: varlibdockercontainers #这里主要是把宿主机上的源日志目录挂载到filebeat容器中,如果没有修改docker或者containerd的runtime进行了标准的日志落盘路径，可以把mountPath改为/var/lib
-              mountPath: /data/var/
+              mountPath: /var/lib
               readOnly: true
             - name: varlog #这里主要是把宿主机上/var/log/pods和/var/log/containers的软链接挂载到filebeat容器中
               mountPath: /var/log/
@@ -142,7 +142,7 @@ spec:
             name: filebeat-config
         - name: varlibdockercontainers
           hostPath: #如果没有修改docker或者containerd的runtime进行了标准的日志落盘路径，可以把path改为/var/lib
-            path: /data/var/
+            path: /var/lib
         - name: varlog
           hostPath:
             path: /var/log/
