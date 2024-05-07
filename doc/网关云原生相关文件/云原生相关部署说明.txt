@@ -32,9 +32,16 @@ prometheus adapter的作用是取代k8s自带的metrics server，来给hpa提供
 首先需要修改prometheusAdapter-apiService.yaml，增加一个用于拉取自定义指标的APIService配置
 然后修改prometheusAdapter-configMap.yaml，将相应的prometheus监控数据映射为一个k8s监控指标（即网关应用的qps）。
 修改配置文件后，注意使用kubectl apply命令更新，并且通过kubectl rollout restart重启prometheus adapter
-通过kubectl get --raw加上相应的api路径，可以判断k8s获取自定义指标是否成功
+通过kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1，可以判断k8s获取自定义指标是否成功
 4、配置hpa
 在prometheus web或者grafana界面通过sum(irate(gateway_request_seconds_count[1m])) by (pod)可以查看扩容过程
+
+四、ELK日志收集平台
+1、配置filebeat
+2、配置logstash
+3、配置elasticsearch
+4、配置kibana
+5、启动ELK日志收集平台
 
 
 
