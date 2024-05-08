@@ -122,7 +122,7 @@ A：为了使后台服务能够更加方便，简洁地使用该网关系统，�
 因此，此处以web框架中占比最大的spring boot为例，开发了一套针对spring boot应用的客户端系统，其他web框架客户端均可以此为参考，就不再赘述。
 
 客户端模块的完整工作流程：
-在实际应用中，客户端模块会作为外部依赖被使用到网关系统的spring boot后台服务所引入。
+在实际应用中，客户端模块会作为外部依赖被使用该网关系统的spring boot后台/下游服务所引入。
 在spring boot应用中，@SpringBootApplication会开启自动装配机制，扫描resources/META-INF/spring.factories文件，将其中配置的ApiClientAutoConfiguration类注册到ioc容器中。
 由于该类使用了@EnableConfigurationProperties(ApiProperties.class)，所以会将application.properties中以api开头的属性值绑定到ApiProperties相应字段中，并注册Bean实例。
 此外，由于该类还使用了@Configuration，所以@Bean修饰的HttpClientRegisterManager方法也会注册到ioc容器中。
