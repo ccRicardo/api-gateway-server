@@ -12,7 +12,7 @@ import org.wyh.gateway.common.utils.RemotingHelper;
  * @BelongsPackage: org.wyh.core.netty
  * @Author: wyh
  * @Date: 2024-01-16 13:56
- * @Description: 连接管理器，定义了channel在各种状态下/事件发生时要进行的相应操作（主要是打印日志）。
+ * @Description: 连接管理器，作用是当channel中发生某些特殊事件时，打印相应的日志信息。
                  ChannelDuplexHandler是ChannelInboundHandler和ChannelOutboundHandler的结合，
                  它可以同时处理入站和出站数据/事件
 
@@ -24,7 +24,7 @@ public class NettyServerConnectManagerHandler extends ChannelDuplexHandler {
         //当Channel注册到相应的EventLoop，并且能处理I/O时被调用
         //获取远程主机（客户端）的地址，并打印相应日志
         final String remoteAddr = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-        log.debug("NETTY SERVER PIPLINE: channelRegistered {}", remoteAddr);
+        log.info("NETTY SERVER PIPLINE: channelRegistered {}", remoteAddr);
         super.channelRegistered(ctx);
     }
 
@@ -33,7 +33,7 @@ public class NettyServerConnectManagerHandler extends ChannelDuplexHandler {
         //当Channel从相应的EventLoop中注销，并且无法处理任何I/O时被调用
         //获取远程主机（客户端）的地址，并打印相应日志
         final String remoteAddr = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-        log.debug("NETTY SERVER PIPLINE: channelUnregistered {}", remoteAddr);
+        log.info("NETTY SERVER PIPLINE: channelUnregistered {}", remoteAddr);
         super.channelUnregistered(ctx);
     }
 
@@ -42,7 +42,7 @@ public class NettyServerConnectManagerHandler extends ChannelDuplexHandler {
         //当Channel变为活动状态（建立连接）时被调用
         //获取远程主机（客户端）的地址，并打印相应日志
         final String remoteAddr = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-        log.debug("NETTY SERVER PIPLINE: channelActive {}", remoteAddr);
+        log.info("NETTY SERVER PIPLINE: channelActive {}", remoteAddr);
         super.channelActive(ctx);
     }
 
@@ -51,7 +51,7 @@ public class NettyServerConnectManagerHandler extends ChannelDuplexHandler {
         //当Channel变为非活动状态时（断开连接）被调用
         //获取远程主机（客户端）的地址，并打印相应日志
         final String remoteAddr = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
-        log.debug("NETTY SERVER PIPLINE: channelInactive {}", remoteAddr);
+        log.info("NETTY SERVER PIPLINE: channelInactive {}", remoteAddr);
         super.channelInactive(ctx);
     }
 

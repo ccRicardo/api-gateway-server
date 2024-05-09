@@ -94,15 +94,15 @@ public class NettyHttpServer implements LifeCycle {
     }
     @Override
     public void start() {
-        //初始化netty服务器端，并绑定端口监听请求
+        //初始化并启动netty服务器端
         this.serverBootstrap
                 //设置两个EventLoopGroup，boss group和worker group。
                 .group(eventLoopGroupBoss, eventLoopGroupWorker)
-                //设置用于接入和处理客户端连接的Server Channel的类型
+                //设置ServerSocketChannel类型（当客户端连接请求到达服务端时，ServerSocketChannel的accept方法会创建相应的SocketChannel）
                 .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 //设置服务器监听的端口
                 .localAddress(new InetSocketAddress(serverPort))
-                //设置每个已经接入的连接的channel pipeline。pipeline中包含了处理I/O操作的channelHandler。
+                //设置channel的pipeline。pipeline中包含各种Handler。
                 .childHandler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel channel) throws Exception {
@@ -111,12 +111,12 @@ public class NettyHttpServer implements LifeCycle {
                          * 然而HttpServerCodec无法完全解析Http POST请求，
                          * 因为HttpServerCodec只能获取uri中参数，所以需要加上HttpObjectAggregator
                          *
-                         * HttpObjectAggregator的主要作用是解析http POST请求，
-                         * 并且可以将分块的消息体聚合成一个完整的请求或响应对象。
+                         * HttpObjectAggregator的主要作用是将分块的消息体聚合成一个完整的请求或响应对象。
                          * （也就是FullHttpRequest和FullHttpResponse）
+                         * 并且可以解析http POST请求。
                          *
                          * NettyServerConnectManagerHandler是连接管理器，
-                         * 负责定义连接对象在特定情况下的操作，主要是打印相应日志信息
+                         * 主要作用是当channel中发生某些特殊事件时，打印相应的日志信息。
                          *
                          * NettyHttpServerHandler负责构造请求包装类对象，并交给请求处理器进行处理
                          */
