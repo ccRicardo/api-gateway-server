@@ -20,6 +20,8 @@ public class Config {
      */
     //网关服务名称
     private String applicationName = "my-api-gateway";
+    //网关服务版本号
+    private String version = "1.0.0";
     //网关服务的端口号
     private int port = 8888;
     //提供给Prometheus拉取数据的api接口的端口号
@@ -28,7 +30,7 @@ public class Config {
     private String registryAddress = "127.0.0.1:8848";
     //nacos配置中心地址
     private String configAddress = "127.0.0.1:8848";
-    //环境
+    //环境（其实就是命名空间）
     private String env = "dev";
     //用户鉴权过滤器中，生成jwt签名使用的密钥
     private String secretKey = "amknvqo390j0oinxbhw9u10jlg3nikbn";

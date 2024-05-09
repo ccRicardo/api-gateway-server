@@ -97,6 +97,7 @@ public class Bootstrap {
             log.error("未找到注册中心实例");
             return new RuntimeException("未找到注册中心实例");
         });
+        //初始化注册中心
         registerCenter.init(config.getRegistryAddress(), config.getEnv());
         //构造网关服务的服务定义和服务实例
         ServiceDefinition serviceDefinition = buildGatewayServiceDefinition(config);
@@ -132,7 +133,7 @@ public class Bootstrap {
         //Map.of方法创建的是一个不可修改的空Map
         serviceDefinition.setInvokerMap(Map.of());
         //网关服务的唯一id和服务id就是配置文件中设定的applicationName
-        serviceDefinition.setUniqueId(config.getApplicationName());
+        serviceDefinition.setUniqueId(config.getApplicationName()+":"+config.getVersion());
         serviceDefinition.setServiceId(config.getApplicationName());
         serviceDefinition.setEnvType(config.getEnv());
         return serviceDefinition;
@@ -149,7 +150,7 @@ public class Bootstrap {
         int port = config.getPort();
         ServiceInstance serviceInstance = new ServiceInstance();
         //服务实例id的形式：ip:port
-        serviceInstance.setServiceInstanceId(localIp + BasicConst.COLON_SEPARATOR + port);
+        serviceInstance.setServiceInstanceId(localIp + ":" + port);
         serviceInstance.setIp(localIp);
         serviceInstance.setPort(port);
         serviceInstance.setRegisterTime(TimeUtil.currentTimeMillis());
