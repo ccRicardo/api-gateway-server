@@ -21,7 +21,7 @@ public class ConfigLoader {
     //配置文件名称
     private static final String CONFIG_FILE = "gateway.properties";
     //环境变量的前缀
-    private static final String ENV_PREFIX = "GATEWAY_";
+    private static final String ENV_PREFIX = "gateway_";
     //jvm参数的前缀
     private static final String JVM_PREFIX = "gateway.";
     //配置类Config对象。注意这里并没有创建相应的实例，而是在load方法中才创建相应实例。
