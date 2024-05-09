@@ -27,15 +27,17 @@ import java.net.InetSocketAddress;
  * @Author: wyh
  * @Date: 2024-01-16 9:36
  * @Description: netty http服务端。
-                 主要负责接收并解析客户端请求，然后交给请求处理器进行进一步处理，最后将结果返回给客户端。
+                 主要负责接收并解析客户端请求，然后交给请求处理器进行进一步处理。
  */
 @Slf4j
 public class NettyHttpServer implements LifeCycle {
     //网关的核心静态配置
     private final Config config;
+    //netty http server监听的端口（也就是网关应用接收请求的端口）
+    private int serverPort;
     //请求处理类。
     private final NettyProcessor nettyProcessor;
-    //netty服务器引导类（负责初始化netty服务器并监听端口）
+    //netty服务器引导启动类（负责初始化并启动netty服务器）
     private ServerBootstrap serverBootstrap;
     //boss eventLoopGroup，负责监听和处理accept事件（客户端请求连接）
     private EventLoopGroup eventLoopGroupBoss;
@@ -51,6 +53,7 @@ public class NettyHttpServer implements LifeCycle {
      */
     public NettyHttpServer(Config config, NettyProcessor nettyProcessor){
         this.config = config;
+        this.serverPort = config.getPort();
         this.nettyProcessor = nettyProcessor;
         //初始化
         init();
@@ -98,7 +101,7 @@ public class NettyHttpServer implements LifeCycle {
                 //设置用于接入和处理客户端连接的Server Channel的类型
                 .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 //设置服务器监听的端口
-                .localAddress(new InetSocketAddress(config.getPort()))
+                .localAddress(new InetSocketAddress(serverPort))
                 //设置每个已经接入的连接的channel pipeline。pipeline中包含了处理I/O操作的channelHandler。
                 .childHandler(new ChannelInitializer<Channel>() {
                     @Override

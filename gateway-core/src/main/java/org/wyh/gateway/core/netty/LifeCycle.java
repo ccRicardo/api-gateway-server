@@ -5,7 +5,7 @@ package org.wyh.gateway.core.netty;
  * @BelongsPackage: org.wyh.core
  * @Author: wyh
  * @Date: 2024-01-15 15:45
- * @Description: 管理网关中各组件的生命周期
+ * @Description: 管理网关中netty相关组件（主要是server，processor，client和container）的生命周期
  */
 public interface LifeCycle {
     /**
