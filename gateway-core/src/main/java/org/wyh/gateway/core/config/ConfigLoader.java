@@ -13,7 +13,7 @@ import java.util.Properties;
  * @BelongsPackage: org.wyh.core
  * @Author: wyh
  * @Date: 2024-01-15 10:09
- * @Description: 网关配置加载类
+ * @Description: 网关配置加载类，支持多种配置加载方式。
  */
 // TODO: 2024-01-15 这里的日志还没配置 
 @Slf4j
@@ -84,7 +84,7 @@ public class ConfigLoader {
             try{
                 //将properties文件加载到properties对象中
                 properties.load(is);
-                //将properties对象中的属性映射到Config对象中
+                //将properties对象中的属性映射到Config对象的相应字段上
                 PropertiesUtils.properties2Object(properties, config);
 
             }catch (IOException e){
@@ -112,7 +112,7 @@ public class ConfigLoader {
         Map<String, String> env = System.getenv();
         Properties properties = new Properties();
         properties.putAll(env);
-        //将properties对象中的属性映射到Config对象中
+        //将properties对象中的属性映射到Config对象的相应字段上
         PropertiesUtils.properties2Object(properties, config, ENV_PREFIX);
 
     }
