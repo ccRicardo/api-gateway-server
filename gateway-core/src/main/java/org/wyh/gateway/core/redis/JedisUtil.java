@@ -1,4 +1,4 @@
-package org.wyh.gateway.common.utils;
+package org.wyh.gateway.core.redis;
 
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;

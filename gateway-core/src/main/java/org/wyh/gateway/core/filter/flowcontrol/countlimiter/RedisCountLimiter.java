@@ -1,6 +1,6 @@
 package org.wyh.gateway.core.filter.flowcontrol.countlimiter;
 
-import org.wyh.gateway.common.utils.JedisUtil;
+import org.wyh.gateway.core.redis.JedisUtil;
 
 /**
  * @BelongsProject: my-api-gateway

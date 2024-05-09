@@ -1,6 +1,8 @@
-package org.wyh.gateway.common.utils;
+package org.wyh.gateway.core.redis;
 
 import lombok.extern.slf4j.Slf4j;
+import org.wyh.gateway.core.config.Config;
+import org.wyh.gateway.core.config.ConfigLoader;
 import redis.clients.jedis.*;
 
 import java.util.Properties;
@@ -45,19 +47,18 @@ public class JedisPoolUtil {
      */
     private void initialConfig() {
         try {
-            Properties prop = new Properties();
-            //加载配置文件获取配置数据
-            prop.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("redis.properties"));
-            host = prop.getProperty("redis.host");
-            port = Integer.parseInt(prop.getProperty("redis.port"));
-            maxTotal = Integer.parseInt(prop.getProperty("redis.maxTotal"));
-            maxIdle = Integer.parseInt(prop.getProperty("redis.maxIdle"));
-            minIdle = Integer.parseInt(prop.getProperty("redis.minIdle"));
+            //获取配置信息
+            Config config = ConfigLoader.getConfig();
+            host = config.getRedisHost();
+            port = config.getRedisPort();
+            maxTotal = config.getRedisMaxTotal();
+            maxIdle = config.getRedisMaxIdle();
+            minIdle = config.getRedisMinIdle();
             //以下参数暂时未配置
-            /*blockWhenExhausted = Boolean.parseBoolean(prop.getProperty("redis.blockWhenExhausted"));
-            maxWaitMillis = Integer.parseInt(prop.getProperty("redis.maxWaitMillis"));
-            testOnBorrow = Boolean.parseBoolean(prop.getProperty("redis.testOnBorrow"));
-            testOnReturn = Boolean.parseBoolean(prop.getProperty("redis.testOnReturn"));*/
+            /*blockWhenExhausted;
+            maxWaitMillis;
+            testOnBorrow;
+            testOnReturn;*/
         } catch (Exception e) {
             log.debug("parse configure file error.");
         }

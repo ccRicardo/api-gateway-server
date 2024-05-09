@@ -62,6 +62,23 @@ public class Config {
     private int httpConnectionsPerHost = 8000;
     //空闲连接超时时间（AsyncHttpClient连接池中的连接在空闲状态下可以保持多长时间）
     private int httpPooledConnectionIdleTimeout = 60 * 1000;
+    /*
+     * 以下是（流量控制组件中使用到的）redis的配置参数
+     */
+    //要使用的redis库
+    private int redisDatabase = 0;
+    //redis服务的地址
+    private String redisHost = "127.0.0.1";
+    //redis服务的端口号
+    private int redisPort = 6379;
+    //redis连接超时时间
+    private int redisTimeout = 2000;
+    //redis最大总连接数
+    private int redisMaxTotal = 10;
+    //redis最大空闲连接数
+    private int redisMaxIdle = 10;
+    //redis最小空闲连接数
+    private int redisMinIdle = 3;
 
     /*
      * 以下是Disruptor缓冲队列的配置参数

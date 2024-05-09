@@ -3,7 +3,7 @@ package org.wyh.gateway.core.filter.flowcontrol;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.wyh.gateway.common.config.Rule;
-import org.wyh.gateway.common.utils.JedisUtil;
+import org.wyh.gateway.core.redis.JedisUtil;
 import org.wyh.gateway.core.filter.flowcontrol.countlimiter.GuavaCountLimiter;
 import org.wyh.gateway.core.filter.flowcontrol.countlimiter.RedisCountLimiter;
 
