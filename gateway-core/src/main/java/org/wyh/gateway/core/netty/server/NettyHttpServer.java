@@ -133,7 +133,7 @@ public class NettyHttpServer implements LifeCycle {
             //bind()作用是启动netty服务器，并绑定指定端口
             //sync()作用是阻塞当前线程，直到netty服务器相关初始化操作完成
             this.serverBootstrap.bind().sync();
-            log.info("NettyHttp服务端运行端口: {}", this.config.getPort());
+            log.info("NettyHttp服务端启动成功，端口: {}", this.config.getPort());
         }catch (Exception e){
             throw new RuntimeException();
         }
@@ -146,7 +146,7 @@ public class NettyHttpServer implements LifeCycle {
             eventLoopGroupBoss.shutdownGracefully();
         }
         if(eventLoopGroupWorker != null){
-            eventLoopGroupBoss.shutdownGracefully();
+            eventLoopGroupWorker.shutdownGracefully();
         }
 
     }
