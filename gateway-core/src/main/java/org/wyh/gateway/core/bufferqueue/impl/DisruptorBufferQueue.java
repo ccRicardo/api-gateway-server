@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
  * @Description: 基于Disruptor框架实现的高性能缓冲队列。其中泛型E指的是事件中数据的类型。
                  Disruptor是一个高性能的内存队列。其高性能主要得益于两点：
                  1、使用了CAS原语来替代（悲观）锁，来保证多线程安全
-                 2、通过冗余填充，使不相关（即无依赖关系）的变量在缓存中不在同一行，避免了伪共享问题
+                 2、通过填充缓存行，使每个变量都处于不同的缓存行中，这样就能保证每个变量都不会与其他任何变量产生意外冲突，避免了伪共享问题
                  总而言之，Disruptor是一个基于数组实现，并使用CAS操作保证多线程安全的环形内存队列。
                  本系统中：
                  1、生产者是DisruptorNettyCoreProcessor中的process方法
@@ -34,15 +34,15 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
      * 注意：本类在编写的时候并未严格区分事件和事件的数据/值，因此遇到歧义时需要仔细辨别。
      * 实际上，Event类型的参数是事件，而E类型的参数是事件的数据/值。
      * 2、RingBuffer：Disruptor中用于存储事件的数据结构，其本质是一个基于数组实现的环形缓冲队列。
-     * 生产者将事件（也就是数据）放入缓冲队列，随后，消费者从缓冲队列中取出该事件进行处理。
-     * 3、Sequence（序列号）：本质上是对RingBuffer中位置下标的抽象/封装，用于记录读写位置。
+     * 生产者将事件放入缓冲队列，随后，消费者从缓冲队列中取出该事件进行处理。
+     * 3、Sequence（序列号）：本质上其实是对RingBuffer中位置下标的抽象/封装，在发布和消费事件时用于指明事件对象的位置
      * 4、Sequencer（序列器）：Disruptor的控制核心。
      * 用于控制RingBuffer中事件的读写等行为，协调生产者与消费者之间的事件传递。
      * Sequencer中维护了两个重要的Sequence：
-     * 用于记录生产者生产进度位置的cursor和用于记录消费者消费进度位置的gatingSequence。
+     * 用于记录生产者生产进度位置的cursor和用于记录消费者消费进度/位置的gatingSequence。
      * 生产方面，Sequencer需要保证不会覆盖掉未被消费的事件，即cursor+1不能超过gatingSequence。
      * 消费方面，Sequencer需要判断是否有可消费的事件，即检查gatingSequence和cursor的大小关系。
-     * 5、SequenceBarrier（序列屏障）：处于Sequencer和消费者之间，用于维护消费者与生产者，或者与其他消费者之间的依赖关系。
+     * 5、SequenceBarrier（序列屏障）：用于维护消费者与生产者，或者与其他消费者之间的依赖关系。
      * （依赖关系有两种：消费者依赖于生产者，或者消费者依赖于其他的消费者）
      * 具体来说，当消费者请求消费指定Sequence位置的事件时，SequenceBarrier会将其与dependentSequence比较。
      * （dependentSequence默认为Sequencer中的生产者cursor，也可以设置为被依赖消费者的Sequence。）
@@ -98,7 +98,8 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
                 new DisruptorExceptionHandler(), workHandlers);
         /*
          * 在RingBuffer对应的Sequencer中设置gatingSequences属性（其作用在上述关键概念中有提到）
-         * 使其能够追踪到WorkerPool中所有WorkProcessor消费者的事件处理/消费进度，
+         * 使其能够追踪到WorkerPool中每个WorkProcessor消费者的事件处理/消费进度，
+         * （WorkerPool.getWorkerSequences会返回一个Sequence数组，该数组记录了每一个WorkProcessor的消费进度/位置）
          * 从而确保生产者在发布事件时不会覆盖还未被消费的事件。
          */
         ringBuffer.addGatingSequences(workerPool.getWorkerSequences());
