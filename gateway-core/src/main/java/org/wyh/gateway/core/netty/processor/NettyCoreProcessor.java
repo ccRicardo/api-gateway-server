@@ -42,7 +42,7 @@ public class NettyCoreProcessor implements NettyProcessor{
     }
     /**
      * @date: 2024-01-18 15:11
-     * @description: 请求失败时调用（准确来说，是接收异步请求的响应之前出现了异常）。写回异常信息，并且释放连接。
+     * @description: 请求失败时调用（准确来说，是网关内部出现了错误，导致未能成功发送请求）。写回异常信息，并且释放连接。
      * @Param nettyCtx:
      * @Param fullRequest:
      * @Param fullResponse:
@@ -62,7 +62,7 @@ public class NettyCoreProcessor implements NettyProcessor{
         ChannelHandlerContext nettyCtx = requestWrapper.getNettyCtx();
         FullHttpRequest fullRequest = requestWrapper.getFullHttpRequest();
         try {
-            //获取请求在网关中的上下文对象（GatewayContext对象）
+            //解析请求对象，构建该请求在网关中的上下文对象（GatewayContext对象）
             GatewayContext gatewayContext = RequestHelper.doContext(fullRequest, nettyCtx);
             //执行过滤器链，对网关上下文进行过滤处理，并最终路由到相应的后台服务。
             filterChainFactory.buildFilterChain(gatewayContext).doFilterChain(gatewayContext);

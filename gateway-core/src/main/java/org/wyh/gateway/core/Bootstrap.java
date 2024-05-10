@@ -65,13 +65,15 @@ public class Bootstrap {
         //五、初始化注册中心，并监听服务的变更
         final RegisterCenter registerCenter = registerAndSubscribe(config);
         //六、服务优雅关机
-        //addShutdownHook添加的线程会在JVM关闭过程中被调用，因此通常用于在程序终止时执行一些清理工作。
+        //addShutdownHook添加的线程会在JVM关闭之前被调用，因此通常用于在程序终止时执行一些清理工作。
         Runtime.getRuntime().addShutdownHook(new Thread(){
             @Override
             public void run(){
                 //在注册中心注销掉网关服务。
                 registerCenter.deregister(buildGatewayServiceDefinition(config),
                         buildGatewayServiceInstance(config));
+                //关闭网关容器
+                container.shutdown();
             }
         });
     }
