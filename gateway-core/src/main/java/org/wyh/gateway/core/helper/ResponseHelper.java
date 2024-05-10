@@ -21,7 +21,7 @@ import java.util.Objects;
 public class ResponseHelper {
     /**
      * @date: 2024-01-18 10:33
-     * @description: 请求失败时调用（准确来说，是接收异步请求的响应之前出现了异常）。
+     * @description: 请求失败时调用（准确来说，是网关内部出现了异常，导致未能成功发送请求）。
                      根据ResponseCode对象，构建FullHttpResponse响应对象
      * @Param responseCode:
      * @return: io.netty.handler.codec.http.FullHttpResponse

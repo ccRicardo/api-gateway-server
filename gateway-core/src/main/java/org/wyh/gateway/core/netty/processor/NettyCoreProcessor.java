@@ -42,7 +42,7 @@ public class NettyCoreProcessor implements NettyProcessor{
     }
     /**
      * @date: 2024-01-18 15:11
-     * @description: 请求失败时调用（准确来说，是网关内部出现了错误，导致未能成功发送请求）。写回异常信息，并且释放连接。
+     * @description: 请求失败时调用（准确来说，是网关内部出现了异常，导致未能成功发送请求）。写回异常信息，并且释放连接。
      * @Param nettyCtx:
      * @Param fullRequest:
      * @Param fullResponse:

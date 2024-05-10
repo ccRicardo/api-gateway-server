@@ -98,7 +98,7 @@ public class Config {
      * @description: 根据配置信息获取对应的Disruptor等待策略实例
      * @return: com.lmax.disruptor.WaitStrategy
      */
-    public WaitStrategy getWaitStrategy(){
+    public WaitStrategy getTrueWaitStrategy(){
         switch (waitStrategy){
             //阻塞等待。
             case "blocking":
