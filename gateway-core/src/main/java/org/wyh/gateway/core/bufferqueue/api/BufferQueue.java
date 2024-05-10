@@ -15,31 +15,31 @@ public interface BufferQueue<E> {
     /**
      * @date: 2024-03-21 9:38
      * @description: 添加一个事件。若失败则抛出异常，并调用监听器的异常处理方法。
-     * @Param event:
+     * @Param eventValue:
      * @return: void
      */
-    void add(E event);
+    void add(E eventValue);
     /**
      * @date: 2024-03-21 9:39
      * @description: 添加多个事件。若失败则抛出异常，并调用监听器的异常处理方法。
-     * @Param events:
+     * @Param eventValues:
      * @return: void
      */
-    void add(E... events);
+    void add(E... eventValues);
     /**
      * @date: 2024-03-21 9:39
      * @description: 尝试添加一个事件，若失败则直接返回false。
-     * @Param event:
+     * @Param eventValue:
      * @return: boolean
      */
-    boolean tryAdd(E event);
+    boolean tryAdd(E eventValue);
     /**
      * @date: 2024-03-21 9:40
      * @description: 尝试添加多个事件，若失败则直接返回false。
-     * @Param events:
+     * @Param eventValues:
      * @return: boolean
      */
-    boolean tryAdd(E... events);
+    boolean tryAdd(E... eventValues);
     /**
      * @date: 2024-03-21 9:40
      * @description: 启动缓冲队列

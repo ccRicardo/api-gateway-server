@@ -30,8 +30,8 @@ import java.util.concurrent.Executors;
 public class DisruptorBufferQueue<E> implements BufferQueue<E> {
     /*
      * Disruptor中的一些关键概念：
-     * 1、事件：本质上是生产者提供给消费者的数据，在本系统中，具体是指HttpRequestWrapper对象。
-     * 注意：本类在概念上并未严格区分事件和事件的数据。
+     * 1、事件：包含了生产者要传递给消费者的数据/值。在本系统中，事件的值具体是指HttpRequestWrapper对象。
+     * 注意：本类在编写的时候并未严格区分事件和事件的数据/值，因此遇到歧义时需要仔细辨别。
      * 实际上，Event类型的参数是事件，而E类型的参数是事件的数据/值。
      * 2、RingBuffer：Disruptor中用于存储事件的数据结构，其本质是一个基于数组实现的环形缓冲队列。
      * 生产者将事件（也就是数据）放入缓冲队列，随后，消费者从缓冲队列中取出该事件进行处理。
@@ -50,7 +50,8 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
      * 否则，根据指定的等待策略，让对应消费者进行等待。
      * 6、生产者：用于初始化并发布事件的对象。
      * 通常通过事件转换器EventTranslator来初始化事件，再通过RingBuffer.publishEvent发布该事件。
-     * 事件初始化分为两步：先从Sequencer获取Sequence，然后向RingBuffer相应位置的事件对象中写入/填充数据。
+     * 事件初始化分为两步：先从Sequencer获取Sequence，然后给RingBuffer相应位置的事件对象赋值/填充数据。
+     * 以上两步都被EventTranslator封装好了，因此只需要重写相应方法，实现具体的赋值操作即可。
      * 发布事件本质上就是通知RingBuffer该事件已经写入完毕。
      * 7、消费者：用于处理缓冲队列中事件的对象。
      * Disruptor会通过EventProcessor不断地从RingBuffer中获取事件，并传递给EventHandler的onEvent回调方法进行处理。
@@ -202,11 +203,12 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
      * @Author: wyh
      * @Date: 2024-03-21 15:57
      * @Description: 内部类，用于定义事件转换器，来初始化事件。
-                     其中，translateTo回调方法会在发布事件时被调用，用于初始化该事件
+                     其中，translateTo回调方法会在发布事件时被调用，用于给相应的事件对象赋值/填充数据
      */
     private class DisruptorEventTranslator implements EventTranslatorOneArg<Event, E> {
         @Override
         public void translateTo(Event event, long sequence, E value) {
+            //给事件赋值/填充数据（其实就是调用set方法给value属性赋值）
             event.setValue(value);
         }
     }
@@ -297,52 +299,52 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
         }
     }
     @Override
-    public void add(E event) {
+    public void add(E eventValue) {
         if(ringBuffer == null){
-            process(eventListener, new IllegalStateException("缓冲队列未开启"), event);
+            process(eventListener, new IllegalStateException("缓冲队列未开启"), eventValue);
         }
         try{
             //初始化并发布事件
-            ringBuffer.publishEvent(eventTranslator, event);
+            ringBuffer.publishEvent(eventTranslator, eventValue);
         }catch (NullPointerException e){
-            process(eventListener, new IllegalStateException("缓冲队列未开启"), event);
+            process(eventListener, new IllegalStateException("缓冲队列未开启"), eventValue);
         }
     }
 
     @Override
-    public void add(E... events) {
+    public void add(E... eventValues) {
         if(ringBuffer == null){
-            process(eventListener, new IllegalStateException("缓冲队列未开启"), events);
+            process(eventListener, new IllegalStateException("缓冲队列未开启"), eventValues);
         }
         try{
             //初始化并发布多个事件
-            ringBuffer.publishEvents(eventTranslator, events);
+            ringBuffer.publishEvents(eventTranslator, eventValues);
         }catch(NullPointerException e){
-            process(eventListener, new IllegalStateException("缓冲队列未开启"), events);
+            process(eventListener, new IllegalStateException("缓冲队列未开启"), eventValues);
         }
     }
 
     @Override
-    public boolean tryAdd(E event) {
+    public boolean tryAdd(E eventValue) {
         //若事件添加成功则返回true，否则一律返回false
         if(ringBuffer == null){
             return false;
         }
         try{
-            return ringBuffer.tryPublishEvent(eventTranslator, event);
+            return ringBuffer.tryPublishEvent(eventTranslator, eventValue);
         }catch(NullPointerException e){
             return false;
         }
     }
 
     @Override
-    public boolean tryAdd(E... events) {
+    public boolean tryAdd(E... eventValues) {
         //若多个事件添加成功则返回true，否则一律返回false
         if(ringBuffer == null){
             return false;
         }
         try{
-            return ringBuffer.tryPublishEvents(eventTranslator, events);
+            return ringBuffer.tryPublishEvents(eventTranslator, eventValues);
         }catch(NullPointerException e){
             return false;
         }

@@ -58,18 +58,18 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
 
         @Trace
         @Override
-        public void onEvent(HttpRequestWrapper eventData) {
+        public void onEvent(HttpRequestWrapper eventValue) {
             //调用NettyCoreProcessor（请求处理器）来真正处理请求事件
-            nettyCoreProcessor.process(eventData);
+            nettyCoreProcessor.process(eventValue);
             // TODO 从以下两句测试代码可知，不同消费者线程共享的是同一个处理器对象。这会不会限制系统吞吐量？
             //System.out.println(Thread.currentThread().getName());
             //System.out.println(nettyCoreProcessor.hashCode());
         }
 
         @Override
-        public void onException(Throwable ex, long sequence, HttpRequestWrapper eventData) {
-            FullHttpRequest httpRequest = eventData.getFullHttpRequest();
-            ChannelHandlerContext nettyCtx = eventData.getNettyCtx();
+        public void onException(Throwable ex, long sequence, HttpRequestWrapper eventValue) {
+            FullHttpRequest httpRequest = eventValue.getFullHttpRequest();
+            ChannelHandlerContext nettyCtx = eventValue.getNettyCtx();
             log.error("Disruptor缓冲队列处理过程中出现错误！请求：{}，错误信息：{}",
                     httpRequest, ex.getMessage(), ex);
             //构建响应对象

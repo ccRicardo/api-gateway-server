@@ -12,18 +12,18 @@ public interface EventListener<E> {
      * @date: 2024-03-21 14:57
      * @description: 消费者线程从RingBuffer中获取到事件时被调用。
                      具体是被DisruptorBufferQueue.DisruptorWorkHandler中的onEvent方法调用
-     * @Param eventData:
+     * @Param eventValue:
      * @return: void
      */
-    void onEvent(E eventData);
+    void onEvent(E eventValue);
     /**
      * @date: 2024-03-21 14:58
      * @description: 事件处理过程中出现异常时被调用。
                      具体是被DisruptorBufferQueue.DisruptorExceptionHandler中的handleEventException调用
      * @Param ex:
      * @Param sequence:
-     * @Param eventData:
+     * @Param eventValue:
      * @return: void
      */
-    void onException(Throwable ex, long sequence, E eventData);
+    void onException(Throwable ex, long sequence, E eventValue);
 }
