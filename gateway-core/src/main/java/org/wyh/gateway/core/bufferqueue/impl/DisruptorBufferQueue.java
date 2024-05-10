@@ -282,9 +282,9 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
      * @Param eventData:
      * @return: void
      */
-    private static <E> void process(EventListener<E> listener, Throwable ex, E eventData){
+    private static <E> void process(EventListener<E> listener, Throwable ex, E eventValue){
         //该方法中没有传入Sequence参数，而且监听器的onException方法也不需要，因此这里设置为-1，表示该参数无效/不存在
-        listener.onException(ex, -1, eventData);
+        listener.onException(ex, -1, eventValue);
     }
     /**
      * @date: 2024-03-25 9:41
@@ -294,9 +294,9 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
      * @Param eventDatas: 
      * @return: void
      */
-    private static <E> void process(EventListener<E> listener, Throwable ex, E... eventDatas){
-        for (E eventData : eventDatas) {
-            process(listener, ex, eventData);
+    private static <E> void process(EventListener<E> listener, Throwable ex, E... eventValues){
+        for (E eventValue : eventValues) {
+            process(listener, ex, eventValue);
         }
     }
     @Override
@@ -374,6 +374,7 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
         }
         //将ringBuffer属性设置为null，表示缓冲队列已经关闭
         ringBuffer = null;
+        log.info("Disruptor缓冲队列关闭成功");
     }
 
     @Override
