@@ -16,7 +16,8 @@ import java.util.Set;
  * @Date: 2024-01-08 9:49
  * @Description: 可插拔式过滤规则定义类（可插拔主要体现为按需取用）
                  规则实际上就是描述了某一服务或路径需要使用哪些过滤组件，组件的执行顺序以及各组件的配置参数等。
-                 由于规则匹配时需要比较规则优先级，所以需要实现Comparable<Rule>接口
+                 由于一条路径可以绑定多个规则，而最终应用时需要进行优先级比较来选择一个具体规则，
+                 所以该规则类需要实现Comparable<Rule>接口
 
  */
 @Setter
@@ -30,22 +31,26 @@ public class Rule implements Comparable<Rule>, Serializable{
     private String name;
     //规则对应的协议
     private String protocol;
-    //规则优先级。应用场景为一条路径对应多条规则时。
+    //规则优先级。一条路径可以绑定多个规则，而最终应用时需要进行优先级比较来选择一个具体规则。优先级数字越小，执行的顺序越靠前。
     private Integer order;
-    //规则对应的后端服务id。通常来说，一个后端服务可以对应多个规则。
-    private String serviceId;
-    //规则对应的请求前缀。todo 该属性的作用目前还不大明白，猜测是用来标识要请求的后端服务的类别。
-    private String prefix;
-    //规则绑定的路径集合。通常来说，一个规则可以绑定多条请求路径。
-    private List<String> paths;
-    //过滤器配置集合（也就是一条过滤器链）。
     private Set<FilterConfig> filterConfigs = new HashSet<>();
-    //限流配置集合
+    //规则的限流配置集合
     private Set<FlowCtrlConfig> flowCtrlConfigs = new HashSet<>();
-    //熔断配置集合
+    //规则的熔断配置集合
     private Set<HystrixConfig> hystrixConfigs = new HashSet<>();
-    //请求重试的配置信息
+    //规则的请求重试配置信息
     private RetryConfig retryConfig = new RetryConfig();
+    /*
+     * 注意：“规则的”与“当前规则对象的”的含义是不同的，两者的差异类似于类与对象
+     * 可以把具备相同规则id的规则对象视为同一类，这样就容易理解了
+     */
+    //当前规则对象对应的后端服务id。
+    private String serviceId;
+    //当前规则对象对应的请求前缀。todo 该属性的作用目前还不大明白
+    private String prefix;
+    //当前规则对象绑定的路径集合。（当前规则对象对应的后端服务可能会存在多条访问路径）
+    private List<String> paths;
+    //规则的过滤器配置集合（其实就是在定义一条过滤器链）。
     /**
      * @date: 2024-01-11 14:04
      * @description: 无参构造器
@@ -65,7 +70,7 @@ public class Rule implements Comparable<Rule>, Serializable{
     public static class FilterConfig{
         //过滤器的id
         private String filterId;
-        //该过滤器的配置信息
+        //该过滤器的配置信息，通常是一个json串
         private String Config;
 
         @Override
@@ -174,7 +179,7 @@ public class Rule implements Comparable<Rule>, Serializable{
     }
     /**
      * @date: 2024-01-11 14:53
-     * @description: 判断filterId指定的过滤器配置是否存在
+     * @description: 判断filterId指定的过滤器组件是否存在
      * @Param filterId:
      * @return: boolean
      */
