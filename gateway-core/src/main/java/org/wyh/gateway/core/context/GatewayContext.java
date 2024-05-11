@@ -20,8 +20,6 @@ import org.wyh.gateway.core.response.GatewayResponse;
 public class GatewayContext extends BasicContext{
     //网关请求对象
     private final GatewayRequest gatewayRequest;
-    //原始的（未修改的）网关请求对象（网关请求对象中的内容是可以修改的）
-    private final GatewayRequest originRequest;
     //网关响应对象
     private GatewayResponse gatewayResponse;
     //规则对象
@@ -34,7 +32,7 @@ public class GatewayContext extends BasicContext{
     @Setter
     @Getter
     private boolean gray = false;
-    //用于统计方法的执行耗时（在本系统中则是统计请求的处理时间），是监控过滤器的数据采集器之一。
+    //用于统计方法的执行耗时（在本系统中则是统计请求在过滤器链中的处理时间），是监控过滤器的数据采集器。
     @Setter
     @Getter
     private Timer.Sample timerSample;
@@ -54,7 +52,6 @@ public class GatewayContext extends BasicContext{
                           GatewayRequest gatewayRequest, Rule rule, int currentRetryTimes) {
         super(protocol, nettyCtx, keepAlive);
         this.gatewayRequest = gatewayRequest;
-        this.originRequest = gatewayRequest;
         this.rule = rule;
         this.currentRetryTimes = currentRetryTimes;
     }
@@ -155,8 +152,7 @@ public class GatewayContext extends BasicContext{
      * @return: java.lang.Object
      */
     public Object getRequiredAttribute(String key){
-        //强制转换为泛型指定的类型
-        Object value =  super.getAttribute(key);
+        Object value = super.getAttribute(key);
         AssertUtil.notNull(value, "需要的属性'"+key+"'不存在");
         return value;
     }
@@ -165,28 +161,19 @@ public class GatewayContext extends BasicContext{
      * @description: 获取指定的上下文参数，如果不存在则返回指定的默认值
      * @Param key:
      * @Param defaultValue:
-     * @return: T
+     * @return: java.lang.Object
      */
-    public <T> T getAttributeOrDefault(String key, T defaultValue){
-        return (T) super.attributes.getOrDefault(key, defaultValue);
+    public Object getAttributeOrDefault(String key, Object defaultValue){
+        return super.attributes.getOrDefault(key, defaultValue);
     }
     /**
      * @date: 2024-01-12 10:05
-     * @description: 获取指定的过滤器（链）配置信息
+     * @description: 获取指定的过滤器配置信息
      * @Param configId: 
      * @return: org.wyh.common.config.Rule.FilterConfig
      */
     public Rule.FilterConfig getFilterConfig(String configId){
         return rule.getFilterConfig(configId);
-    }
-    /**
-     * @date: 2024-01-12 10:40
-     * @description: 获取原始（未修改的）的请求对象（网关请求对象中的内容是可以修改的）
-     * @return: org.wyh.core.request.GatewayRequest
-     */
-    // TODO: 2024-01-12 这里我设置了一个额外属性，用于记录原始的（未修改的）请求对象
-    public GatewayRequest getOriginRequest(){
-        return originRequest;
     }
     /**
      * @date: 2024-02-21 14:43
@@ -199,6 +186,7 @@ public class GatewayContext extends BasicContext{
 
     @Override
     public void releaseRequest(){
+        //该方法用于真正释放FullHttpRequest请求对象，而父类方法只是改了一下标识
         //如果当前值等于期望值，则将当前值设置为新值并返回true，否则不修改当前值并返回false
         if(requestReleased.compareAndSet(false, true)){
             //将fullRequest对象的引用计数减1。如果该对象引用计数为0，则释放该对象。
