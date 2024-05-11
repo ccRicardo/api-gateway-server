@@ -46,7 +46,7 @@ public class Rule implements Comparable<Rule>, Serializable{
      */
     //当前规则对象对应的后端服务id。
     private String serviceId;
-    //当前规则对象对应的请求前缀。todo 该属性的作用目前还不大明白
+    //当前规则对象对应的请求路径的（公共）前缀。todo 该属性的作用目前还不大明白
     private String prefix;
     //当前规则对象绑定的路径集合。（当前规则对象对应的后端服务可能会存在多条访问路径）
     private List<String> paths;
