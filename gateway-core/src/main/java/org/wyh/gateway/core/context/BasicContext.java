@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * @Date: 2024-01-08 10:13
  * @Description: IContext上下文接口的基础实现类
  */
-public class BasicContext implements IContext{
+public abstract class BasicContext implements IContext{
     //设置上下文的基础属性
     //转发协议
     protected final String protocol;
@@ -26,7 +26,7 @@ public class BasicContext implements IContext{
     protected volatile int status = IContext.RUNNING;
     //Netty ChannelHandler上下文
     protected final ChannelHandlerContext nettyCtx;
-    //上下文参数集合
+    //保存所有的上下文参数
     protected final Map<String, Object> attributes = new HashMap<>();
     //异常
     protected Throwable throwable;
@@ -95,34 +95,10 @@ public class BasicContext implements IContext{
         return this.protocol;
     }
 
-    //该类中并没有request，response和rule属性，因此这里的setter，getter方法都是空的。
-    //真正的实现在子类GatewayContext中
-
-    @Override
-    public Object getRequest() {
-        return null;
-    }
-
-    @Override
-    public void setResponse(Object response) {
-
-    }
-
-    @Override
-    public Object getResponse() {
-        return null;
-    }
-
-    @Override
-    public void setRule() {
-
-    }
-
-    @Override
-    public Rule getRule() {
-        return null;
-    }
-
+    /*
+     * 该类中并没有request，response和rule属性，因此相应的setter，getter方法都未实现。
+     * 它们的真正实现在子类GatewayContext中
+     */
     @Override
     public void setThrowable(Throwable throwable) {
         this.throwable = throwable;
@@ -134,8 +110,8 @@ public class BasicContext implements IContext{
     }
 
     @Override
-    public void setAttribute(String key, Object obj) {
-        this.attributes.put(key, obj);
+    public void setAttribute(String key, Object value) {
+        this.attributes.put(key, value);
     }
 
     @Override
@@ -155,7 +131,7 @@ public class BasicContext implements IContext{
 
     @Override
     public void releaseRequest() {
-        //如果requestReleased为false，则置为true
+        //如果requestReleased为false，则置为true（实际上，这里只是将资源释放标识设置为了true，并没有进行真正的资源释放）
         this.requestReleased.compareAndSet(false, true);
     }
 
@@ -170,6 +146,7 @@ public class BasicContext implements IContext{
     @Override
     public void invokeCompletedCallBack() {
         if(completedCallBacks != null){
+            //此处的this指的是当前对象，也就是当前上下文对象
             completedCallBacks.forEach(call->call.accept(this));
         }
     }

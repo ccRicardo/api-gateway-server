@@ -18,7 +18,7 @@ public interface IContext {
     // TODO: 目前定义了四个状态，考虑再定义一个初始化状态。此外，可以考虑用内部枚举类来表示状态。
     //运行中
     int RUNNING = 0;
-    //响应完成或出现异常，需写回
+    //请求完成或出现异常，需写回响应
     int WRITTEN = 1;
     //写回完成
     int COMPLETED = 2;
@@ -39,7 +39,7 @@ public interface IContext {
 
     /**
      * @date: 2024-01-05 15:41
-     * @description: 获取转发协议
+     * @description: 获取请求转发要用到的协议（目前只有http）
      * @return: java.lang.String
      */
     String getProtocol();
@@ -61,12 +61,6 @@ public interface IContext {
      * @return: java.lang.Object
      */
     Object getResponse();
-    /**
-     * @date: 2024-01-05 15:44
-     * @description: 设置过滤规则
-     * @return: void
-     */
-    void setRule();
     /**
      * @date: 2024-01-08 9:55
      * @description: 获取过滤规则
@@ -93,7 +87,7 @@ public interface IContext {
      * @Param obj:
      * @return: void
      */
-    void setAttribute(String key,Object obj);
+    void setAttribute(String key, Object value);
     /**
      * @date: 2024-01-05 15:43
      * @description: 获取上下文参数
