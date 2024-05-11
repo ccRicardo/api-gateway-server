@@ -20,16 +20,15 @@ import org.wyh.gateway.common.utils.JSONUtil;
 @Setter
 @Getter
 public class GatewayResponse {
-    //标准响应头
+    //标准响应头，用于存放标准的响应信息
     private HttpHeaders responseHeaders = new DefaultHttpHeaders();
-    //额外的响应头信息，可根据实际需求进行拓展
+    //额外响应头，可根据实际需求存放额外的响应/特殊的响应信息
     private HttpHeaders extraResponseHeaders = new DefaultHttpHeaders();
     //响应内容（响应体）
     private String content;
     //响应状态码
     private HttpResponseStatus httpResponseStatus;
-    //异步响应对象
-    //该项目底层使用了AsyncHttpClient框架，因此响应对象是org.asynchttpclient.Response类型
+    //AsyncHttpClient框架的异步响应结果
     private Response futureResponse;
 
 
@@ -63,7 +62,7 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 15:57
-     * @description: 根据网关接收到的异步响应对象来构建网关响应对象
+     * @description: 根据AsyncHttpClient的异步响应结果来构建网关响应对象
      * @Param futureResponse: 网关接收到的后台服务响应
      * @return: org.wyh.core.response.GatewayResponse
      */
@@ -76,19 +75,19 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 16:00
-     * @description: 构建一个JSON类型响应信息的网关响应对象，失败时使用
+     * @description: 根据响应码，构建一个JSON类型响应信息的网关响应对象，请求失败时使用（实际上是网关内部出现异常时调用）
      * @Param code: 响应代码
      * @return: org.wyh.core.response.GatewayResponse
      */
     public static GatewayResponse buildGatewayResponse(ResponseCode code){
-        //ObjectNode是JsonNode的子类，代表JSON的树模型
+        //ObjectNode是JsonNode的子类，代表JSON的树模型，主要用于构建json串
         //JSON树模型就是将JSON数据组织成树形结构
         ObjectNode objectNode = JSONUtil.createObjectNode();
-        //http状态码
+        //设置http状态码
         objectNode.put(JSONUtil.STATUS, code.getStatus().code());
-        //本网关系统定义的业务状态码，提供更加具体和细粒度的响应状态
+        //设置本网关系统自定义的业务状态码，提供更加具体和细粒度的响应状态
         objectNode.put(JSONUtil.CODE, code.getCode());
-        //本网关系统定义的业务状态信息
+        //设置本网关系统自定义的业务状态描述信息
         objectNode.put(JSONUtil.MESSAGE, code.getMessage());
         GatewayResponse gatewayResponse = new GatewayResponse();
         gatewayResponse.setHttpResponseStatus(code.getStatus());
@@ -102,7 +101,7 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 16:01
-     * @description: 构建一个JSON类型响应信息的网关响应对象，成功时使用
+     * @description: 根据响应数据对象，构建一个JSON类型响应信息的网关响应对象，请求成功时使用
      * @Param data: 响应数据内容
      * @return: org.wyh.core.response.GatewayResponse
      */
