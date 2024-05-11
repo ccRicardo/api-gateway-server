@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 
+
 /**
  * @BelongsProject: my-api-gateway
  * @BelongsPackage: org.wyh.core.request
@@ -31,7 +32,7 @@ import java.util.*;
  */
 @Getter
 public class GatewayRequest implements IGatewayRequest{
-    //服务唯一id
+    //服务唯一id，格式是服务id:版本号
     private final String uniqueId;
     //请求进入网关的时间
     private final long beginTime;
@@ -39,11 +40,11 @@ public class GatewayRequest implements IGatewayRequest{
     private final Charset charset;
     //客户端ip
     private final String clientIp;
-    //请求的主机地址/域名
+    //请求的主机地址，格式为ip:port
     private final String host;
-    //请求的路径（port:ip后面的路径部分）
+    //请求的路径（port:ip后面的路径部分，不包括参数）
     private final String path;
-    //请求的uri
+    //请求的uri（其实就是路径加上参数）
     private final String uri;
     //请求方式
     private final HttpMethod method;
@@ -53,7 +54,7 @@ public class GatewayRequest implements IGatewayRequest{
     private final HttpHeaders headers;
     //参数解析器，用于解析uri，将其分为path部分和键值对参数部分
     private final QueryStringDecoder queryStringDecoder;
-    //FullHttpRequest是完整的http请求，包含了请求行，请求头和请求体信息
+    //FullHttpRequest对象
     private final FullHttpRequest fullHttpRequest;
     //请求体
     @Setter
@@ -61,25 +62,17 @@ public class GatewayRequest implements IGatewayRequest{
     //用户id。如果没有做用户鉴权处理，那么该值没有意义（为-1）。
     @Setter
     private long userId = -1;
-    //
     /*
      * 保存请求的cookie
      * 这里的cookie类型是io.netty.handler.codec.http.cookie.Cookie，
-     * 而不是org.asynchttpclient.cookie.Cookie
-     * 两者大同小异，其差异主要体现在：
-     * io.netty.handler.codec.http.cookie.Cookie是Request级别
-     * org.asynchttpclient.cookie.Cookie是全局级别的
-     * 为了做服务隔离，让系统之间互不干扰，所以这里选择使用io.netty.handler.codec.http.cookie.Cookie
      */
-
     private Map<String, Cookie> cookieMap;
-    // TODO: 2024-01-09 这里只是存储了post请求的参数，计划拓展为存储post/get请求的参数
     //post请求参数集合。由于一个参数名可能对应多个参数值，所以使用List<String>来存储值。
     private Map<String, List<String>> postParameters;
     /*
      * 下面是一些可修改的请求参数
      * modifyHost与前面final修饰的host的不同是：
-     * host是客户端原始请求中给定的主机地址/域名，这并不一定是真正的服务主机地址
+     * host是客户端原始请求中给定的主机地址，这并不一定是真正的服务主机地址
      * modifyHost则是网关通过注册中心以及负载均衡后，得到的真正的服务主机地址
      * modifyPath与path同理
      */
@@ -209,17 +202,17 @@ public class GatewayRequest implements IGatewayRequest{
         if(postParameters == null){
             //解析application/x-www-form-urlencoded或multipart/form-data类型的post请求参数
             if(isFormPost()){
-//                //该类型的body以key=value形式编码参数，因此可以使用QueryStringDecoder来解析
+//                //对于第一种表单类型的post请求，其body以key=value形式编码参数，因此可以使用QueryStringDecoder来解析
 //                QueryStringDecoder paramDecoder = new QueryStringDecoder(body, false);
 //                postParameters = paramDecoder.parameters();
                 /*
-                 * HttpPostRequestDecoder实际上是一个解码器的代理对象，使用DefaultHttpDataFactory作为HttpDataFactory
-                 * HttpDataFactory将body中的数据解析为httpData，httpData有两种类型，Attribute和FileUpload
+                 * 由于要解析两种表单类型的post请求，因此只能使用HttpPostRequestDecoder
+                 * HttpDataFactory的作用是将body中的数据解析为httpData，httpData有两种类型，Attribute和FileUpload
                  * 前者表示普通属性（key=value形式），后者表示上传的文件。此方法只考虑属性，不考虑文件上传。
                  * DefaultHttpDataFactory中的minSize是一个阈值，小于该阈值则使用内存存储，大于则使用磁盘存储
                  */
                 HttpPostRequestDecoder paramDecoder = new HttpPostRequestDecoder(
-                        new DefaultHttpDataFactory(DefaultHttpDataFactory.MAXSIZE), fullHttpRequest, charset);
+                        new DefaultHttpDataFactory(charset), fullHttpRequest, charset);
                 //通过getBodyHttpDatas方法获取所有的HttpData（HttpData就是对body中数据的一个抽象）
                 for (InterfaceHttpData data : paramDecoder.getBodyHttpDatas()) {
                     //不考虑文件上传
