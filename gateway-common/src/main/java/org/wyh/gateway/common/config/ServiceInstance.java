@@ -19,7 +19,7 @@ public class ServiceInstance implements Serializable {
     private static final long serialVersionUID = -7559569289189228478L;
     //服务实例id，由ip和port构成
     protected String serviceInstanceId;
-    //服务定义的唯一id
+    //服务实例所属的服务定义的唯一id
     protected String uniqueId;
     //服务实例ip
     protected String ip;
@@ -29,13 +29,13 @@ public class ServiceInstance implements Serializable {
     protected String tags;
     //权重信息（负载均衡时可能用到）
     protected Integer weight;
-    //服务注册时的时间戳
+    //服务注册时间
     protected long registerTime;
     //服务实例启用/禁用
     protected boolean enable = true;
     //服务实例的版本号
     protected String version;
-    //标识是否为灰度服务
+    //标识是否为灰度服务实例
     protected boolean gray;
     /**
      * @date: 2024-01-22 14:23
@@ -47,20 +47,14 @@ public class ServiceInstance implements Serializable {
     }
     /**
      * @date: 2024-01-22 14:26
-     * @description: 获取服务定义的唯一id，同getUniqueId方法
+     * @description: 获取服务实例的地址（即ip:port）
      * @return: java.lang.String
      */
     public String getAddress(){
-        return this.uniqueId;
+        //serviceInstanceId属性就是由ip:port构成的
+        return this.serviceInstanceId;
     }
-    /**
-     * @date: 2024-01-22 14:24
-     * @description: 判断服务实例是否启用，同getEnable方法
-     * @return: boolean
-     */
-    public boolean isEnable(){
-        return this.enable;
-    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) {
