@@ -42,26 +42,11 @@ public class RequestHelper {
         //根据请求对象里的uniqueId，从动态配置管理器中获取服务定义信息
         ServiceDefinition serviceDefinition =
                 DynamicConfigManager.getInstance().getServiceDefinition(gatewayRequest.getUniqueId());
-        /* 以下是之前写死的代码
-        //注意：ServiceDefinition类上加了@Builder注解，所以可以采用以下形式来构建对象
-        ServiceDefinition serviceDefinition = ServiceDefinition.builder()
-                .serviceId("test-demo")
-                .enable(true)
-                .version("v1")
-                .patternPath("**")
-                .envType("dev")
-                .protocol(GatewayProtocol.HTTP)
-                .build();
+        // TODO: 2024-05-13 这里需要做一个路径匹配，如果匹配失败，则直接返回
+        //
 
-         */
-        /* todo 这段代码其实没有实际作用。因为本系统最关键的其实是获取服务实例，获取真实的主机地址。
-        todo 在这个过程中，方法调用信息其实根本就没有用到，没有任何作用。
-        //根据请求对象，获取服务定义中对应的服务（方法）调用的信息
-        HttpServiceInvoker serviceInvoker = new HttpServiceInvoker();
-        serviceInvoker.setInvokerPath(gatewayRequest.getPath());
-        serviceInvoker.setTimeout(500);
 
-         */
+
         //根据请求对象中的路径信息，获取相应的规则
         Rule rule = getRule(gatewayRequest, serviceDefinition.getServiceId());
 

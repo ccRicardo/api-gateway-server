@@ -12,13 +12,14 @@ import java.util.stream.Collectors;
  * @BelongsPackage: org.wyh.common.config
  * @Author: wyh
  * @Date: 2024-01-22 11:00
- * @Description: 动态配置管理类，主要负责缓存动态配置信息，包括服务定义，服务实例和规则
+ * @Description: 动态配置管理类，主要负责缓存和管理动态配置信息，即服务定义，服务实例和规则信息
+ * todo：其实这个类应该改名成DynamicInfoManager，也就是动态信息管理器类
  */
 public class DynamicConfigManager {
     //缓存服务定义的集合。key为uniqueId，是服务定义的唯一标识
     private ConcurrentHashMap<String, ServiceDefinition> serviceDefinitionMap =
             new ConcurrentHashMap<>();
-    //缓存服务实例的集合。key为uniqueId，是服务定义的唯一标识。一个服务定义与一组服务实例对应。
+    //缓存服务实例的集合。key为uniqueId，是服务实例所属的服务定义的唯一标识。一个服务定义与一组服务实例对应。
     private ConcurrentHashMap<String, Set<ServiceInstance>> serviceInstanceMap =
             new ConcurrentHashMap<>();
     //缓存规则的集合。key为ruleId，是规则的唯一标识。
@@ -27,6 +28,13 @@ public class DynamicConfigManager {
     private ConcurrentHashMap<String, Rule> pathRuleMap = new ConcurrentHashMap<>();
     //保存服务名与规则映射关系的集合。key为服务名/id，value为对应的规则集合。
     private ConcurrentHashMap<String, List<Rule>> serviceRuleMap = new ConcurrentHashMap<>();
+    /**
+     * @date: 2024-01-22 15:20
+     * @description: private修饰的无参构造器
+     * @return: null
+     */
+    private DynamicConfigManager() {
+    }
     /**
      * @BelongsProject: my-api-gateway
      * @BelongsPackage: org.wyh.common.config
@@ -37,13 +45,7 @@ public class DynamicConfigManager {
     private static class SingletonHolder {
         private static final DynamicConfigManager INSTANCE = new DynamicConfigManager();
     }
-    /**
-     * @date: 2024-01-22 15:20
-     * @description: private修饰的无参构造器
-     * @return: null
-     */
-    private DynamicConfigManager() {
-    }
+
     /**
      * @date: 2024-01-22 15:29
      * @description: 获取该类的单例对象
