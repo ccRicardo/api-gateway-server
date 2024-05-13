@@ -8,6 +8,7 @@ import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.common.config.ServiceDefinition;
 import org.wyh.gateway.common.constant.BasicConst;
 import org.wyh.gateway.common.constant.GatewayConst;
+import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.request.GatewayRequest;
@@ -30,7 +31,7 @@ import static org.wyh.gateway.common.enumeration.ResponseCode.PATH_NO_MATCHED;
 public class RequestHelper {
     /**
      * @date: 2024-01-17 9:55
-     * @description: 构建请求在网关中的上下文信息（GatewayContext对象）
+     * @description: 解析请求对象（FullHttpRequest对象），构建对应的上下文对象（GatewayContext对象）
      * @Param request:
      * @Param nettyCtx:
      * @return: org.wyh.core.context.GatewayContext
@@ -61,7 +62,7 @@ public class RequestHelper {
         serviceInvoker.setTimeout(500);
 
          */
-        //根据请求对象中的路径，获取相应的规则
+        //根据请求对象中的路径信息，获取相应的规则
         Rule rule = getRule(gatewayRequest, serviceDefinition.getServiceId());
 
         //构建该请求的GatewayContext上下文对象
@@ -78,7 +79,7 @@ public class RequestHelper {
     }
     /**
      * @date: 2024-01-17 9:58
-     * @description: 构建GatewayRequest请求对象
+     * @description: 根据FullHttpRequest请求对象，构建内部的GatewayRequest请求对象
      * @Param request:
      * @Param nettyCtx:
      * @return: org.wyh.core.request.GatewayRequest
@@ -89,6 +90,10 @@ public class RequestHelper {
          */
         HttpHeaders headers = request.headers();
         String uniqueId = headers.get(GatewayConst.UNIQUE_ID);
+        //请求头中必须带有uniqueId属性
+        if(StringUtils.isBlank(uniqueId)){
+            throw new ResponseException(ResponseCode.REQUEST_PARSE_ERROR_NO_UNIQUEID);
+        }
         String host = headers.get(HttpHeaderNames.HOST);
         HttpMethod method = request.method();
         String uri = request.uri();
@@ -111,7 +116,7 @@ public class RequestHelper {
      */
     private static String getClientIp(FullHttpRequest request, ChannelHandlerContext nettyCtx){
         /*
-         * X-Forwarded-For(XFF)是一个http请求头字段，用于标识通过代理方式连接到服务器的客户端的真实IP地址
+         * X-Forwarded-For(XFF)是一个http请求头字段，通过它可以获取以代理方式连接服务器的客户端的真实IP地址
          * 例如，如果一个http请求到达服务器之前，经过了三个代理Proxy1、Proxy2、Proxy3，IP分别为IP1、IP2、IP3，
          * 用户真实IP为IP0，那么该请求的X-Forwarded-For字段值应为: IP0, IP1, IP2
          */
