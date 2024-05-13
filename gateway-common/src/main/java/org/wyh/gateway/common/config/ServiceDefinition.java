@@ -75,14 +75,6 @@ public class ServiceDefinition implements Serializable {
         this.desc = desc;
         this.invokerMap = invokerMap;
     }
-    /**
-     * @date: 2024-01-17 14:32
-     * @description: 判断服务是否启用
-     * @return: boolean
-     */
-    public boolean isEnable() {
-        return enable;
-    }
     @Override
     public boolean equals(Object o) {
         if(this == o){
