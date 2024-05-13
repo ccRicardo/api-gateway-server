@@ -149,7 +149,7 @@ public class RouterFilter implements Filter {
                     //设置请求失败时的响应结果
                     ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.REQUEST_TIMEOUT));
                 } else {
-                    //其他异常默认为服务响应/返回异常。设置异常信息。
+                    //其他异常默认为服务连接异常。设置异常信息。
                     ctx.setThrowable(new ConnectException(throwable,
                             ctx.getRequest().getUniqueId(),
                             url, ResponseCode.HTTP_RESPONSE_ERROR));

@@ -9,7 +9,7 @@ import lombok.Getter;
  * @BelongsPackage: org.wyh.common.enums
  * @Author: wyh
  * @Date: 2024-01-10 15:30
- * @Description: 定义了一些常见的响应状态码
+ * @Description: 定义了一些常见的网关响应状态码
  */
 public enum ResponseCode {
 
@@ -39,12 +39,12 @@ public enum ResponseCode {
     DUBBO_RESPONSE_ERROR(HttpResponseStatus.INTERNAL_SERVER_ERROR, 10029, "服务返回异常"),
     VERIFICATION_FAILED(HttpResponseStatus.BAD_REQUEST,10030, "请求参数校验失败"),
     BLACKLIST(HttpResponseStatus.FORBIDDEN,10004, "请求IP在黑名单"),
-    WHITELIST(HttpResponseStatus.FORBIDDEN,10005, "请求IP不在白名单")
-    
-    ;
-
+    WHITELIST(HttpResponseStatus.FORBIDDEN,10005, "请求IP不在白名单");
+    //http响应状态码
     private HttpResponseStatus status;
+    //自定义的业务响应状态码
     private int code;
+    //自定义的业务响应状态信息
     private String message;
 
     ResponseCode(HttpResponseStatus status, int code, String msg) {

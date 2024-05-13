@@ -9,7 +9,9 @@ import org.wyh.gateway.common.config.ServiceDefinition;
 import org.wyh.gateway.common.constant.BasicConst;
 import org.wyh.gateway.common.constant.GatewayConst;
 import org.wyh.gateway.common.enumeration.ResponseCode;
+import org.wyh.gateway.common.exception.PathNoMatchedException;
 import org.wyh.gateway.common.exception.ResponseException;
+import org.wyh.gateway.common.utils.AntPathMatcher;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.request.GatewayRequest;
 
@@ -29,6 +31,8 @@ import static org.wyh.gateway.common.enumeration.ResponseCode.PATH_NO_MATCHED;
  * @Description: 处理请求对象的辅助类
  */
 public class RequestHelper {
+    //ANT路径规则匹配器
+    private static final AntPathMatcher antPathMatcher = new AntPathMatcher();
     /**
      * @date: 2024-01-17 9:55
      * @description: 解析请求对象（FullHttpRequest对象），构建对应的上下文对象（GatewayContext对象）
@@ -42,10 +46,10 @@ public class RequestHelper {
         //根据请求对象里的uniqueId，从动态配置管理器中获取服务定义信息
         ServiceDefinition serviceDefinition =
                 DynamicConfigManager.getInstance().getServiceDefinition(gatewayRequest.getUniqueId());
-        // TODO: 2024-05-13 这里需要做一个路径匹配，如果匹配失败，则直接返回
-        //
-
-
+        //将服务定义中的ANT风格（匹配）规则与请求中的请求路径进行匹配，如果匹配失败，则直接抛出相应异常
+        if(!antPathMatcher.match(serviceDefinition.getPatternPath(), gatewayRequest.getPath())){
+            throw new PathNoMatchedException(PATH_NO_MATCHED);
+        }
 
         //根据请求对象中的路径信息，获取相应的规则
         Rule rule = getRule(gatewayRequest, serviceDefinition.getServiceId());

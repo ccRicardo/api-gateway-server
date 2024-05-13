@@ -30,7 +30,6 @@ public class ServiceDefinition implements Serializable {
     //服务采用的具体协议（也就是RPC采用的具体协议），例如http(mvc http), dubbo等
     private String protocol;
     //服务的路径匹配规则，是一个ANT风格的表达式（正则匹配的效率太低，所以使用ANT）
-    // TODO: 2024-04-01 目前尚未使用该属性，计划在发送请求前进行一次路径匹配
     private String patternPath;
     //环境类型，例如开发环境，测试环境等
     private String envType;

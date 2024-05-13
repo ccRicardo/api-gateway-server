@@ -7,12 +7,12 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
  * @BelongsPackage: org.wyh.common.exception
  * @Author: wyh
  * @Date: 2024-01-17 10:09
- * @Description: 项目的异常（发生在网关系统之外的异常）基类
+ * @Description: 网关异常的基类（不进一步区分网关内部和外部异常）
  */
 public class BaseException extends RuntimeException{
     //序列化版本号
     private static final long serialVersionUID = -5658789202563433456L;
-    //响应状态码
+    //网关响应状态码
     protected ResponseCode code;
 
     /*
@@ -43,7 +43,7 @@ public class BaseException extends RuntimeException{
     }
     /**
      * @date: 2024-01-17 10:22
-     * @description: 获取响应状态码
+     * @description: 获取网关响应状态码
      * @return: org.wyh.common.enums.ResponseCode
      */
     public ResponseCode getCode() {

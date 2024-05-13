@@ -15,10 +15,6 @@ public class PathNoMatchedException extends BaseException{
     /*
      * 以下是一系列不同参数的构造函数
      */
-    public PathNoMatchedException() {
-        this(ResponseCode.PATH_NO_MATCHED);
-    }
-
     public PathNoMatchedException(ResponseCode code) {
         super(code.getMessage(), code);
     }

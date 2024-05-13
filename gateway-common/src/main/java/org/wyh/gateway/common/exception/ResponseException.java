@@ -14,9 +14,7 @@ public class ResponseException extends BaseException{
     /*
      * 以下是一系列不同参数的构造函数
      */
-    public ResponseException() {
-        this(ResponseCode.INTERNAL_ERROR);
-    }
+
     public ResponseException(ResponseCode code) {
         super(code.getMessage(), code);
     }
