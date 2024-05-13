@@ -90,7 +90,7 @@ public class FlowCtrlByServiceRule implements IGatewayFlowCtrlRule{
         }else{
             //计算每秒的最大访问数，向下取整
             int maxPermits = permits / duration;
-            //根据serviceId获取相应的GuavaCountLimiter实例
+            //根据uniqueId获取相应的GuavaCountLimiter实例
             GuavaCountLimiter guavaCountLimiter = GuavaCountLimiter.getInstance(flowCtrlConfig, maxPermits);
             if(guavaCountLimiter == null){
                 throw new RuntimeException("获取单机限流工具为空");

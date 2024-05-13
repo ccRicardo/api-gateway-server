@@ -38,7 +38,7 @@ public class RoundRobinLoadBalanceRule implements IGatewayLoadBalanceRule{
     /**
      * @date: 2024-02-21 15:14
      * @description: 有参构造器，主要负责初始化final修饰的uniqueId属性
-     * @Param serviceId:
+     * @Param uniqueId:
      * @return: null
      */
     public RoundRobinLoadBalanceRule(String uniqueId){
@@ -62,9 +62,9 @@ public class RoundRobinLoadBalanceRule implements IGatewayLoadBalanceRule{
     }
     @Override
     public ServiceInstance choose(GatewayContext ctx) {
-        String serviceId = ctx.getUniqueId();
+        String uniqueId = ctx.getUniqueId();
         //将具体的业务逻辑委托给另一个重载方法
-        return choose(serviceId, ctx.isGray());
+        return choose(uniqueId, ctx.isGray());
     }
 
     @Override

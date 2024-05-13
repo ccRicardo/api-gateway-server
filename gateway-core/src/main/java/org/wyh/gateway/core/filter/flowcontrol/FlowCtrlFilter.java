@@ -49,7 +49,7 @@ public class FlowCtrlFilter implements Filter {
                     flowCtrlRule = FlowCtrlByPathRule.getInstance(path);
                 }else if(flowCtrlConfig.getType().equals(FLOW_CTRL_TYPE_SERVICE)
                         && uniqueId.equals(flowCtrlConfig.getValue())){
-                    //根据serviceId获取相应的服务限流策略实例
+                    //根据uniqueId获取相应的服务限流策略实例
                     flowCtrlRule = FlowCtrlByServiceRule.getInstance(uniqueId);
                 }
                 //若在本次循环中找到了相应的配置项，则调用流量控制策略实例的相应方法完成过滤，然后退出循环

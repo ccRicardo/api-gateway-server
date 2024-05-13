@@ -21,7 +21,7 @@ public interface IGatewayLoadBalanceRule {
     /**
      * @date: 2024-02-21 9:52
      * @description: 根据服务id选择相应的服务实例
-     * @Param serviceId:
+     * @Param uniqueId:
      * @Param gray: 标识请求的是否为灰度服务实例
      * @return: org.wyh.common.config.ServiceInstance
      */
