@@ -20,15 +20,15 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
  * @Description: 通过服务id实现/完成流量控制。
  */
 public class FlowCtrlByServiceRule implements IGatewayFlowCtrlRule{
-    //服务id
-    private String serviceId;
+    //服务唯一id
+    private String uniqueId;
     //基于redis的分布式限流器
     private RedisCountLimiter redisCountLimiter;
     //限流时的提示信息
     private static final String LIMIT_MESSAGE ="您的请求过于频繁，请稍后重试";
     /*
-     * 保存服务id与对应的FlowCtrlByServiceRule对象
-     * 这么做的目的是避免对同一个serviceId，创建多个重复的FlowCtrlByServiceRule对象。
+     * 保存服务唯一id与对应的FlowCtrlByServiceRule对象
+     * 这么做的目的是避免对同一个uniqueId，创建多个重复的FlowCtrlByServiceRule对象。
      * 即大幅减少了创建FlowCtrlByServiceRule对象的开销。
      */
     private static ConcurrentHashMap<String, FlowCtrlByServiceRule> serviceRuleMap =
@@ -36,28 +36,28 @@ public class FlowCtrlByServiceRule implements IGatewayFlowCtrlRule{
     /**
      * @date: 2024-02-28 10:25
      * @description: 有参构造器
-     * @Param serviceId:
+     * @Param uniqueId:
      * @Param redisCountLimiter:
      * @return: null
      */
-    public FlowCtrlByServiceRule(String serviceId, RedisCountLimiter redisCountLimiter){
-        this.serviceId = serviceId;
+    public FlowCtrlByServiceRule(String uniqueId, RedisCountLimiter redisCountLimiter){
+        this.uniqueId = uniqueId;
         this.redisCountLimiter = redisCountLimiter;
     }
     /**
      * @date: 2024-02-28 10:26
-     * @description: 根据serviceId获取相应的FlowCtrlByServiceRule对象。
+     * @description: 根据uniqueId获取相应的FlowCtrlByServiceRule对象。
                      该方法可以避免重复创建FlowCtrlByServiceRule对象。
-     * @Param serviceId:
+     * @Param uniqueId:
      * @return: org.wyh.core.filter.flowcontrol.FlowCtrlByServiceRule
      */
-    public static FlowCtrlByServiceRule getInstance(String serviceId){
-        FlowCtrlByServiceRule flowCtrlByServiceRule = serviceRuleMap.get(serviceId);
+    public static FlowCtrlByServiceRule getInstance(String uniqueId){
+        FlowCtrlByServiceRule flowCtrlByServiceRule = serviceRuleMap.get(uniqueId);
         if(flowCtrlByServiceRule == null){
-            flowCtrlByServiceRule = new FlowCtrlByServiceRule(serviceId, 
+            flowCtrlByServiceRule = new FlowCtrlByServiceRule(uniqueId,
                     new RedisCountLimiter(new JedisUtil()));
-            //将该serviceId的FlowCtrlByServiceRule对象存入serviceRuleMap中，供之后使用
-            serviceRuleMap.put(serviceId, flowCtrlByServiceRule);
+            //将该uniqueId的FlowCtrlByServiceRule对象存入serviceRuleMap中，供之后使用
+            serviceRuleMap.put(uniqueId, flowCtrlByServiceRule);
         }
         return flowCtrlByServiceRule;
     }
@@ -82,8 +82,8 @@ public class FlowCtrlByServiceRule implements IGatewayFlowCtrlRule{
         int permits = map.get(FLOW_CTRL_LIMIT_PERMITS);
         //标识是否对当前的请求进行限流处理（也就是是否抛弃/忽略该次请求）。true为正常处理该次请求，不进行限流。
         boolean flag = true;
-        //限流对象的值就是serviceId属性的值
-        String key = serviceId;
+        //限流对象的值就是uniqueId属性的值
+        String key = uniqueId;
         //如果限流模式为分布式，则使用基于redis的分布式限流器；否则，使用基于guava的单机限流器。
         if(FLOW_CTRL_MODE_DISTRIBUTED.equals(flowCtrlConfig.getMode())){
             flag = redisCountLimiter.doFlowCtrl(key, permits, duration);

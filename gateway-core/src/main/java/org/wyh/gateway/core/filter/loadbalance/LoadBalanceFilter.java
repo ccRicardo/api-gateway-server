@@ -68,17 +68,17 @@ public class LoadBalanceFilter implements Filter {
                     switch (strategy){
                         case LOAD_BALANCE_STRATEGY_RANDOM:
                             //getInstance方法可以避免创建冗余对象
-                            loadBalanceRule = RandomLoadBalanceRule.getInstance(rule.getServiceId());
+                            loadBalanceRule = RandomLoadBalanceRule.getInstance(ctx.getUniqueId());
                             break;
                         case LOAD_BALANCE_STRATEGY_ROUND_ROBIN:
                             //getInstance方法可以避免创建冗余对象
-                            loadBalanceRule = RoundRobinLoadBalanceRule.getInstance(rule.getServiceId());
+                            loadBalanceRule = RoundRobinLoadBalanceRule.getInstance(ctx.getUniqueId());
                             break;
                         default:
                             //目前仅支持随机和轮询策略，其他情况都默认使用随机策略
                             log.warn("【负载均衡过滤器】暂不提供此负载均衡策略: {}", strategy);
                             //getInstance方法可以避免创建冗余对象
-                            loadBalanceRule = RandomLoadBalanceRule.getInstance(rule.getServiceId());
+                            loadBalanceRule = RandomLoadBalanceRule.getInstance(ctx.getUniqueId());
                             break;
                     }
                     //读取完负载均衡过滤器的配置后，退出循环
@@ -90,11 +90,11 @@ public class LoadBalanceFilter implements Filter {
     }
     @Override
     public void doFilter(GatewayContext ctx) throws Exception {
-        String serviceId = ctx.getUniqueId();
+        String uniqueId = ctx.getUniqueId();
         //通过网关上下文，获取相应的负载均衡策略
         IGatewayLoadBalanceRule loadBalanceRule = getLoadBalanceRule(ctx);
         //根据指定的负载均衡策略，获取相应的服务实例
-        ServiceInstance serviceInstance = loadBalanceRule.choose(serviceId, ctx.isGray());
+        ServiceInstance serviceInstance = loadBalanceRule.choose(uniqueId, ctx.isGray());
         log.info("服务实例ip: {} port: {}", serviceInstance.getIp(), serviceInstance.getPort());
         GatewayRequest request = ctx.getRequest();
         if(serviceInstance != null && request != null){
@@ -102,7 +102,7 @@ public class LoadBalanceFilter implements Filter {
             String host = serviceInstance.getIp() + ":" + serviceInstance.getPort();
             request.setModifyHost(host);
         }else{
-            log.warn("【负载均衡过滤器】无可用的服务实例: {}",serviceId);
+            log.warn("【负载均衡过滤器】无可用的服务实例: {}", uniqueId);
             throw new NotFoundException(SERVICE_INSTANCE_NOT_FOUND);
         }
     }

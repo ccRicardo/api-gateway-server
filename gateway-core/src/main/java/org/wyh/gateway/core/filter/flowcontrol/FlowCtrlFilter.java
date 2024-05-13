@@ -33,7 +33,7 @@ public class FlowCtrlFilter implements Filter {
             Iterator<Rule.FlowCtrlConfig> iterator = flowCtrlConfigs.iterator();
             Rule.FlowCtrlConfig flowCtrlConfig;
             String path;
-            String serviceId;
+            String uniqueId;
             //遍历流量控制配置集合，找到与当前上下文匹配的流量控制配置项
             while(iterator.hasNext()){
                 flowCtrlConfig = iterator.next();
@@ -41,16 +41,16 @@ public class FlowCtrlFilter implements Filter {
                     continue;
                 }
                 path = ctx.getRequest().getPath();
-                serviceId = rule.getServiceId();
+                uniqueId = ctx.getUniqueId();
                 //如果流量控制类型为路径，则比较配置值和当前的路径值，类型为服务id时同理。
                 if(flowCtrlConfig.getType().equals(FLOW_CTRL_TYPE_PATH)
                         && path.equals(flowCtrlConfig.getValue())){
                     //根据path获取相应的路径限流策略实例
                     flowCtrlRule = FlowCtrlByPathRule.getInstance(path);
                 }else if(flowCtrlConfig.getType().equals(FLOW_CTRL_TYPE_SERVICE)
-                        && serviceId.equals(flowCtrlConfig.getValue())){
+                        && uniqueId.equals(flowCtrlConfig.getValue())){
                     //根据serviceId获取相应的服务限流策略实例
-                    flowCtrlRule = FlowCtrlByServiceRule.getInstance(serviceId);
+                    flowCtrlRule = FlowCtrlByServiceRule.getInstance(uniqueId);
                 }
                 //若在本次循环中找到了相应的配置项，则调用流量控制策略实例的相应方法完成过滤，然后退出循环
                 if(flowCtrlRule != null){

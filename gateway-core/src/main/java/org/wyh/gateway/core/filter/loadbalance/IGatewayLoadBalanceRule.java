@@ -25,5 +25,5 @@ public interface IGatewayLoadBalanceRule {
      * @Param gray: 标识请求的是否为灰度服务实例
      * @return: org.wyh.common.config.ServiceInstance
      */
-    ServiceInstance choose(String serviceId, boolean gray);
+    ServiceInstance choose(String uniqueId, boolean gray);
 }

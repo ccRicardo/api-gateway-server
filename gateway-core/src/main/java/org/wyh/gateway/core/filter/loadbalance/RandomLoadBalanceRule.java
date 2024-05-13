@@ -23,38 +23,38 @@ import static org.wyh.gateway.common.enumeration.ResponseCode.SERVICE_INSTANCE_N
  */
 @Slf4j
 public class RandomLoadBalanceRule implements IGatewayLoadBalanceRule{
-    //后端服务id
-    private final String serviceId;
+    //后端服务唯一id
+    private final String uniqueId;
     //服务实例集合
     private Set<ServiceInstance> serviceInstanceSet;
     /*
      * 保存服务id与对应的RandomLoadBalanceRule对象。
-     * 这么做的目的是避免对同一个serviceId，创建多个重复的RandomLoadBalanceRule对象。
+     * 这么做的目的是避免对同一个uniqueId，创建多个重复的RandomLoadBalanceRule对象。
      * 即大幅减少了创建RandomLoadBalanceRule对象的开销。
      */
     private static ConcurrentHashMap<String, RandomLoadBalanceRule> serviceMap = new ConcurrentHashMap<>();
     /**
      * @date: 2024-02-21 14:21
-     * @description: 有参构造器，主要负责初始化final修饰的serviceId属性
+     * @description: 有参构造器，主要负责初始化final修饰的uniqueId属性
      * @Param serviceId:
      * @return: null
      */
-    public RandomLoadBalanceRule(String serviceId){
-        this.serviceId = serviceId;
+    public RandomLoadBalanceRule(String uniqueId){
+        this.uniqueId = uniqueId;
     }
     /**
      * @date: 2024-02-21 14:22
-     * @description: 根据serviceId获取相应的RandomLoadBalanceRule对象。
+     * @description: 根据uniqueId获取相应的RandomLoadBalanceRule对象。
                      该方法可以避免重复创建RandomLoadBalanceRule对象。
-     * @Param serviceId:
+     * @Param uniqueId:
      * @return: org.wyh.core.filter.loadbalance.RandomLoadBalanceRule
      */
-    public static RandomLoadBalanceRule getInstance(String serviceId){
-        RandomLoadBalanceRule loadBalanceRule = serviceMap.get(serviceId);
+    public static RandomLoadBalanceRule getInstance(String uniqueId){
+        RandomLoadBalanceRule loadBalanceRule = serviceMap.get(uniqueId);
         if(loadBalanceRule == null){
-            loadBalanceRule = new RandomLoadBalanceRule(serviceId);
-            //将该serviceId的RandomLoadBalanceRule对象存入serviceMap中，供之后使用。
-            serviceMap.put(serviceId, loadBalanceRule);
+            loadBalanceRule = new RandomLoadBalanceRule(uniqueId);
+            //将该uniqueId的RandomLoadBalanceRule对象存入serviceMap中，供之后使用。
+            serviceMap.put(uniqueId, loadBalanceRule);
         }
         return loadBalanceRule;
     }
@@ -67,10 +67,10 @@ public class RandomLoadBalanceRule implements IGatewayLoadBalanceRule{
     }
 
     @Override
-    public ServiceInstance choose(String serviceId, boolean gray) {
-        serviceInstanceSet = DynamicConfigManager.getInstance().getServiceInstanceByUniqueId(serviceId, gray);
+    public ServiceInstance choose(String uniqueId, boolean gray) {
+        serviceInstanceSet = DynamicConfigManager.getInstance().getServiceInstanceByUniqueId(uniqueId, gray);
         if(serviceInstanceSet.isEmpty()){
-            log.warn("【负载均衡过滤器】无可用的服务实例: {}",serviceId);
+            log.warn("【负载均衡过滤器】无可用的服务实例: {}",uniqueId);
             throw new NotFoundException(SERVICE_INSTANCE_NOT_FOUND);
         }
         //将set转换为list，以便能够按照索引取值
