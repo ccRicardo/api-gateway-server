@@ -1,7 +1,6 @@
 package org.wyh.gateway.common.utils;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.wyh.gateway.common.utils.AssertUtil;
 import org.wyh.gateway.common.utils.CollectionUtils;
 
@@ -9,17 +8,20 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
 /**
- * <B>主类名称：</B>AntPathMatcher<BR>
- * <B>概要说明：</B>Ant路径规则匹配类<BR>
- * <B>?	匹配任何单字符</B><BR>
- * <B>*	匹配0或者任意数量的字符</B><BR>
- * <B>**	匹配0或者更多的目录</B><BR>
- * <B>概要说明：匹配规则例子</B><BR>
- * <B>/app/*.x	匹配(Matches)所有在app路径下的.x文件</B><BR>
- * <B>/app/p?ttern	匹配(Matches) /app/pattern 和 /app/pXttern,但是不包括/app/pttern</B><BR>
- * @author JiFeng
- * @since 2021年12月5日 下午3:17:46
+ * @BelongsProject: my-api-gateway
+ * @BelongsPackage: org.wyh.common.utils
+ * @Author: wyh
+ * @Date: 2024-05-13 14:07
+ * @Description: ANT风格的路径规则匹配类。
+ *               todo 该类的内容比较多，而且逻辑很复杂，因此就不去研究源码了
+ *               todo 用到的核心方法：public boolean match(String pattern, String path)
+ *               todo 以下是ANT风格路径中常用通配符的说明：
+ *               ?  匹配任何单字符
+ *               *  匹配任意数量的字符（只能匹配单层目录）
+ *               **	 匹配任意数量的字符（可以匹配多层目录）
  */
 public class AntPathMatcher {
 
@@ -145,7 +147,13 @@ public class AntPathMatcher {
         return false;
     }
 
-
+    /**
+     * @date: 2024-05-13 14:26
+     * @description: 核心方法，用于做路径规则匹配。方法返回的是匹配结果。
+     * @Param pattern: 匹配规则
+     * @Param path: 匹配路径
+     * @return: boolean
+     */
     public boolean match(String pattern, String path) {
         return doMatch(pattern, path, true, null);
     }
@@ -163,6 +171,15 @@ public class AntPathMatcher {
      * @param fullMatch whether a full pattern match is required (else a pattern match
      *                  as far as the given base path goes is sufficient)
      * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
+     */
+    /**
+     * @date: 2024-05-13 14:31
+     * @description: 用于真正实现ANT路径规则匹配的业务逻辑。由于过于复杂，就不研究了。
+     * @Param pattern:
+     * @Param path:
+     * @Param fullMatch:
+     * @Param uriTemplateVariables:
+     * @return: boolean
      */
     protected boolean doMatch(String pattern, String path, boolean fullMatch,
                               Map<String, String> uriTemplateVariables) {

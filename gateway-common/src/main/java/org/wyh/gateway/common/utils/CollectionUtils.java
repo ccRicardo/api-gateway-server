@@ -5,127 +5,32 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @BelongsProject: my-api-gateway
+ * @BelongsPackage: org.wyh.common.utils
+ * @Author: wyh
+ * @Date: 2024-05-13 13:35
+ * @Description: 集合工具类，负责集合相关的操作
+ */
 public class CollectionUtils {
-
-    private static final Comparator<String> SIMPLE_NAME_COMPARATOR = new Comparator<String>() {
-        @Override
-        public int compare(String s1, String s2) {
-            if (s1 == null && s2 == null) {
-                return 0;
-            }
-            if (s1 == null) {
-                return -1;
-            }
-            if (s2 == null) {
-                return 1;
-            }
-            int i1 = s1.lastIndexOf('.');
-            if (i1 >= 0) {
-                s1 = s1.substring(i1 + 1);
-            }
-            int i2 = s2.lastIndexOf('.');
-            if (i2 >= 0) {
-                s2 = s2.substring(i2 + 1);
-            }
-            return s1.compareToIgnoreCase(s2);
-        }
-    };
-
+    /**
+     * @date: 2024-05-13 13:45
+     * @description: 私有无参构造器。工具类的方法通常都是静态方法，不需要构建类对象。
+     * @return: null
+     */
     private CollectionUtils() {
     }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static <T> List<T> sort(List<T> list) {
-        if (isNotEmpty(list)) {
-            Collections.sort((List) list);
-        }
-        return list;
-    }
-
-    public static List<String> sortSimpleName(List<String> list) {
-        if (list != null && list.size() > 0) {
-            Collections.sort(list, SIMPLE_NAME_COMPARATOR);
-        }
-        return list;
-    }
-
-    public static Map<String, Map<String, String>> splitAll(Map<String, List<String>> list, String separator) {
-        if (list == null) {
-            return null;
-        }
-        Map<String, Map<String, String>> result = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : list.entrySet()) {
-            result.put(entry.getKey(), split(entry.getValue(), separator));
-        }
-        return result;
-    }
-
-    public static Map<String, List<String>> joinAll(Map<String, Map<String, String>> map, String separator) {
-        if (map == null) {
-            return null;
-        }
-        Map<String, List<String>> result = new HashMap<>();
-        for (Map.Entry<String, Map<String, String>> entry : map.entrySet()) {
-            result.put(entry.getKey(), join(entry.getValue(), separator));
-        }
-        return result;
-    }
-
-    public static Map<String, String> split(List<String> list, String separator) {
-        if (list == null) {
-            return null;
-        }
-        Map<String, String> map = new HashMap<>();
-        if (list.isEmpty()) {
-            return map;
-        }
-        for (String item : list) {
-            int index = item.indexOf(separator);
-            if (index == -1) {
-                map.put(item, "");
-            } else {
-                map.put(item.substring(0, index), item.substring(index + 1));
-            }
-        }
-        return map;
-    }
-
-    public static List<String> join(Map<String, String> map, String separator) {
-        if (map == null) {
-            return null;
-        }
-        List<String> list = new ArrayList<>();
-        if (map.size() == 0) {
-            return list;
-        }
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (StringUtils.isEmpty(value)) {
-                list.add(key);
-            } else {
-                list.add(key + separator + value);
-            }
-        }
-        return list;
-    }
-
-    public static String join(List<String> list, String separator) {
-        StringBuilder sb = new StringBuilder();
-        for (String ele : list) {
-            if (sb.length() > 0) {
-                sb.append(separator);
-            }
-            sb.append(ele);
-        }
-        return sb.toString();
-    }
-
+    /**
+     * @date: 2024-05-13 13:52
+     * @description: 判断两个map集合是否相同（即包含的元素是否完全相同）
+     * @Param map1:
+     * @Param map2:
+     * @return: boolean
+     */
     public static boolean mapEquals(Map<?, ?> map1, Map<?, ?> map2) {
         if (map1 == null && map2 == null) {
             return true;
@@ -146,7 +51,13 @@ public class CollectionUtils {
         }
         return true;
     }
-
+    /**
+     * @date: 2024-05-13 13:54
+     * @description: 私有方法，判断两个对象是否相等
+     * @Param obj1:
+     * @Param obj2:
+     * @return: boolean
+     */
     private static boolean objectEquals(Object obj1, Object obj2) {
         if (obj1 == null && obj2 == null) {
             return true;
@@ -154,12 +65,19 @@ public class CollectionUtils {
         if (obj1 == null || obj2 == null) {
             return false;
         }
+        //具体的相等标准取决于obj1和obj2的具体类型。如果该类型没有重写equals方法，则使用Object.equals。
         return obj1.equals(obj2);
     }
-
+    /**
+     * @date: 2024-05-13 13:58
+     * @description: 将一个字符串数组形式的kv对序列转换为相应的map集合
+     * @Param pairs:
+     * @return: java.util.Map<java.lang.String, java.lang.String>
+     */
     public static Map<String, String> toStringMap(String... pairs) {
         Map<String, String> parameters = new HashMap<>();
         if (pairs.length > 0) {
+            //验证字符串数组的元素数量是否为偶数
             if (pairs.length % 2 != 0) {
                 throw new IllegalArgumentException("pairs must be even.");
             }
@@ -170,13 +88,18 @@ public class CollectionUtils {
         return parameters;
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * @date: 2024-05-13 14:02
+     * @description: 将一个对象数组形式的kv对序列转换为相应的map集合
+     * @Param pairs:
+     * @return: java.util.Map<K, V>
+     */
     public static <K, V> Map<K, V> toMap(Object... pairs) {
         Map<K, V> ret = new HashMap<>();
         if (pairs == null || pairs.length == 0) {
             return ret;
         }
-
+        //验证对象数组的元素数量是否为偶数
         if (pairs.length % 2 != 0) {
             throw new IllegalArgumentException("Map pairs can not be odd number.");
         }
@@ -186,19 +109,39 @@ public class CollectionUtils {
         }
         return ret;
     }
-
+    /**
+     * @date: 2024-05-13 14:04
+     * @description: 判断Collection集合是否为空（集合对象为null或集合不包含任何元素）
+     * @Param collection:
+     * @return: boolean
+     */
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
     }
-
+    /**
+     * @date: 2024-05-13 14:05
+     * @description: 判断Collection集合是否为非空（集合对象不为null且包含至少一个元素）
+     * @Param collection:
+     * @return: boolean
+     */
     public static boolean isNotEmpty(Collection<?> collection) {
         return !isEmpty(collection);
     }
-
+    /**
+     * @date: 2024-05-13 14:05
+     * @description: 判断一个map集合是否为空
+     * @Param map:
+     * @return: boolean
+     */
     public static boolean isEmptyMap(Map map) {
         return map == null || map.size() == 0;
     }
-
+    /**
+     * @date: 2024-05-13 14:06
+     * @description: 判断一个map集合是否为非空
+     * @Param map:
+     * @return: boolean
+     */
     public static boolean isNotEmptyMap(Map map) {
         return !isEmptyMap(map);
     }
