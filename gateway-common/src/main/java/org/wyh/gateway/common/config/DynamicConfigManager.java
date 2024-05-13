@@ -24,10 +24,6 @@ public class DynamicConfigManager {
             new ConcurrentHashMap<>();
     //缓存规则的集合。key为ruleId，是规则的唯一标识。
     private ConcurrentHashMap<String, Rule> ruleMap = new ConcurrentHashMap<>();
-    //保存路径与规则映射关系的集合。key为路径，value为绑定的规则
-    private ConcurrentHashMap<String, Rule> pathRuleMap = new ConcurrentHashMap<>();
-    //保存服务名与规则映射关系的集合。key为服务名/id，value为对应的规则集合。
-    private ConcurrentHashMap<String, List<Rule>> serviceRuleMap = new ConcurrentHashMap<>();
     /**
      * @date: 2024-01-22 15:20
      * @description: private修饰的无参构造器
@@ -215,39 +211,18 @@ public class DynamicConfigManager {
     /**
      * @date: 2024-01-22 16:01
      * @description: 加载多个规则（规则列表）。
-                     该方法除了要初始化ruleMap外，还要初始化pathRuleMap和serviceRuleMap
      * @Param ruleList:
      * @return: void
      */
     public void putAllRule(List<Rule> ruleList) {
         //该方法除了要初始化ruleMap外，还要初始化pathRuleMap和serviceRuleMap
         ConcurrentHashMap<String,Rule> newRuleMap = new ConcurrentHashMap<>();
-        ConcurrentHashMap<String,Rule> newPathMap = new ConcurrentHashMap<>();
-        ConcurrentHashMap<String,List<Rule>> newServiceMap = new ConcurrentHashMap<>();
         for (Rule rule : ruleList) {
             //更新规则的最后修改时间属性
             rule.setLastModifiedTime(TimeUtil.currentTimeMillis());
             newRuleMap.put(rule.getRuleId(), rule);
-            //获取绑定到该rule上的path集合
-            List<String> paths = rule.getPaths();
-            for (String path : paths) {
-                //注意，key中的路径由rule中的服务id和path组合而成
-                String key = rule.getServiceId()+"."+path;
-                newPathMap.put(key, rule);
-            }
-            //获取服务对应的规则集合
-            List<Rule> rules = newServiceMap.get(rule.getServiceId());
-            //判断规则集合是否存在，若不存在，则需要先创建对象。
-            if(rules == null){
-                rules = new ArrayList<>();
-            }
-            //将当前的rule对象添加到对应的规则集合中
-            rules.add(rule);
-            newServiceMap.put(rule.getServiceId(), rules);
         }
         ruleMap = newRuleMap;
-        pathRuleMap = newPathMap;
-        serviceRuleMap = newServiceMap;
     }
     /**
      * @date: 2024-01-22 16:15
@@ -274,23 +249,5 @@ public class DynamicConfigManager {
      */
     public ConcurrentHashMap<String, Rule> getRuleMap() {
         return ruleMap;
-    }
-    /**
-     * @date: 2024-02-20 15:13
-     * @description: 获取指定路径绑定的规则
-     * @Param path:
-     * @return: org.wyh.common.config.Rule
-     */
-    public Rule getRuleByPath(String path){
-        return pathRuleMap.get(path);
-    }
-    /**
-     * @date: 2024-02-20 15:15
-     * @description: 获取指定服务对应的规则集合
-     * @Param serviceId:
-     * @return: java.util.List<org.wyh.common.config.Rule>
-     */
-    public List<Rule> getRuleByServiceId(String serviceId){
-        return serviceRuleMap.get(serviceId);
     }
 }

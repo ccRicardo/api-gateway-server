@@ -33,6 +33,7 @@ public class Rule implements Comparable<Rule>, Serializable{
     private String protocol;
     //规则优先级。一条路径可以绑定多个规则，而最终应用时需要进行优先级比较来选择一个具体规则。优先级数字越小，执行的顺序越靠前。
     private Integer order;
+    //规则的过滤器配置集合（其实就是在定义一条过滤器链）。
     private Set<FilterConfig> filterConfigs = new HashSet<>();
     //规则的限流配置集合
     private Set<FlowCtrlConfig> flowCtrlConfigs = new HashSet<>();
@@ -40,17 +41,7 @@ public class Rule implements Comparable<Rule>, Serializable{
     private Set<HystrixConfig> hystrixConfigs = new HashSet<>();
     //规则的请求重试配置信息
     private RetryConfig retryConfig = new RetryConfig();
-    /*
-     * 注意：“规则的”与“当前规则对象的”的含义是不同的，两者的差异类似于类与对象
-     * 可以把具备相同规则id的规则对象视为同一类，这样就容易理解了
-     */
-    //当前规则对象对应的后端服务id。
-    private String serviceId;
-    //当前规则对象对应的请求路径的（公共）前缀。todo 该属性的作用目前还不大明白
-    private String prefix;
-    //当前规则对象绑定的路径集合。（当前规则对象对应的后端服务可能会存在多条访问路径）
-    private List<String> paths;
-    //规则的过滤器配置集合（其实就是在定义一条过滤器链）。
+
     /**
      * @date: 2024-01-11 14:04
      * @description: 无参构造器
@@ -231,9 +222,6 @@ public class Rule implements Comparable<Rule>, Serializable{
                 ", name='" + name + '\'' +
                 ", protocol='" + protocol + '\'' +
                 ", order=" + order +
-                ", serviceId='" + serviceId + '\'' +
-                ", prefix='" + prefix + '\'' +
-                ", paths=" + paths +
                 ", filterConfigs=" + filterConfigs +
                 ", flowCtrlConfigs=" + flowCtrlConfigs +
                 ", hystrixConfigs=" + hystrixConfigs +

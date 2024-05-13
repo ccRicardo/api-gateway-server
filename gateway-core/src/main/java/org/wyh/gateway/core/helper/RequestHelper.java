@@ -6,9 +6,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.wyh.gateway.common.config.DynamicConfigManager;
 import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.common.config.ServiceDefinition;
+import org.wyh.gateway.common.config.ServiceInvoker;
 import org.wyh.gateway.common.constant.BasicConst;
 import org.wyh.gateway.common.constant.GatewayConst;
 import org.wyh.gateway.common.enumeration.ResponseCode;
+import org.wyh.gateway.common.exception.NotFoundException;
 import org.wyh.gateway.common.exception.PathNoMatchedException;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.common.utils.AntPathMatcher;
@@ -20,6 +22,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.wyh.gateway.common.enumeration.ResponseCode.PATH_NO_MATCHED;
 
@@ -46,24 +49,23 @@ public class RequestHelper {
         //根据请求对象里的uniqueId，从动态配置管理器中获取服务定义信息
         ServiceDefinition serviceDefinition =
                 DynamicConfigManager.getInstance().getServiceDefinition(gatewayRequest.getUniqueId());
-        //将服务定义中的ANT风格（匹配）规则与请求中的请求路径进行匹配，如果匹配失败，则直接抛出相应异常
+        //将服务定义中的ANT风格（匹配）规则与请求中的请求路径进行匹配，如果匹配失败，则直接抛出相应异常（这就是快速失败策略）
         if(!antPathMatcher.match(serviceDefinition.getPatternPath(), gatewayRequest.getPath())){
             throw new PathNoMatchedException(PATH_NO_MATCHED);
         }
-
-        //根据请求对象中的路径信息，获取相应的规则
-        Rule rule = getRule(gatewayRequest, serviceDefinition.getServiceId());
-
+        //根据请求对象中的路径信息，获取对应的方法调用对象
+        ServiceInvoker serviceInvoker = getServiceInvoker(gatewayRequest, serviceDefinition);
+        //根据方法调用对象中的ruleId，从动态配置管理器中获取对应的规则对象
+        String ruleId = serviceInvoker.getRuleId();
+        Rule rule = DynamicConfigManager.getInstance().getRule(ruleId);
         //构建该请求的GatewayContext上下文对象
-        GatewayContext gatewayContext = new GatewayContext(
-                serviceDefinition.getProtocol(),
-                nettyCtx,
-                HttpUtil.isKeepAlive(request),
-                gatewayRequest,
-                rule,
-                0);
-        //在负载均衡过滤器中，已经获取了真实的服务实例，并且更新了请求中的modifyHost属性。因此这里不需要再设置。
-        //gatewayContext.getRequest().setModifyHost("127.0.0.1:8080");
+        GatewayContext gatewayContext = new GatewayContext.Builder()
+                .setProtocol(serviceDefinition.getProtocol())
+                .setNettyCtx(nettyCtx)
+                .setKeepAlive(HttpUtil.isKeepAlive(request))
+                .setGatewayRequest(gatewayRequest)
+                .setRule(rule)
+                .build();
         return gatewayContext;
     }
     /**
@@ -127,31 +129,20 @@ public class RequestHelper {
         return clientIp;
     }
     /**
-     * @date: 2024-02-20 16:05
-     * @description: 根据请求对象中的路径，获取对应的规则
-     * @Param gatewayRequest:
-     * @Param serviceId:
-     * @return: org.wyh.common.config.Rule
+     * @date: 2024-05-13 16:03
+     * @description: 根据请求对象中的路径信息，获取对应的方法调用对象
+     * @Param request:
+     * @Param serviceDefinition:
+     * @return: org.wyh.gateway.common.config.ServiceInvoker
      */
-    private static Rule getRule(GatewayRequest gatewayRequest, String serviceId){
-        //动态配置管理器中的pathRuleMap中的key是由服务id和请求路径构成
-        String key = serviceId +"."+ gatewayRequest.getPath();
-        Rule rule = DynamicConfigManager.getInstance().getRuleByPath(key);
-        if(rule != null){
-            return rule;
+    private static ServiceInvoker getServiceInvoker(GatewayRequest request,
+                                                    ServiceDefinition serviceDefinition){
+        Map<String, ServiceInvoker> invokerMap = serviceDefinition.getInvokerMap();
+        //根据请求对象中的路径信息，获取对应的方法调用对象
+        ServiceInvoker serviceInvoker = invokerMap.get(request.getPath());
+        if(serviceInvoker == null){
+            throw new NotFoundException(ResponseCode.SERVICE_INVOKER_NOT_FOUND);
         }
-        //如果上述规则查找步骤（getRuleByPath）失败，则使用另一种方式（getRuleByServiceId）进行查找
-        /*
-         * stream方法将返回的List<Rule>转换为流
-         * filter方法的作用是过滤，具体来说，它会遍历流中的每一个元素，并检查表达式结果是否为真。
-         * 只有当结果为真，对应元素才会被保留在流中。
-         * findAny方法会返回流中的任意一个元素，通常是第一个元素。
-         * orElseThrow方法会在流为空时抛出一个特定的异常。
-         * 综上，该段代码的思路就是先根据serviceId找到服务对应的规则集合
-         * 然后再根据请求路径的前缀找到匹配的规则
-         */
-        return DynamicConfigManager.getInstance().getRuleByServiceId(serviceId)
-                .stream().filter(r -> gatewayRequest.getPath().startsWith(r.getPrefix()))
-                .findAny().orElseThrow(()-> new ResponseException(PATH_NO_MATCHED));
+        return serviceInvoker;
     }
 }
