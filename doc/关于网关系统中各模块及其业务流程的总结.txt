@@ -69,6 +69,7 @@ ChannelManager：管理channel池，并负责创建客户端的bootstrap等
 NettyRequestSender：发送http异步请求
 
 （二）过滤组件模块：
+todo 补充过滤组件模块，将过滤组件进一步细分为前置，后置，异常，路由过滤器，并补充详细的执行流程和步骤。
 1、过滤组件链工厂
 过滤组件链工厂类的主要作用是通过spi机制加载各组件的实例，然后根据请求上下文中携带的规则信息，构建相应的过滤器链实例，并保存到缓存中。
 过滤组件链工厂类的主要类是GatewayFilterChainFactory
