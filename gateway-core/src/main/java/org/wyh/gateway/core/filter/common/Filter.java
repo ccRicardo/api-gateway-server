@@ -18,7 +18,7 @@ public interface Filter<T> {
     boolean check(T t);
     /**
      * @date: 2024-05-14 15:49
-     * @description: 执行过滤器，对指定内容进行过滤处理
+     * @description: 执行过滤器，对指定内容进行过滤处理。（核心过滤逻辑其实是调用doFilter方法完成的）
      * @Param t:
      * @Param args:
      * @return: void
@@ -26,7 +26,7 @@ public interface Filter<T> {
     void filter(T t, Object... args);
     /**
      * @date: 2024-05-14 15:51
-     * @description: 真正执行过滤处理逻辑的方法
+     * @description: 真正执行过滤处理逻辑的核心方法
      * @Param t:
      * @Param args:
      * @return: void
