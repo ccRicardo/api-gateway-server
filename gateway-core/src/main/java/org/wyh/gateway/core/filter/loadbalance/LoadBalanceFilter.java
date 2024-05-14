@@ -7,8 +7,8 @@ import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.common.config.ServiceInstance;
 import org.wyh.gateway.common.exception.NotFoundException;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.common.Filter;
-import org.wyh.gateway.core.filter.common.FilterAspect;
+import org.wyh.gateway.core.filter.old_common.Filter;
+import org.wyh.gateway.core.filter.old_common.FilterAspect;
 import org.wyh.gateway.core.request.GatewayRequest;
 
 import java.util.Iterator;

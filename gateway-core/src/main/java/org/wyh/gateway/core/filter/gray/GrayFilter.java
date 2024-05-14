@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.common.Filter;
-import org.wyh.gateway.core.filter.common.FilterAspect;
+import org.wyh.gateway.core.filter.old_common.Filter;
+import org.wyh.gateway.core.filter.old_common.FilterAspect;
 
 import java.util.HashSet;
 import java.util.Iterator;

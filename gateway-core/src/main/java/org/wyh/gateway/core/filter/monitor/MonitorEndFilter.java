@@ -7,8 +7,8 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.common.Filter;
-import org.wyh.gateway.core.filter.common.FilterAspect;
+import org.wyh.gateway.core.filter.old_common.Filter;
+import org.wyh.gateway.core.filter.old_common.FilterAspect;
 
 import java.io.IOException;
 import java.io.OutputStream;

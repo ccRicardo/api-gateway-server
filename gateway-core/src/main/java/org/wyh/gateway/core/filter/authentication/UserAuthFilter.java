@@ -9,8 +9,8 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.common.Filter;
-import org.wyh.gateway.core.filter.common.FilterAspect;
+import org.wyh.gateway.core.filter.old_common.Filter;
+import org.wyh.gateway.core.filter.old_common.FilterAspect;
 
 import static org.wyh.gateway.common.constant.FilterConst.*;
 
