@@ -87,14 +87,14 @@ public interface IContext {
      * @Param obj:
      * @return: void
      */
-    void setAttribute(String key, Object value);
+    <T> void setAttribute(AttributeKey<T> key, T value);
     /**
      * @date: 2024-01-05 15:43
      * @description: 获取上下文参数
      * @Param key:
      * @return: java.lang.Object
      */
-    Object getAttribute(String key);
+    <T> T getAttribute(AttributeKey<T> key);
     /**
      * @date: 2024-01-08 10:03
      * @description: 获取Netty ChannelHandler的上下文信息

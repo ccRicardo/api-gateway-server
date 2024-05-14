@@ -2,6 +2,7 @@ package org.wyh.gateway.core.context;
 
 import io.micrometer.core.instrument.Timer;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.Attribute;
 import io.netty.util.ReferenceCountUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -151,9 +152,9 @@ public class GatewayContext extends BasicContext{
      * @Param key: 
      * @return: java.lang.Object
      */
-    public Object getRequiredAttribute(String key){
-        Object value = super.getAttribute(key);
-        AssertUtil.notNull(value, "需要的属性'"+key+"'不存在");
+    public <T> T getRequiredAttribute(AttributeKey<T> key){
+        T value = super.getAttribute(key);
+        AssertUtil.notNull(value, "需要的上下文参数'"+key+"'不存在");
         return value;
     }
     /**
@@ -163,8 +164,8 @@ public class GatewayContext extends BasicContext{
      * @Param defaultValue:
      * @return: java.lang.Object
      */
-    public Object getAttributeOrDefault(String key, Object defaultValue){
-        return super.attributes.getOrDefault(key, defaultValue);
+    public <T> T getAttributeOrDefault(AttributeKey<T> key, T defaultValue){
+        return (T)super.attributes.getOrDefault(key, defaultValue);
     }
     /**
      * @date: 2024-01-12 10:05

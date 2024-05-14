@@ -20,9 +20,9 @@ import java.util.Set;
 public abstract class AttributeKey<T> {
     //保存预定义好（即已经命名好）的AttributeKey对象。其中，key是AttributeKey的名称。
     private static Map<String, AttributeKey<?>> namedMap = new HashMap<>();
-    //（预定义好的）表示ip地址列表（上下文）参数key的AttributeKey对象
+    //（预定义好的）表示“ip地址列表”（上下文）参数key的AttributeKey对象
     public static final AttributeKey<Set<String>> IP_ADDRESS = create(Set.class);
-    //（预定义好的）表示http方法调用（上下文）参数key的AttributeKey对象
+    //（预定义好的）表示“http方法调用”（上下文）参数key的AttributeKey对象
     public static final AttributeKey<ServiceInvoker> HTTP_INVOKER = create(ServiceInvoker.class);
     //静态代码块，用于将预定义好的AttributeKey对象及其名称放入namedMap集合中
     static{

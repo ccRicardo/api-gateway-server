@@ -27,7 +27,7 @@ public abstract class BasicContext implements IContext{
     //Netty ChannelHandler上下文
     protected final ChannelHandlerContext nettyCtx;
     //保存所有的上下文参数
-    protected final Map<String, Object> attributes = new HashMap<>();
+    protected final Map<AttributeKey<?>, Object> attributes = new HashMap<>();
     //异常
     protected Throwable throwable;
     //长连接标识
@@ -110,13 +110,13 @@ public abstract class BasicContext implements IContext{
     }
 
     @Override
-    public void setAttribute(String key, Object value) {
+    public <T> void setAttribute(AttributeKey<T> key, T value) {
         this.attributes.put(key, value);
     }
 
     @Override
-    public Object getAttribute(String key) {
-        return this.attributes.get(key);
+    public <T> T getAttribute(AttributeKey<T> key) {
+        return (T)this.attributes.get(key);
     }
 
     @Override

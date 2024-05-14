@@ -14,6 +14,7 @@ import org.wyh.gateway.common.exception.NotFoundException;
 import org.wyh.gateway.common.exception.PathNoMatchedException;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.common.utils.AntPathMatcher;
+import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.request.GatewayRequest;
 
@@ -66,6 +67,8 @@ public class RequestHelper {
                 .setGatewayRequest(gatewayRequest)
                 .setRule(rule)
                 .build();
+        //在网关上下文中设置“http方法调用”（上下文）参数
+        gatewayContext.setAttribute(AttributeKey.HTTP_INVOKER, serviceInvoker);
         return gatewayContext;
     }
     /**
