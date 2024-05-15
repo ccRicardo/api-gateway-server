@@ -3,6 +3,7 @@ package org.wyh.gateway.core.filter.common;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.core.context.GatewayContext;
+import org.wyh.gateway.core.filter.common.filter.AbstractLinkedFilter;
 
 /**
  * @BelongsProject: api-gateway-server

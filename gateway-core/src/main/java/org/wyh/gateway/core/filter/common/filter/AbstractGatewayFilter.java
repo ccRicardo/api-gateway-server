@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.common;
+package org.wyh.gateway.core.filter.common.filter;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,8 @@ import org.wyh.gateway.common.constant.FilterConst;
 import org.wyh.gateway.common.utils.JSONUtil;
 import org.wyh.gateway.core.cache.GatewayCacheManager;
 import org.wyh.gateway.core.context.GatewayContext;
-
+import org.wyh.gateway.core.filter.common.FilterAspect;
+import org.wyh.gateway.core.filter.common.filter.AbstractLinkedFilter;
 
 
 /**
@@ -23,7 +24,7 @@ import org.wyh.gateway.core.context.GatewayContext;
  */
 // TODO: 2024-05-15 目前存在的一个问题：在nacos中修改规则的过滤器配置，本地缓存中对应的原配置项不会失效
 @Slf4j
-public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter<GatewayContext>{
+public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter<GatewayContext> {
     //过滤器的注解对象
     protected FilterAspect filterAnnotation;
     //caffeine本地缓存。其中，key由ruleId加filterId构成，value是具体过滤器的配置类对象
