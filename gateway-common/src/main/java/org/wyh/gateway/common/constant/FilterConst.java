@@ -8,8 +8,8 @@ package org.wyh.gateway.common.constant;
  * @Description: 定义了一些过滤器相关的常量
  */
 public interface FilterConst {
-    //过滤器链缓存的名称/id
-    String FILTER_CHAIN_CACHE_ID = "filter_chain_cache";
+    //过滤器配置缓存的名称/id
+    String FILTER_CONFIG_CACHE_ID = "filter_config_cache";
     /*
      * 负载均衡过滤器相关常量
      */

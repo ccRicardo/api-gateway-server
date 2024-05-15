@@ -218,6 +218,7 @@ public class DynamicConfigManager {
         //该方法除了要初始化ruleMap外，还要初始化pathRuleMap和serviceRuleMap
         ConcurrentHashMap<String,Rule> newRuleMap = new ConcurrentHashMap<>();
         for (Rule rule : ruleList) {
+            // TODO: 2024-05-15 我想在此方法中加入缓存更新逻辑，而不是依靠最后修改时间作为key
             //更新规则的最后修改时间属性
             rule.setLastModifiedTime(TimeUtil.currentTimeMillis());
             newRuleMap.put(rule.getRuleId(), rule);

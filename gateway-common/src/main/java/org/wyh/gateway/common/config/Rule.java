@@ -170,11 +170,11 @@ public class Rule implements Comparable<Rule>, Serializable{
     }
     /**
      * @date: 2024-01-11 14:53
-     * @description: 判断filterId指定的过滤器组件是否存在
+     * @description: 检查给定filterId对应的过滤器组件是否存在/启用
      * @Param filterId:
      * @return: boolean
      */
-    public boolean checkConfigExists(String filterId){
+    public boolean checkFilterExist(String filterId){
         for (FilterConfig filterConfig : filterConfigs) {
             if(filterConfig.getFilterId().equalsIgnoreCase(filterId)){
                 return true;

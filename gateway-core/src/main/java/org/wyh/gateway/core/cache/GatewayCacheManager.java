@@ -13,7 +13,7 @@ import java.util.function.Function;
  * @Date: 2024-03-27 13:42
  * @Description: 基于caffeine的（本地）缓存管理器，用于统一管理系统中用到的各种缓存。
                  （也就是说，系统中的其他部分应该通过该缓存管理器来操作缓存，而不是直接操作）
-                 实际上，目前只有过滤器链工厂部分使用到了缓存。
+                 实际上，目前只有过滤器链部分使用到了缓存。
  */
 public class GatewayCacheManager {
     //保存系统中需要用到的各种缓存。其中key是缓存的名称/id，value是保存相关数据的缓存实例。
@@ -56,31 +56,6 @@ public class GatewayCacheManager {
         Cache<String, V> cache = Caffeine.newBuilder().build();
         cacheMap.put(cacheId, cache);
         return (Cache<String, V>)cacheMap.get(cacheId);
-    }
-    /**
-     * @date: 2024-03-27 14:20
-     * @description: 将一个缓存实例纳入缓存管理器的管理。
-     * @Param cacheId:
-     * @Param cache:
-     * @return: void
-     */
-    public <V> void add(String cacheId, Cache<String, V> cache){
-        cacheMap.put(cacheId, cache);
-    }
-    /**
-     * @date: 2024-03-27 15:02
-     * @description: 获取指定缓存中的指定缓存项。
-                     若该缓存项不存在，则调用function（通常是一个lambda表达式）来生成缓存项值，并将其保存在缓存中。
-                     其中，function的入参必须是String类型，出参可以是V或者V的子类
-     * @Param cacheId:
-     * @Param key:
-     * @Param function: 当指定key对应的缓存项不存在时被调用，用来生成key对应的缓存项值，并保存到缓存中供之后使用
-     * @return: com.github.benmanes.caffeine.cache.Cache<java.lang.String, V>
-     */
-    public <V> V get(String cacheId, String key,
-                     Function<String, ? extends V> function){
-        Cache<String, V> cache = (Cache<String, V>)cacheMap.get(cacheId);
-        return cache.get(key, function);
     }
     /**
      * @date: 2024-03-27 14:29
