@@ -32,7 +32,10 @@ public abstract class AbstractLinkedFilter<T> implements Filter<T> {
 
     @Override
     public void filter(T t, Object... args) {
-        //该方法是一个接口方法，因此，此处实际上调用的是具体实现类（即具体过滤器）的filter方法。
+        /*
+         * 该方法是一个接口方法，并且只在过滤器实现类中实现。
+         * 因此，此处实际上调用的是实现类实例（即具体过滤器）的doFilter方法。
+         */
         doFilter(t, args);
     }
 
@@ -42,10 +45,18 @@ public abstract class AbstractLinkedFilter<T> implements Filter<T> {
         if(next != null){
             //检查是否要执行下一个过滤器
             if(next.check(t)){
-                //执行下一个过滤器
+
+                /*
+                 * 执行下一个过滤器。
+                 * 实际情况下，next指向的是一个过滤器实现类的实例，因此会尝试调用实现类实例的filter方法。
+                 * 由于实现类中没有filter方法，所以会调用AbstractGatewayFilter的filter方法。
+                 * 而AbstractGatewayFilter.filter在加载完配置参数后，又调用该类的filter方法。
+                 * 由于只有实现类中实现了doFilter方法，所以该类的filter方法最终会去调用实现类的doFilter，真正完成过滤处理。
+                 * 之后再调用该方法，激发下一个过滤器，并重复上述步骤，直至整个过滤器链执行完毕。
+                 */
                 next.filter(t, args);
             }else{
-                //激发下下一个过滤器
+                //激发下下一个过滤器。此处是一个递归调用
                 next.fireNext(t, args);
             }
         }else{
