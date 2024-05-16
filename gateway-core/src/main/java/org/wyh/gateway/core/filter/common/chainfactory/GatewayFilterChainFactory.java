@@ -43,7 +43,7 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
      */
     private GatewayFilterChainFactory(){
         //保存过滤器类型及其对应的过滤器实例集合。其中，key指的是过滤器类型的描述代码。
-        Map<String, List<AbstractLinkedFilter<GatewayContext>>> filterMap = new LinkedHashMap<>();
+        Map<String, List<AbstractLinkedFilter>> filterMap = new LinkedHashMap<>();
         /*
          * 以下这段代码的作用是通过java SPI机制来加载/构建各过滤器插件的实例
          * SPI是JDK内置的一种服务提供发现机制，可以动态获取/发现接口的实现类
@@ -58,16 +58,16 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
         //以下这段代码的作用是：获取每个过滤器组件的实例，并添加到filterMap集合中
         serviceLoader.stream().forEach(filterProvider -> {
             //获取过滤器组件实例
-            Filter<GatewayContext> filter = filterProvider.get();
+            Filter filter = filterProvider.get();
             FilterAspect annotation = filter.getClass().getAnnotation(FilterAspect.class);
             if(annotation != null){
                 //获取该过滤器类型的描述代码，并以此为key，将对应实例加入到相应的list集合中
                 String filterTypeCode = annotation.type().getCode();
-                List<AbstractLinkedFilter<GatewayContext>> filterList = filterMap.get(filterTypeCode);
+                List<AbstractLinkedFilter> filterList = filterMap.get(filterTypeCode);
                 if(filterList == null){
-                    filterList = new ArrayList<AbstractLinkedFilter<GatewayContext>>();
+                    filterList = new ArrayList<AbstractLinkedFilter>();
                 }
-                filterList.add((AbstractLinkedFilter<GatewayContext>) filter);
+                filterList.add((AbstractLinkedFilter) filter);
                 filterMap.put(filterTypeCode, filterList);
             }
         });
@@ -78,14 +78,14 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
          */
         for (FilterType filterType : FilterType.values()) {
             //获取该类型对应的过滤器集合
-            List<AbstractLinkedFilter<GatewayContext>> filterList = filterMap.get(filterType.getCode());
+            List<AbstractLinkedFilter> filterList = filterMap.get(filterType.getCode());
             if(filterList == null || filterList.isEmpty()){
                 continue;
             }
             //将集合中的过滤器实例按照优先级进行排序，优先级数字越小，执行位置越靠前
-            Collections.sort(filterList, new Comparator<AbstractLinkedFilter<GatewayContext>>() {
+            Collections.sort(filterList, new Comparator<AbstractLinkedFilter>() {
                 @Override
-                public int compare(AbstractLinkedFilter<GatewayContext> o1, AbstractLinkedFilter<GatewayContext> o2) {
+                public int compare(AbstractLinkedFilter o1, AbstractLinkedFilter o2) {
                     //优先级数字越小，执行位置越靠前
                     return o1.getClass().getAnnotation(FilterAspect.class).order() -
                             o2.getClass().getAnnotation(FilterAspect.class).order();
@@ -94,7 +94,7 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
             try{
                 //将排好序的过滤器集合添加到相应的过滤器链中
                 super.buildFilterChain(filterType, filterList);
-            }catch (Exception e){
+            }catch (Throwable e){
                 log.error("过滤器链构建异常: {}", e.getMessage(), e);
             }
         }

@@ -10,6 +10,7 @@ import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.base.FilterAspect;
+import org.wyh.gateway.core.filter.common.base.FilterConfig;
 import org.wyh.gateway.core.filter.common.base.FilterType;
 import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
 
@@ -29,7 +30,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
               name=USER_AUTH_FILTER_NAME,
               type=FilterType.PRE,
               order=USER_AUTH_FILTER_ORDER)
-public class UserAuthFilter extends AbstractGatewayFilter<> {
+public class UserAuthFilter extends AbstractGatewayFilter<UserAuthFilter.Config> {
     /*
      * jwt是一个基于json的轻量级token，主要用于做用户认证（鉴权）
      * 具体过程大概如下：
@@ -42,19 +43,42 @@ public class UserAuthFilter extends AbstractGatewayFilter<> {
      * 2、payload：存储实际需要传递的数据，默认不加密，一般存储非敏感信息。
      * 3、signature：用指定的签名算法，结合密钥对上述两部分内容使用后得到的签名。作用是验证数据是否被篡改。
      */
-    //携带用户jwt信息的cookie的名称
-    private static final String COOKIE_NAME = "user-jwt";
     //从静态配置类中获取生成签名时使用的密钥
     private static final String SECRET_KEY = ConfigLoader.getConfig().getSecretKey();
+    /**
+     * @BelongsProject: my-api-gateway
+     * @BelongsPackage: org.wyh.core.filter.authentication
+     * @Author: wyh
+     * @Date: 2024-05-16 14:36
+     * @Description: （静态内部类）该过滤器的配置类。
+     */
+    public static class Config extends FilterConfig{
+        //暂时没有定义任何属性
+    }
+    /**
+     * @date: 2024-05-16 14:41
+     * @description: 无参构造器，负责初始化父类的filterConfigClass属性
+     * @return: null
+     */
+    public UserAuthFilter(){
+        super(UserAuthFilter.Config.class);
+    }
+    /**
+     * @date: 2024-03-11 15:25
+     * @description: 从jwt中解析出用户id信息
+     * @Param token:
+     * @return: long
+     */
+    private long parseUserId(String token){
+        //解析jwt
+        Jwt jwt = Jwts.parser().setSigningKey(SECRET_KEY).parse(token);
+        //DefaultClaims的作用是处理jwt中payload部分。其中，subject/sub声明通常用于存放用户id信息。
+        return Long.parseLong(((DefaultClaims)jwt.getBody()).getSubject());
+    }
     @Override
     public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
 
         try{
-            //根据规则中的过滤器链配置判断是否需要进行用户鉴权
-            if(ctx.getRule().getFilterConfig(USER_AUTH_FILTER_ID) == null){
-                log.info("【用户鉴权过滤器】未配置相关信息");
-                return;
-            }
             //从请求对象中获取相应的cookie
             Cookie cookie = ctx.getRequest().getCookie(COOKIE_NAME);
             //若存放jwt的cookie不存在，则说明用户未登录
@@ -78,17 +102,5 @@ public class UserAuthFilter extends AbstractGatewayFilter<> {
              */
             super.fireNext(ctx, args);
         }
-    }
-    /**
-     * @date: 2024-03-11 15:25
-     * @description: 从jwt中解析出用户id信息
-     * @Param token:
-     * @return: long
-     */
-    private long parseUserId(String token){
-        //解析jwt
-        Jwt jwt = Jwts.parser().setSigningKey(SECRET_KEY).parse(token);
-        //DefaultClaims的作用是处理jwt中payload部分。其中，subject/sub声明通常用于存放用户id信息。
-        return Long.parseLong(((DefaultClaims)jwt.getBody()).getSubject());
     }
 }

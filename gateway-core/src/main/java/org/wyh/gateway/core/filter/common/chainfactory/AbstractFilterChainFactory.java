@@ -36,13 +36,13 @@ public abstract class AbstractFilterChainFactory implements FilterChainFactory {
      * 内层（也就是上述提到的对应过滤器集合）key指的是过滤器id，内存value指的是过滤器实例
      * 此外，LinkedHashMap可以保证插入和访问的顺序一致
      */
-    protected Map<String, Map<String, AbstractLinkedFilter<GatewayContext>>> filterTypeMap = new LinkedHashMap<>();
+    protected Map<String, Map<String, AbstractLinkedFilter>> filterTypeMap = new LinkedHashMap<>();
     /*
      * 保存过滤器id及其对应实例的集合
      * 其中，key指的是过滤器id，value指的是对应的过滤器实例
      * 此外，LinkedHashMap可以保证插入和访问的顺序一致
      */
-    protected Map<String, AbstractLinkedFilter<GatewayContext>> filterIdMap = new LinkedHashMap<>();
+    protected Map<String, AbstractLinkedFilter> filterIdMap = new LinkedHashMap<>();
     /**
      * @date: 2024-05-15 16:23
      * @description: 将单个过滤器添加到指定过滤器链中
@@ -50,7 +50,7 @@ public abstract class AbstractFilterChainFactory implements FilterChainFactory {
      * @Param filter:
      * @return: void
      */
-    private void addFilter(GatewayFilterChain filterChain, AbstractLinkedFilter<GatewayContext> filter){
+    private void addFilter(GatewayFilterChain filterChain, AbstractLinkedFilter filter){
         FilterAspect annotation = filter.getClass().getAnnotation(FilterAspect.class);
         if(annotation != null){
             filterChain.addLast(filter);
@@ -59,7 +59,7 @@ public abstract class AbstractFilterChainFactory implements FilterChainFactory {
             String filterId = annotation.id();
             String filterTypeCode = annotation.type().getCode();
             //获取该类型对应的过滤器集合，若不存在，则创建
-            Map<String, AbstractLinkedFilter<GatewayContext>> filterMap = filterTypeMap.get(filterTypeCode);
+            Map<String, AbstractLinkedFilter> filterMap = filterTypeMap.get(filterTypeCode);
             if(filterMap == null){
                 filterMap = new LinkedHashMap<>();
             }
@@ -76,15 +76,15 @@ public abstract class AbstractFilterChainFactory implements FilterChainFactory {
      * @Param filters:
      * @return: void
      */
-    private void addFilters(GatewayFilterChain filterChain, List<AbstractLinkedFilter<GatewayContext>> filters){
-        for (AbstractLinkedFilter<GatewayContext> filter : filters) {
+    private void addFilters(GatewayFilterChain filterChain, List<AbstractLinkedFilter> filters) throws Throwable{
+        for (AbstractLinkedFilter filter : filters) {
             //过滤器初始化
             filter.init();
             addFilter(filterChain, filter);
         }
     }
     @Override
-    public void buildFilterChain(FilterType filterType, List<AbstractLinkedFilter<GatewayContext>> filters) {
+    public void buildFilterChain(FilterType filterType, List<AbstractLinkedFilter> filters) throws Throwable{
         /*
          * pre，rout会添加到正常过滤器链中
          * error会添加到异常过滤器连中
@@ -119,7 +119,7 @@ public abstract class AbstractFilterChainFactory implements FilterChainFactory {
 
     @Override
     public <T> T getFilter(String filterId) {
-        AbstractLinkedFilter<GatewayContext> filter = null;
+        AbstractLinkedFilter filter = null;
         if(!filterIdMap.isEmpty()){
             filter = filterIdMap.get(filterId);
         }

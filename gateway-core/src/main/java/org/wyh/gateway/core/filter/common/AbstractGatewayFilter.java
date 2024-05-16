@@ -27,7 +27,7 @@ public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
     protected FilterAspect filterAnnotation;
     //caffeine本地缓存。其中，key由ruleId加filterId构成，value是具体过滤器的配置类对象
     protected Cache<String, C> filterConfigCache;
-    //具体过滤器的配置类的Class对象
+    //具体过滤器的配置类的Class对象，用于对配置信息反序列化
     protected Class<C> filterConfigClass;
     /**
      * @date: 2024-05-15 9:39

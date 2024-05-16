@@ -45,6 +45,8 @@ public interface FilterConst {
     String USER_AUTH_FILTER_ID = "user_auth_filter";
     String USER_AUTH_FILTER_NAME = "user_auth_filter";
     int USER_AUTH_FILTER_ORDER = 2;
+    //携带用户jwt信息的cookie的名称
+    String COOKIE_NAME = "user-jwt";
     /*
      * 灰度过滤器相关常量
      */

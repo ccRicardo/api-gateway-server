@@ -21,7 +21,7 @@ public interface FilterChainFactory {
      * @Param filters: 要加入过滤器链的过滤器列表集合
      * @return: void
      */
-    void buildFilterChain(FilterType filterType, List<AbstractLinkedFilter<GatewayContext>> filters);
+    void buildFilterChain(FilterType filterType, List<AbstractLinkedFilter> filters) throws Throwable;
     /**
      * @date: 2024-05-15 15:43
      * @description: 执行正常情况下的过滤器链

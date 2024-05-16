@@ -20,9 +20,9 @@ public class GatewayFilterChain {
     @Getter
     private String filterChainId;
     //头指针，指向第一个过滤器。由于本类中使用了虚拟头节点，所以该指针始终指向虚拟头节点。
-    private AbstractLinkedFilter<GatewayContext> first;
+    private AbstractLinkedFilter first;
     //尾指针，指向最后一个过滤器
-    private AbstractLinkedFilter<GatewayContext> end;
+    private AbstractLinkedFilter end;
     /**
      * @date: 2024-05-15 14:09
      * @description: 有参构造器。完成属性初始化工作。
@@ -32,7 +32,7 @@ public class GatewayFilterChain {
     public GatewayFilterChain(String filterChainId){
         this.filterChainId = filterChainId;
         //创建虚拟头节点，简化链表相关操作
-        this.first = new AbstractLinkedFilter<GatewayContext>() {
+        this.first = new AbstractLinkedFilter() {
             @Override
             public boolean check(GatewayContext gatewayContext) {
                 //该方法永远不会执行
@@ -52,7 +52,7 @@ public class GatewayFilterChain {
      * @Param filter:
      * @return: void
      */
-    public void addFirst(AbstractLinkedFilter<GatewayContext> filter){
+    public void addFirst(AbstractLinkedFilter filter){
         filter.setNext(first.getNext());
         first.setNext(filter);
         //如果链表之前为空，则更新尾指针
@@ -66,7 +66,7 @@ public class GatewayFilterChain {
      * @Param filter:
      * @return: void
      */
-    public void addLast(AbstractLinkedFilter<GatewayContext> filter){
+    public void addLast(AbstractLinkedFilter filter){
         end.setNext(filter);
         end = filter;
     }
@@ -78,7 +78,7 @@ public class GatewayFilterChain {
      * @Param args: 
      * @return: void
      */
-    public void start(GatewayContext ctx){
+    public void start(GatewayContext ctx) throws Throwable{
         //激发第一个过滤器实例（不激发虚拟头节点）
         first.fireNext(ctx);
     }
