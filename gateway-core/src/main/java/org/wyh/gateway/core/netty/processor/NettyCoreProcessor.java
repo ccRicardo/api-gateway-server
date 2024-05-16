@@ -11,8 +11,7 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.exception.BaseException;
 import org.wyh.gateway.core.config.Config;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.old_common.FilterChainFactory;
-import org.wyh.gateway.core.filter.old_common.GatewayFilterChainFactory;
+import org.wyh.gateway.core.filter.common.chainfactory.GatewayFilterChainFactory;
 import org.wyh.gateway.core.helper.RequestHelper;
 import org.wyh.gateway.core.helper.ResponseHelper;
 import org.wyh.gateway.core.request.HttpRequestWrapper;
@@ -28,7 +27,7 @@ import org.wyh.gateway.core.request.HttpRequestWrapper;
 @Slf4j
 public class NettyCoreProcessor implements NettyProcessor{
     //过滤器链工厂类，用于生成过滤器链对象。
-    private FilterChainFactory filterChainFactory;
+    private GatewayFilterChainFactory filterChainFactory;
     //静态配置信息
     private Config config;
     /**
@@ -64,8 +63,8 @@ public class NettyCoreProcessor implements NettyProcessor{
         try {
             //解析请求对象，构建该请求在网关中的上下文对象（GatewayContext对象）
             GatewayContext gatewayContext = RequestHelper.doContext(fullRequest, nettyCtx);
-            //执行过滤器链，对网关上下文进行过滤处理，并最终路由到相应的后台服务。
-            filterChainFactory.buildFilterChain(gatewayContext).doFilterChain(gatewayContext);
+            //构建并执行过滤器链，对网关上下文进行过滤处理，最终通过路由过滤器发送和接收请求，并将响应写回。
+            // TODO: 2024-05-16 等待实现
         } catch (BaseException e) {
             //捕获已定义的异常
             log.error("Netty核心处理器出现错误 {} {}", e.getCode().getCode(), e.getCode().getMessage());
