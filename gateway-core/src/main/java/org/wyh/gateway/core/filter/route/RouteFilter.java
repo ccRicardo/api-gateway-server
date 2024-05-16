@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.router;
+package org.wyh.gateway.core.filter.route;
 
 import com.netflix.hystrix.*;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
 @FilterAspect(id=ROUTER_FILTER_ID,
               name=ROUTER_FILTER_NAME,
               order=ROUTER_FILTER_ORDER)
-public class RouterFilter implements Filter {
+public class RouteFilter implements Filter {
     //访问日志的日志记录器
     private static Logger accessLog = LoggerFactory.getLogger("accessLog");
     /**

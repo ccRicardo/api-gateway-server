@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.loadbalance;
+package org.wyh.gateway.core.filter.pre.loadbalance;
 
 import org.wyh.gateway.common.config.ServiceInstance;
 import org.wyh.gateway.core.context.GatewayContext;

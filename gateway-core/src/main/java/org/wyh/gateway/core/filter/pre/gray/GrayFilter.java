@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.gray;
+package org.wyh.gateway.core.filter.pre.gray;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

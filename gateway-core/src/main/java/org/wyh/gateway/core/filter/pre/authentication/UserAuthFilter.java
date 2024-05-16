@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.authentication;
+package org.wyh.gateway.core.filter.pre.authentication;
 
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;

@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.flowcontrol;
+package org.wyh.gateway.core.filter.pre.flowcontrol;
 
 import org.wyh.gateway.common.config.Rule;
 

@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.flowcontrol;
+package org.wyh.gateway.core.filter.pre.flowcontrol;
 
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.config.Rule;

@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.mock;
+package org.wyh.gateway.core.filter.pre.deprecated_mock;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;

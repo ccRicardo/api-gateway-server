@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.loadbalance;
+package org.wyh.gateway.core.filter.pre.loadbalance;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
