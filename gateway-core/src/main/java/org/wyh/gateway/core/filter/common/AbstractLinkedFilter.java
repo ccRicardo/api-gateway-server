@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.common.filter;
+package org.wyh.gateway.core.filter.common;
 
 /**
  * @BelongsProject: api-gateway-server
@@ -24,7 +24,7 @@ public abstract class AbstractLinkedFilter<T> implements Filter<T> {
     /**
      * @date: 2024-05-14 16:45
      * @description: 获取该链式过滤器的下一个过滤器
-     * @return: org.wyh.gateway.core.filter.common.filter.AbstractLinkedFilter<T>
+     * @return: org.wyh.gateway.core.filter.common.AbstractLinkedFilter<T>
      */
     public AbstractLinkedFilter<T> getNext(){
         return next;

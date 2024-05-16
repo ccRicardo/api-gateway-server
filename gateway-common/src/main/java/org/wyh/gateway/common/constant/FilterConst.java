@@ -65,11 +65,11 @@ public interface FilterConst {
     String MONITOR_END_FILTER_NAME = "monitor_end_filter";
     //由于监控（后置）过滤器必须位于过滤器来链的末尾，所以这里将order值设为int的最大值
     int MONITOR_END_FILTER_ORDER = Integer.MAX_VALUE;
-    /*
-     * mock过滤器相关常量
-     */
-    String MOCK_FILTER_ID = "mock_filter";
-    String MOCK_FILTER_NAME = "mock_filter";
-    //mock接口只是个用于联调测试的”模拟“接口，所以不进行真实的过滤器链处理。因此mock过滤器应该放在过滤器链的开头。
-    int MOCK_FILTER_ORDER = -1;
+//    /*
+//     * （已弃用）mock过滤器相关常量
+//     */
+//    String MOCK_FILTER_ID = "mock_filter";
+//    String MOCK_FILTER_NAME = "mock_filter";
+//    //mock接口只是个用于联调测试的”模拟“接口，所以不进行真实的过滤器链处理。因此mock过滤器应该放在过滤器链的开头。
+//    int MOCK_FILTER_ORDER = -1;
 }

@@ -9,8 +9,9 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.old_common.Filter;
-import org.wyh.gateway.core.filter.old_common.FilterAspect;
+import org.wyh.gateway.core.filter.common.base.FilterAspect;
+import org.wyh.gateway.core.filter.common.base.FilterType;
+import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
 
 import static org.wyh.gateway.common.constant.FilterConst.*;
 
@@ -19,15 +20,16 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
  * @BelongsPackage: org.wyh.core.filter.authentication
  * @Author: wyh
  * @Date: 2024-03-11 10:24
- * @Description: 用户鉴权过滤器，用于对用户的身份和权限进行确认
+ * @Description: 用户鉴权过滤器，用于确认用户的身份信息（即用户id）
                  本质上来说，就是先判断用户是否已登录（也就是判断请求是否携带jwt cookie），
                  若已登录，则解析jwt获取用户id等用户信息，并写入请求对象中。（下游的后端服务就不需要重复这些步骤了）
  */
 @Slf4j
 @FilterAspect(id=USER_AUTH_FILTER_ID,
               name=USER_AUTH_FILTER_NAME,
+              type=FilterType.PRE,
               order=USER_AUTH_FILTER_ORDER)
-public class UserAuthFilter implements Filter {
+public class UserAuthFilter implements AbstractGatewayFilter<> {
     /*
      * jwt是一个基于json的轻量级token，主要用于做用户认证（鉴权）
      * 具体过程大概如下：

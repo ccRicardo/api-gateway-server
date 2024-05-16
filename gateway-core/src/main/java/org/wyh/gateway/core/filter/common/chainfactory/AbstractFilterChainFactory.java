@@ -4,11 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.common.FilterAspect;
-import org.wyh.gateway.core.filter.common.FilterType;
+import org.wyh.gateway.core.filter.common.base.FilterAspect;
+import org.wyh.gateway.core.filter.common.base.FilterType;
 import org.wyh.gateway.core.filter.common.GatewayFilterChain;
-import org.wyh.gateway.core.filter.common.chainfactory.FilterChainFactory;
-import org.wyh.gateway.core.filter.common.filter.AbstractLinkedFilter;
+import org.wyh.gateway.core.filter.common.AbstractLinkedFilter;
 
 import java.util.LinkedHashMap;
 import java.util.List;

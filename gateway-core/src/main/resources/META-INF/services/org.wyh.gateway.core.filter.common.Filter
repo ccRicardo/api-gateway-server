@@ -5,4 +5,4 @@ org.wyh.gateway.core.filter.pre.authentication.UserAuthFilter
 org.wyh.gateway.core.filter.pre.gray.GrayFilter
 org.wyh.gateway.core.filter.monitor.MonitorFilter
 org.wyh.gateway.core.filter.monitor.MonitorEndFilter
-org.wyh.gateway.core.filter.pre.deprecated_mock.MockFilter
+# 已弃用 org.wyh.gateway.core.filter.pre.deprecated_mock.MockFilter

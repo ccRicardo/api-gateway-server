@@ -1,8 +1,8 @@
 package org.wyh.gateway.core.filter.common.chainfactory;
 
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.common.FilterType;
-import org.wyh.gateway.core.filter.common.filter.AbstractLinkedFilter;
+import org.wyh.gateway.core.filter.common.base.FilterType;
+import org.wyh.gateway.core.filter.common.AbstractLinkedFilter;
 
 import java.util.List;
 

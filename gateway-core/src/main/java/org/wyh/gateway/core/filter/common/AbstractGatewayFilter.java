@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.common.filter;
+package org.wyh.gateway.core.filter.common;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,7 @@ import org.wyh.gateway.common.constant.FilterConst;
 import org.wyh.gateway.common.utils.JSONUtil;
 import org.wyh.gateway.core.cache.GatewayCacheManager;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.common.FilterAspect;
-import org.wyh.gateway.core.filter.common.filter.AbstractLinkedFilter;
+import org.wyh.gateway.core.filter.common.base.FilterAspect;
 
 
 /**

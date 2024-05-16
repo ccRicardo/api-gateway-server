@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.common.filter;
+package org.wyh.gateway.core.filter.common;
 
 /**
  * @BelongsProject: api-gateway-server
