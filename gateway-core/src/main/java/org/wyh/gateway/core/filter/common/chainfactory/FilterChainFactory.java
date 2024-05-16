@@ -26,18 +26,16 @@ public interface FilterChainFactory {
      * @date: 2024-05-15 15:43
      * @description: 执行正常情况下的过滤器链
      * @Param ctx:
-     * @Param args:
      * @return: void
      */
-    void doFilterChain(GatewayContext ctx, Object... args);
+    void doFilterChain(GatewayContext ctx);
     /**
      * @date: 2024-05-15 15:43
      * @description: 执行异常情况下的过滤器链
      * @Param ctx:
-     * @Param args:
      * @return: void
      */
-    void doErrorFilterChain(GatewayContext ctx, Object... args);
+    void doErrorFilterChain(GatewayContext ctx);
     /**
      * @date: 2024-05-15 15:44
      * @description: 获取指定类型的过滤器

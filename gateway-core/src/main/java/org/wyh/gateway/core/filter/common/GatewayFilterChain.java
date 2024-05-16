@@ -79,9 +79,9 @@ public class GatewayFilterChain {
      * @Param args: 
      * @return: void
      */
-    public void start(GatewayContext ctx, Object... args){
+    public void start(GatewayContext ctx){
         //激发第一个过滤器实例（不激发虚拟头节点）
-        first.fireNext(ctx, args);
+        first.fireNext(ctx);
     }
 
 

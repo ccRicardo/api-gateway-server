@@ -88,7 +88,10 @@ public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter<Gate
     public void filter(GatewayContext ctx, Object... args) {
         //从上下文中加载过本滤器配置信息，并作为参数传递给父类filter方法，父类filter再调用具体过滤器对象的doFilter方法，完成过滤处理
         C filterConfig = loadFilterConfig(ctx, args);
-        //这里把参数args给丢了。但实际上，args通常是空的，所以没有影响。
+        /*
+         * 这里看似是把参数args给丢了，但实际上，上层的过滤器链根本就不会传递args参数。
+         * 也就是说，该args参数从设计之初就是用来传递过滤器配置
+         */
         super.filter(ctx, filterConfig);
     }
 }
