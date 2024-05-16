@@ -29,7 +29,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
               name=USER_AUTH_FILTER_NAME,
               type=FilterType.PRE,
               order=USER_AUTH_FILTER_ORDER)
-public class UserAuthFilter implements AbstractGatewayFilter<> {
+public class UserAuthFilter extends AbstractGatewayFilter<> {
     /*
      * jwt是一个基于json的轻量级token，主要用于做用户认证（鉴权）
      * 具体过程大概如下：
@@ -47,27 +47,36 @@ public class UserAuthFilter implements AbstractGatewayFilter<> {
     //从静态配置类中获取生成签名时使用的密钥
     private static final String SECRET_KEY = ConfigLoader.getConfig().getSecretKey();
     @Override
-    public void doFilter(GatewayContext ctx) throws Exception {
-        //根据规则中的过滤器链配置判断是否需要进行用户鉴权
-        if(ctx.getRule().getFilterConfig(USER_AUTH_FILTER_ID) == null){
-            log.info("【用户鉴权过滤器】未配置相关信息");
-            return;
-        }
-        //从请求对象中获取相应的cookie
-        Cookie cookie = ctx.getRequest().getCookie(COOKIE_NAME);
-        //若存放jwt的cookie不存在，则说明用户未登录
-        if(cookie == null){
-            throw new ResponseException(ResponseCode.UNAUTHORIZED);
-        }
+    public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
+
         try{
-            String token = cookie.value();
-            //解析jwt，获取用户id
-            long userId = parseUserId(token);
-            //设置请求对象中的userId属性，方便下游后台服务获取用户身份信息。
-            ctx.getRequest().setUserId(userId);
-            log.info("【用户鉴权过滤器】用户鉴权成功：{}", userId);
-        }catch (Exception e){
-            throw new ResponseException(ResponseCode.UNAUTHORIZED);
+            //根据规则中的过滤器链配置判断是否需要进行用户鉴权
+            if(ctx.getRule().getFilterConfig(USER_AUTH_FILTER_ID) == null){
+                log.info("【用户鉴权过滤器】未配置相关信息");
+                return;
+            }
+            //从请求对象中获取相应的cookie
+            Cookie cookie = ctx.getRequest().getCookie(COOKIE_NAME);
+            //若存放jwt的cookie不存在，则说明用户未登录
+            if(cookie == null){
+                throw new ResponseException(ResponseCode.UNAUTHORIZED);
+            }
+            try{
+                String token = cookie.value();
+                //解析jwt，获取用户id
+                long userId = parseUserId(token);
+                //设置请求对象中的userId属性，方便下游后台服务获取用户身份信息。
+                ctx.getRequest().setUserId(userId);
+                log.info("【用户鉴权过滤器】用户鉴权成功：{}", userId);
+            }catch (Exception e){
+                throw new ResponseException(ResponseCode.UNAUTHORIZED);
+            }
+        }finally {
+            /*
+             * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
+             * （这是过滤器链能够顺序执行的关键）
+             */
+            super.fireNext(ctx, args);
         }
     }
     /**

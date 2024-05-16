@@ -18,12 +18,11 @@ import org.wyh.gateway.core.filter.common.base.FilterAspect;
  * @Date: 2024-05-14 17:10
  * @Description: 网关过滤器的抽象类，是过滤器实现类真正继承的类。
                  其中，泛型C指的是具体过滤器的配置的类型。
-                 由于该类过滤处理的内容是网关上下文，因此其父类中的泛型被指定为了GatewayContext
                  此外，该类主要实现的是check和filter方法，而doFilter方法是由具体过滤器来实现的。
  */
 // TODO: 2024-05-15 目前存在的一个问题：在nacos中修改规则的过滤器配置，本地缓存中对应的原配置项不会失效
 @Slf4j
-public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter<GatewayContext> {
+public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
     //过滤器的注解对象
     protected FilterAspect filterAnnotation;
     //caffeine本地缓存。其中，key由ruleId加filterId构成，value是具体过滤器的配置类对象
@@ -78,13 +77,13 @@ public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter<Gate
         return filterConfig;
     }
     @Override
-    public boolean check(GatewayContext ctx) {
+    public boolean check(GatewayContext ctx) throws Throwable{
         //根据规则判断是否启用本过滤器组件
         return ctx.getRule().checkFilterExist(filterAnnotation.id());
     }
 
     @Override
-    public void filter(GatewayContext ctx, Object... args) {
+    public void filter(GatewayContext ctx, Object... args) throws Throwable{
         //从上下文中加载过本滤器配置信息，并作为参数传递给父类filter方法，父类filter再调用具体过滤器对象的doFilter方法，完成过滤处理
         C filterConfig = loadFilterConfig(ctx, args);
         /*
