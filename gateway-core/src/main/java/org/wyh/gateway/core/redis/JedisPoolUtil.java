@@ -80,8 +80,9 @@ public class JedisPoolUtil {
                 JedisPoolConfig config = new JedisPoolConfig();
                 config.setMaxTotal(maxTotal);
                 config.setMaxIdle(maxIdle);
-                config.setMaxWaitMillis(maxWaitMillis);
-                config.setTestOnBorrow(testOnBorrow);
+                config.setMinIdle(minIdle);
+//                config.setMaxWaitMillis(maxWaitMillis);
+//                config.setTestOnBorrow(testOnBorrow);
                 jedisPool = new JedisPool(config, host, port);
             } catch (Exception e) {
                 log.debug("init redis pool failed : {}", e.getMessage());

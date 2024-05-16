@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  * @Author: wyh
  * @Date: 2024-02-27 15:04
  * @Description: 基于Guava实现的（单机）限流器，适用于以单机模式部署网关系统的情况。
-                 本质上来说，该限流器是通过RateLimiter的令牌桶来实现的。
+                 本质上来说，该限流器就是对RateLimiter的包装，而RateLimiter是基于令牌桶实现的。
 
  */
 // TODO: 2024-03-05 经测试发现，该限流器的效果不如redis限流器好，准确。目前原因未知，在测试时需要注意。
