@@ -1,10 +1,14 @@
 package org.wyh.gateway.core.filter.pre.flowcontrol;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.old_common.Filter;
-import org.wyh.gateway.core.filter.old_common.FilterAspect;
+import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
+import org.wyh.gateway.core.filter.common.base.FilterAspect;
+import org.wyh.gateway.core.filter.common.base.FilterConfig;
+import org.wyh.gateway.core.filter.common.base.FilterType;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -21,13 +25,45 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
 @Slf4j
 @FilterAspect(id=FLOW_CTRL_FILTER_ID,
               name=FLOW_CTRL_FILTER_NAME,
+              type=FilterType.PRE,
               order=FLOW_CTRL_FILTER_ORDER)
-public class FlowCtrlFilter implements Filter {
+public class FlowCtrlFilter extends AbstractGatewayFilter<FlowCtrlFilter.Config> {
+    /**
+     * @BelongsProject: my-api-gateway
+     * @BelongsPackage: org.wyh.core.filter.flowcontrol
+     * @Author: wyh
+     * @Date: 2024-02-27 10:32
+     * @Description: （静态内部类）该过滤器的配置类。
+     */
+    @Setter
+    @Getter
+    public static class Config extends FilterConfig {
+        //限流的类型，可以是路径，服务唯一id或者ip
+        private String type;
+        //限流的对象（的值）
+        private String value;
+        //限流的模式，单机或分布式
+        private String mode;
+        //下面这两个量通常配合使用，来控制单位时间内的最大访问次数，即qps。
+        //基本时间区间
+        private int duration;
+        //基本时间区间内的最大访问次数
+        private int permits;
+    }
+    /**
+     * @date: 2024-05-16 15:26
+     * @description: 无参构造器，负责初始化父类的filterConfigClass属性
+     * @return: null
+     */
+    public FlowCtrlFilter(){
+        super(FlowCtrlFilter.Config.class);
+    }
     @Override
-    public void doFilter(GatewayContext ctx) throws Exception {
-        IGatewayFlowCtrlRule flowCtrlRule = null;
-        Rule rule = ctx.getRule();
-        if(rule != null){
+    public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
+        try{
+            //args[0]其实就是该过滤器的配置类实例
+            IGatewayFlowCtrlRule flowCtrlRule = null;
+            Rule rule = ctx.getRule();
             //获取流量控制配置集合
             Set<Rule.FlowCtrlConfig> flowCtrlConfigs = rule.getFlowCtrlConfigs();
             Iterator<Rule.FlowCtrlConfig> iterator = flowCtrlConfigs.iterator();
@@ -58,6 +94,14 @@ public class FlowCtrlFilter implements Filter {
                     break;
                 }
             }
+        }catch (){
+
+        }finally {
+            /*
+             * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
+             * （这是过滤器链能够顺序执行的关键）
+             */
+            super.fireNext(ctx, args);
         }
     }
 }

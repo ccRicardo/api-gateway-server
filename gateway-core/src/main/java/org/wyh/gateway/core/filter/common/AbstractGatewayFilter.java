@@ -19,6 +19,7 @@ import org.wyh.gateway.core.filter.common.base.FilterAspect;
  * @Description: 网关过滤器的抽象类，是过滤器实现类真正继承的类。
                  其中，泛型C指的是具体过滤器的配置的类型。
                  此外，该类主要实现的是check和filter方法，而doFilter方法是由具体过滤器来实现的。
+                 注意，方法中的args参数实际上存放的是过滤器组件的配置类实例
  */
 // TODO: 2024-05-15 目前存在的一个问题：在nacos中修改规则的过滤器配置，本地缓存中对应的原配置项不会失效
 @Slf4j
@@ -88,7 +89,7 @@ public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
         C filterConfig = loadFilterConfig(ctx, args);
         /*
          * 这里看似是把参数args给丢了，但实际上，上层的过滤器链根本就不会传递args参数。
-         * 也就是说，该args参数从设计之初就是用来传递过滤器配置
+         * 也就是说，args参数从设计之初就是用来传递过滤器配置信息的
          */
         super.filter(ctx, filterConfig);
     }

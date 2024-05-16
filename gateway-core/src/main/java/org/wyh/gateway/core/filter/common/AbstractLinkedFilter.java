@@ -9,6 +9,7 @@ import org.wyh.gateway.core.context.GatewayContext;
  * @Date: 2024-05-14 16:25
  * @Description: 链式过滤器抽象类。链式过滤器能够组成一条过滤器链并且顺序执行。
                  （链式过滤器其实就是过滤器链上的节点）
+                 注意，方法中的args参数实际上存放的是过滤器组件的配置类实例
  */
 public abstract class AbstractLinkedFilter implements Filter {
     //指向下一个过滤器。默认为null。

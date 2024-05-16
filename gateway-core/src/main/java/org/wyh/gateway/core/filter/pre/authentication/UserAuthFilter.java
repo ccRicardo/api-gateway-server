@@ -4,6 +4,9 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.netty.handler.codec.http.cookie.Cookie;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.exception.ResponseException;
@@ -52,6 +55,8 @@ public class UserAuthFilter extends AbstractGatewayFilter<UserAuthFilter.Config>
      * @Date: 2024-05-16 14:36
      * @Description: （静态内部类）该过滤器的配置类。
      */
+    @Setter
+    @Getter
     public static class Config extends FilterConfig{
         //暂时没有定义任何属性
     }
@@ -77,25 +82,23 @@ public class UserAuthFilter extends AbstractGatewayFilter<UserAuthFilter.Config>
     }
     @Override
     public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
-
         try{
             //从请求对象中获取相应的cookie
             Cookie cookie = ctx.getRequest().getCookie(COOKIE_NAME);
             //若存放jwt的cookie不存在，则说明用户未登录
             if(cookie == null){
+                //抛出用户未登录异常
                 throw new ResponseException(ResponseCode.UNAUTHORIZED);
             }
-            try{
-                String token = cookie.value();
-                //解析jwt，获取用户id
-                long userId = parseUserId(token);
-                //设置请求对象中的userId属性，方便下游后台服务获取用户身份信息。
-                ctx.getRequest().setUserId(userId);
-                log.info("【用户鉴权过滤器】用户鉴权成功：{}", userId);
-            }catch (Exception e){
-                throw new ResponseException(ResponseCode.UNAUTHORIZED);
-            }
-        }finally {
+            String token = cookie.value();
+            //解析jwt，获取用户id
+            long userId = parseUserId(token);
+            //设置请求对象中的userId属性，方便下游后台服务获取用户身份信息。
+            ctx.getRequest().setUserId(userId);
+            log.info("【用户鉴权过滤器】用户鉴权成功：{}", userId);
+        }catch(Exception e){
+            throw new RuntimeException("【用户鉴权过滤器】过滤器执行异常");
+        } finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
              * （这是过滤器链能够顺序执行的关键）

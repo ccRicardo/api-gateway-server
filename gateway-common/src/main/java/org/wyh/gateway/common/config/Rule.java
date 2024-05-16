@@ -35,8 +35,6 @@ public class Rule implements Comparable<Rule>, Serializable{
     private Integer order;
     //规则的过滤器配置集合（其实就是在定义一条过滤器链）。
     private Set<FilterConfig> filterConfigs = new HashSet<>();
-    //规则的限流配置集合
-    private Set<FlowCtrlConfig> flowCtrlConfigs = new HashSet<>();
     //规则的熔断配置集合
     private Set<HystrixConfig> hystrixConfigs = new HashSet<>();
     //规则的请求重试配置信息
@@ -106,25 +104,6 @@ public class Rule implements Comparable<Rule>, Serializable{
         //请求重试的次数
         private int times;
         // TODO: 2024-02-26 还可以考虑添加更多的属性 
-    }
-    /**
-     * @BelongsProject: my-api-gateway
-     * @BelongsPackage: org.wyh.common.config
-     * @Author: wyh
-     * @Date: 2024-02-27 10:19
-     * @Description: 内部类，用于定义流量控制的配置信息
-     */
-    @Setter
-    @Getter
-    public static class FlowCtrlConfig{
-        //限流的类型，可以是路径，服务id或者ip
-        private String type;
-        //限流的对象（值）
-        private String value;
-        //限流的模式，单机或分布式
-        private String mode;
-        //限流的规则配置，以json串的形式给出
-        private String config;
     }
     /**
      * @BelongsProject: my-api-gateway
@@ -223,7 +202,6 @@ public class Rule implements Comparable<Rule>, Serializable{
                 ", protocol='" + protocol + '\'' +
                 ", order=" + order +
                 ", filterConfigs=" + filterConfigs +
-                ", flowCtrlConfigs=" + flowCtrlConfigs +
                 ", hystrixConfigs=" + hystrixConfigs +
                 ", retryConfig=" + retryConfig +
                 '}';

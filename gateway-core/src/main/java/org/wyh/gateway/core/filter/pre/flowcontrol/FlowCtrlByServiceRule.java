@@ -17,7 +17,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
  * @BelongsPackage: org.wyh.core.filter.flowcontrol
  * @Author: wyh
  * @Date: 2024-02-27 15:07
- * @Description: 通过服务id实现/完成流量控制。
+ * @Description: 通过服务唯一id实现/完成流量控制。
  */
 public class FlowCtrlByServiceRule implements IGatewayFlowCtrlRule{
     //服务唯一id
