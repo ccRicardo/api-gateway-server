@@ -65,13 +65,13 @@ public class GuavaCountLimiter {
     }
     /**
      * @date: 2024-02-28 15:00
-     * @description: 根据限流配置获取对应的GuavaCountLimiter实例。
+     * @description: 根据限流对象的值获取对应的GuavaCountLimiter实例。
                      该方法可以避免重复创建GuavaCountLimiter对象。
-     * @Param flowCtrlConfig:
+     * @Param value:
      * @Param maxPermits:
      * @return: org.wyh.core.filter.flowcontrol.GuavaCountLimiter
      */
-    public static GuavaCountLimiter getInstance(Rule.FlowCtrlConfig flowCtrlConfig, int maxPermits){
+    public static GuavaCountLimiter getInstance(String value, int maxPermits){
         if(flowCtrlConfig == null || StringUtils.isEmpty(flowCtrlConfig.getConfig())){
             return null;
         }

@@ -3,15 +3,12 @@ package org.wyh.gateway.core.filter.pre.flowcontrol;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.wyh.gateway.common.config.Rule;
+import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
 import org.wyh.gateway.core.filter.common.base.FilterAspect;
 import org.wyh.gateway.core.filter.common.base.FilterConfig;
 import org.wyh.gateway.core.filter.common.base.FilterType;
-
-import java.util.Iterator;
-import java.util.Set;
 
 import static org.wyh.gateway.common.constant.FilterConst.*;
 
@@ -38,16 +35,14 @@ public class FlowCtrlFilter extends AbstractGatewayFilter<FlowCtrlFilter.Config>
     @Setter
     @Getter
     public static class Config extends FilterConfig {
-        //限流的类型，可以是路径，服务唯一id或者ip
+        //限流的类型，可以只对服务调用路径进行限流，也可以对整个服务进行限流
         private String type;
-        //限流的对象（的值）
-        private String value;
         //限流的模式，单机或分布式
         private String mode;
         //下面这两个量通常配合使用，来控制单位时间内的最大访问次数，即qps。
-        //基本时间区间
+        //基本时间间隔
         private int duration;
-        //基本时间区间内的最大访问次数
+        //基本时间间隔内的最大访问次数
         private int permits;
     }
     /**
@@ -62,40 +57,30 @@ public class FlowCtrlFilter extends AbstractGatewayFilter<FlowCtrlFilter.Config>
     public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
         try{
             //args[0]其实就是该过滤器的配置类实例
-            IGatewayFlowCtrlRule flowCtrlRule = null;
-            Rule rule = ctx.getRule();
-            //获取流量控制配置集合
-            Set<Rule.FlowCtrlConfig> flowCtrlConfigs = rule.getFlowCtrlConfigs();
-            Iterator<Rule.FlowCtrlConfig> iterator = flowCtrlConfigs.iterator();
-            Rule.FlowCtrlConfig flowCtrlConfig;
-            String path;
-            String uniqueId;
-            //遍历流量控制配置集合，找到与当前上下文匹配的流量控制配置项
-            while(iterator.hasNext()){
-                flowCtrlConfig = iterator.next();
-                if(flowCtrlConfig == null){
-                    continue;
+            FlowCtrlFilter.Config filterConfig = (FlowCtrlFilter.Config)args[0];
+            if(filterConfig == null){
+                log.warn("【流量控制过滤器】未设置配置信息");
+            }else{
+                FlowCtrlExecutor flowCtrlExecutor = null;
+                //当前服务调用的路径
+                String path = ctx.getAttribute(AttributeKey.HTTP_INVOKER).getInvokerPath();
+                //当前访问服务的唯一id
+                String uniqueId = ctx.getUniqueId();
+                if(filterConfig.getType().equals(FLOW_CTRL_TYPE_PATH)){
+                    //对路径限流，则限流对象的值为path
+                    flowCtrlExecutor = FlowCtrlExecutor.getInstance(path);
+                }else if(filterConfig.getType().equals(FLOW_CTRL_TYPE_SERVICE)){
+                    //对服务限流，则限流对象的值为uniqueId
+                    flowCtrlExecutor = FlowCtrlExecutor.getInstance(uniqueId);
                 }
-                path = ctx.getRequest().getPath();
-                uniqueId = ctx.getUniqueId();
-                //如果流量控制类型为路径，则比较配置值和当前的路径值，类型为服务id时同理。
-                if(flowCtrlConfig.getType().equals(FLOW_CTRL_TYPE_PATH)
-                        && path.equals(flowCtrlConfig.getValue())){
-                    //根据path获取相应的路径限流策略实例
-                    flowCtrlRule = FlowCtrlByPathRule.getInstance(path);
-                }else if(flowCtrlConfig.getType().equals(FLOW_CTRL_TYPE_SERVICE)
-                        && uniqueId.equals(flowCtrlConfig.getValue())){
-                    //根据uniqueId获取相应的服务限流策略实例
-                    flowCtrlRule = FlowCtrlByServiceRule.getInstance(uniqueId);
-                }
-                //若在本次循环中找到了相应的配置项，则调用流量控制策略实例的相应方法完成过滤，然后退出循环
-                if(flowCtrlRule != null){
-                    flowCtrlRule.doFlowCtrlFilter(flowCtrlConfig);
-                    break;
+                if(flowCtrlExecutor != null){
+                    flowCtrlExecutor.doFlowCtrlFilter(filterConfig);
+                }else{
+                    log.warn("【流量控制过滤器】不支持该限流策略: {}", filterConfig.getType());
                 }
             }
-        }catch (){
-
+        }catch (Exception e){
+            throw new RuntimeException("【流量控制过滤器】过滤器执行异常", e);
         }finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
