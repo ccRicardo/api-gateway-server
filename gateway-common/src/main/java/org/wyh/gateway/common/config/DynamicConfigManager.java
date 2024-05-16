@@ -211,6 +211,7 @@ public class DynamicConfigManager {
     /**
      * @date: 2024-01-22 16:01
      * @description: 加载多个规则（规则列表）。
+                     通常是nacos中的规则配置发生变更时，相应监听器会调用该方法，更新ruleMap
      * @Param ruleList:
      * @return: void
      */
@@ -218,7 +219,8 @@ public class DynamicConfigManager {
         //该方法除了要初始化ruleMap外，还要初始化pathRuleMap和serviceRuleMap
         ConcurrentHashMap<String,Rule> newRuleMap = new ConcurrentHashMap<>();
         for (Rule rule : ruleList) {
-            // TODO: 2024-05-15 我想在此方法中加入缓存更新逻辑，而不是依靠最后修改时间作为key
+            // TODO: 2024-05-16 目前这个方法很不好。更新一条规则，全部的规则都需要重新缓存。
+            // TODO: 2024-05-16 考虑将使用多个文件来存储规则，然后只更新发生变更的文件所对应的规则缓存
             //更新规则的最后修改时间属性
             rule.setLastModifiedTime(TimeUtil.currentTimeMillis());
             newRuleMap.put(rule.getRuleId(), rule);

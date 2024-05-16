@@ -16,7 +16,12 @@ import java.util.function.Function;
                  实际上，目前只有过滤器链部分使用到了缓存。
  */
 public class GatewayCacheManager {
-    //保存系统中需要用到的各种缓存。其中key是缓存的名称/id，value是保存相关数据的缓存实例。
+    //
+    /*
+     * 保存系统中需要用到的各种缓存。
+     * 其中，外层key是缓存的名称/id，外层value是真正保存数据的缓存实例。
+     * 内层key是数据项的id，内层value是对应项保存的具体数据
+     */
     private final ConcurrentHashMap<String, Cache<String, ?>> cacheMap = new ConcurrentHashMap<>();
     /**
      * @BelongsProject: my-api-gateway
@@ -52,8 +57,9 @@ public class GatewayCacheManager {
      * @return: com.github.benmanes.caffeine.cache.Cache<java.lang.String, V>
      */
     public <V> Cache<String, V> create(String cacheId){
-        //根据默认配置参数，创建Caffeine缓存实例
+        //创建Caffeine缓存实例
         Cache<String, V> cache = Caffeine.newBuilder().build();
+        //将该缓存实例添加到指定
         cacheMap.put(cacheId, cache);
         return (Cache<String, V>)cacheMap.get(cacheId);
     }

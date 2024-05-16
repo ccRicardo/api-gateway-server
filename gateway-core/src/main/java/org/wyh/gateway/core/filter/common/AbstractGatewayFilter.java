@@ -21,12 +21,12 @@ import org.wyh.gateway.core.filter.common.base.FilterAspect;
                  此外，该类主要实现的是check和filter方法，而doFilter方法是由具体过滤器来实现的。
                  注意，方法中的args参数实际上存放的是过滤器组件的配置类实例
  */
-// TODO: 2024-05-15 目前存在的一个问题：在nacos中修改规则的过滤器配置，本地缓存中对应的原配置项不会失效
+// TODO: 2024-05-15 需要测试一下：在nacos中修改规则的过滤器配置，本地缓存中对应的原配置项会不会失效
 @Slf4j
 public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
     //过滤器的注解对象
     protected FilterAspect filterAnnotation;
-    //caffeine本地缓存。其中，key由ruleId加filterId构成，value是具体过滤器的配置类对象
+    //caffeine本地缓存。其中，key由ruleId，filterId加lastModifiedTime构成，value是具体过滤器的配置类对象
     protected Cache<String, C> filterConfigCache;
     //具体过滤器的配置类的Class对象，用于对配置信息反序列化
     protected Class<C> filterConfigClass;
@@ -52,8 +52,14 @@ public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
      */
     private C loadFilterConfig(GatewayContext ctx, Object... args){
         String ruleId = ctx.getRule().getRuleId();
-        //构造cache key。
-        String cacheKey = ruleId + ":" + filterAnnotation.id();
+        long lastModifiedTime = ctx.getRule().getLastModifiedTime();
+        /*
+         * 构造cache key（也就是缓存数据项的id）。
+         * cache key由ruleId，filterId加上lastModifiedTime构成
+         * 之所以要加上lastModifiedTime，是为了确保当nacos中的规则配置发生变更时，
+         * 本地缓存中对应的原配置项会失效
+         */
+        String cacheKey = ruleId + ":" + filterAnnotation.id() + ":" + lastModifiedTime;
         //先尝试从缓存中获取本过滤器的（C类型的）配置对象
         C filterConfig = filterConfigCache.getIfPresent(cacheKey);
         //若缓存中不存在对应项，则将上下文规则中的相应配置信息解析为C类型的配置对象，并放入缓存中
