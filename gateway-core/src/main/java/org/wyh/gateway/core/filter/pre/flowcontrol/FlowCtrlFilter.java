@@ -61,20 +61,17 @@ public class FlowCtrlFilter extends AbstractGatewayFilter<FlowCtrlFilter.Config>
             if(filterConfig == null){
                 log.warn("【流量控制过滤器】未设置配置信息");
             }else{
-                FlowCtrlExecutor flowCtrlExecutor = null;
+                FlowCtrlExecutor flowCtrlExecutor = FlowCtrlExecutor.getInstance();
                 //当前服务调用的路径
                 String path = ctx.getAttribute(AttributeKey.HTTP_INVOKER).getInvokerPath();
                 //当前访问服务的唯一id
                 String uniqueId = ctx.getUniqueId();
                 if(filterConfig.getType().equals(FLOW_CTRL_TYPE_PATH)){
                     //对路径限流，则限流对象的值为path
-                    flowCtrlExecutor = FlowCtrlExecutor.getInstance(path);
+                    flowCtrlExecutor.doFlowCtrlFilter(filterConfig, path);
                 }else if(filterConfig.getType().equals(FLOW_CTRL_TYPE_SERVICE)){
                     //对服务限流，则限流对象的值为uniqueId
-                    flowCtrlExecutor = FlowCtrlExecutor.getInstance(uniqueId);
-                }
-                if(flowCtrlExecutor != null){
-                    flowCtrlExecutor.doFlowCtrlFilter(filterConfig);
+                    flowCtrlExecutor.doFlowCtrlFilter(filterConfig, uniqueId);
                 }else{
                     log.warn("【流量控制过滤器】不支持该限流策略: {}", filterConfig.getType());
                 }

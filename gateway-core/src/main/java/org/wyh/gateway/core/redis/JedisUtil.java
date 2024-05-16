@@ -427,7 +427,6 @@ public class JedisUtil {
         try {
             //evalsha方法可以根据SHA1编码来执行相应的脚本，好处是不需要每次都传输整个脚本，减少了网络传输的数据量。
             Object result = jedis.evalsha(scriptLoad, Arrays.asList(key), Arrays.asList(String.valueOf(expire), String.valueOf(limit)));
-            System.out.println(result);
             return result;
         } catch (Exception e) {
             e.printStackTrace();
