@@ -40,7 +40,7 @@ public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
         //获取FilterAspect注解信息
         this.filterAnnotation = this.getClass().getAnnotation(FilterAspect.class);
         //通过网关缓存管理器创建过滤器配置缓存对象
-        this.filterConfigCache = GatewayCacheManager.getInstance().create(FilterConst.FILTER_CONFIG_CACHE_ID);
+        this.filterConfigCache = GatewayCacheManager.getInstance().getCache(FilterConst.FILTER_CONFIG_CACHE_ID);
         this.filterConfigClass = filterConfigClass;
     }
     /**
