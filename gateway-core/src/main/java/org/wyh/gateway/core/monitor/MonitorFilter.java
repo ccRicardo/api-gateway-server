@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.monitor.prometheus;
+package org.wyh.gateway.core.monitor;
 
 import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +25,8 @@ public class MonitorFilter implements Filter {
      * Registry是用于创建和管理Meter实例的。Meter是一组用于收集应用中度量数据的接口，即数据收集器接口。
      * Meter实例的命名通常用"."分隔单词，以体现出层次性。
      * Meter实例还可以设置标签，以进一步指明该Meter实例采集的数据源的详细信息。
-     * Timer（计时器）是Meter的一种类型，其静态内部类Timer.Sample可以用于测量某个操作的耗时时间。
-     * Timer.start方法会创建一个Timer.Sample实例，该实例会将当前时间记录为监控的开始时间。
+     * Timer（计时器）是Meter的一种类型，其静态内部类Timer.Sample可以
+     * Timer.start方法会创建一个Timer.Sample实例，
      * Timer.Sample.stop方法则会结束计时，并将统计的时间间隔数据保存到传入的Timer对象中。
      */
     @Override

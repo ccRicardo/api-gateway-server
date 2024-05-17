@@ -26,6 +26,8 @@ public class Config {
     private int port = 8888;
     //提供给Prometheus拉取数据的api接口的端口号
     private int prometheusPort = 17777;
+    //提供给Prometheus拉取数据的api接口的路径
+    private String prometheusPath = "/prometheus";
     //nacos注册中心地址
     private String registryAddress = "127.0.0.1:8848";
     //nacos配置中心地址

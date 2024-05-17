@@ -26,8 +26,16 @@ public class ConfigLoader {
     private static final String JVM_PREFIX = "gateway.";
     //配置类Config对象。注意这里并没有创建相应的实例，而是在load方法中才创建相应实例。
     private Config config;
-    //使用了单例设计模式。ConfigLoader实例只有一个
-    private static final ConfigLoader INSTANCE = new ConfigLoader();
+    /**
+     * @BelongsProject: my-api-gateway
+     * @BelongsPackage: org.wyh.core
+     * @Author: wyh
+     * @Date: 2024-05-17 14:46
+     * @Description: 静态内部类，用于实现单例模式
+     */
+    private static class SingletonHolder{
+        private static final ConfigLoader INSTANCE = new ConfigLoader();
+    }
     /**
      * @date: 2024-01-15 10:36
      * @description: private修饰的无参构造器
@@ -36,11 +44,11 @@ public class ConfigLoader {
     private ConfigLoader(){}
     /**
      * @date: 2024-01-15 10:48
-     * @description: 获取ClassLoader实例
+     * @description: 获取ClassLoader唯一实例
      * @return: org.wyh.core.ConfigLoader
      */
     public static ConfigLoader getInstance(){
-        return INSTANCE;
+        return SingletonHolder.INSTANCE;
     }
     /**
      * @date: 2024-01-15 10:38
@@ -48,7 +56,7 @@ public class ConfigLoader {
      * @return: org.wyh.core.Config
      */
     public static Config getConfig(){
-        return INSTANCE.config;
+        return SingletonHolder.INSTANCE.config;
     }
     /**
      * @date: 2024-01-15 10:40

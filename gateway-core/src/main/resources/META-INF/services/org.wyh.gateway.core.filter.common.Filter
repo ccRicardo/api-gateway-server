@@ -3,6 +3,6 @@ org.wyh.gateway.core.filter.route.RouteFilter
 org.wyh.gateway.core.filter.pre.flowcontrol.FlowCtrlFilter
 org.wyh.gateway.core.filter.pre.authentication.UserAuthFilter
 org.wyh.gateway.core.filter.pre.gray.GrayFilter
-org.wyh.gateway.core.monitor.prometheus.MonitorFilter
-org.wyh.gateway.core.monitor.prometheus.MonitorEndFilter
+org.wyh.gateway.core.monitor.MonitorFilter
+org.wyh.gateway.core.monitor.MonitorEndFilter
 # 已弃用 org.wyh.gateway.core.filter.pre.deprecated_mock.MockFilter
