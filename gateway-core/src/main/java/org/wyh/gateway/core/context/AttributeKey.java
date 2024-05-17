@@ -16,13 +16,14 @@ import java.util.Set;
                  A: 若直接使用String作为参数key的类型，则参数value的类型只能是Object
                     这会导致在设置和获取参数value时不方便（设置时无法验证value的具体类型，获取时也无法得知value的具体类型）
                     而单独定义一个类表示参数key，则可以通过使用泛型来指定/规定参数value的具体类型
+                    此外，对于一些常用的上下文参数，可以预先定义好对应的AttributeKey实例，并放入namedMap中。
  */
 public abstract class AttributeKey<T> {
     //保存预定义好（即已经命名好）的AttributeKey对象。其中，key是AttributeKey的名称。
     private static Map<String, AttributeKey<?>> namedMap = new HashMap<>();
-    //（预定义好的）表示“ip地址列表”（上下文）参数key的AttributeKey对象
+    //表示“ip地址列表”（上下文）参数的key
     public static final AttributeKey<Set<String>> IP_ADDRESS = create(Set.class);
-    //（预定义好的）表示“http方法调用”（上下文）参数key的AttributeKey对象
+    //表示“http方法调用”（上下文）参数的key
     public static final AttributeKey<ServiceInvoker> HTTP_INVOKER = create(ServiceInvoker.class);
     //静态代码块，用于将预定义好的AttributeKey对象及其名称放入namedMap集合中
     static{
