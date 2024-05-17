@@ -38,7 +38,6 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
                  在前面的负载均衡过滤器中，已经通过serviceId和负载均衡算法确定了要访问的服务实例的真实地址
                  因此，该过滤器本质上就是通过AsyncHttpClient框架向该服务实例发送异步http请求。（目前只支持http协议）
                  此外，过滤器还包括请求重发和服务熔断部分的内容。
- todo：目前只支持发送http请求
  */
 @Slf4j
 @FilterAspect(id=ROUTER_FILTER_ID,
@@ -217,7 +216,6 @@ public class RouteFilter implements Filter {
         //单/双异步标识
         boolean whenComplete = ConfigLoader.getConfig().isWhenComplete();
         //这里可以看出，单/双异步的差异就是异步请求中的回调函数不同
-        // TODO: 2024-03-07 进一步探讨whenComplete（单异步）与whenCompleteAsync（双异步）的不同。
         if (whenComplete) {
             //异步回调函数，使用封装了complete方法的内部类，对响应结果进行处理。
             future.whenComplete(new CompleteBiConsumer(request, ctx, hystrixConfig));

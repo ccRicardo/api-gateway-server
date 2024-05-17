@@ -179,7 +179,6 @@ public class GatewayRequest implements IGatewayRequest{
     public List<String> getQueryParametersMultiple(String name){
         return queryStringDecoder.parameters().get(name);
     }
-    // TODO: 2024-01-09 计划与上述方法合并为一个方法，先判断请求类型（get/post），再获取指定参数
     /**
      * @date: 2024-01-09 10:31
      * @description: 获取post请求中的指定参数

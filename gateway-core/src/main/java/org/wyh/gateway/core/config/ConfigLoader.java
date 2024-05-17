@@ -15,7 +15,7 @@ import java.util.Properties;
  * @Date: 2024-01-15 10:09
  * @Description: 网关配置加载类，支持多种配置加载方式。
  */
-// TODO: 2024-01-15 这里的日志还没配置 
+// TODO: 2024-05-17 更改了环境变量的前缀，k8s配置文件还未更改 
 @Slf4j
 public class ConfigLoader {
     //配置文件名称

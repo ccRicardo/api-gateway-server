@@ -16,7 +16,6 @@ import java.util.concurrent.locks.ReentrantLock;
                  因此，也可以认为Jedis是redis的java客户端。
                  本工具类提供了基本的redis操作方法，但实际上网关系统只用到了lua脚本相关的两个方法。
  */
-// TODO: 2024-02-29 由于目前还未学习redis，对此类的阅读暂未开始
 @Slf4j
 public class JedisUtil {
     //成功获取分布式锁的标识
@@ -410,7 +409,6 @@ public class JedisUtil {
             jedis.close();
         }
     }
-    // TODO: 2024-03-04 将以下两个方法的注释补充完整 
     /**
      * @date: 2024-03-04 15:28
      * @description: 执行lua脚本

@@ -92,7 +92,6 @@ public class NacosRegisterCenter implements RegisterCenter {
     @Override
     public void deregister(ServiceDefinition serviceDefinition, ServiceInstance serviceInstance) {
         try{
-            // TODO: 2024-01-24 这里不太明白为什么用registerInstance
             namingService.deregisterInstance(serviceDefinition.getServiceId(),
                     env, serviceInstance.getIp(), serviceInstance.getPort());
         }catch (NacosException e){

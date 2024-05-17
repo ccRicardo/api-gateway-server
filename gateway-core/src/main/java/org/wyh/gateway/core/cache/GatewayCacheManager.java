@@ -15,7 +15,6 @@ import java.util.function.Function;
                  （也就是说，系统中的其他部分应该通过该缓存管理器来操作缓存，而不是直接操作）
                  实际上，目前只有过滤器链部分使用到了缓存。
  */
-// TODO: 2024-05-16 感觉缓存设计部分有问题 
 public class GatewayCacheManager {
     /*
      * 保存系统中需要用到的各种缓存。

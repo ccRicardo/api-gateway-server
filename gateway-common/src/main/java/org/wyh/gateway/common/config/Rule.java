@@ -103,7 +103,7 @@ public class Rule implements Comparable<Rule>, Serializable{
     public static class RetryConfig{
         //请求重试的次数
         private int times;
-        // TODO: 2024-02-26 还可以考虑添加更多的属性 
+        // TODO: 2024-05-17 感觉重试这个机制可以去掉
     }
     /**
      * @BelongsProject: my-api-gateway

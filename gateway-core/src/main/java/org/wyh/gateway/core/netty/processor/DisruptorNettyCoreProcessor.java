@@ -21,8 +21,6 @@ import org.wyh.gateway.core.request.HttpRequestWrapper;
  * @Description: 带Disruptor缓冲队列的请求处理器。（本质上就是对基本实现类NettyCoreProcessor的包装）
                  该类的主要工作其实是对缓冲队列的生命周期进行管理，以及实现事件监听器。
                  而具体的请求处理逻辑则是交给NettyCoreProcessor来实现。
- todo 目前存在的一个问题是，消费者确实是多线程的，但是他们却共用一个NettyCoreProcessor对象
- todo 这会不会成为限制该系统吞吐量的瓶颈？
  */
 @Slf4j
 public class DisruptorNettyCoreProcessor implements NettyProcessor{
@@ -60,9 +58,6 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
         public void onEvent(HttpRequestWrapper eventValue) {
             //调用NettyCoreProcessor（请求处理器）来真正处理请求事件
             nettyCoreProcessor.process(eventValue);
-            // TODO 从以下两句测试代码可知，不同消费者线程共享的是同一个处理器对象。这会不会限制系统吞吐量？
-            //System.out.println(Thread.currentThread().getName());
-            //System.out.println(nettyCoreProcessor.hashCode());
         }
 
         @Override

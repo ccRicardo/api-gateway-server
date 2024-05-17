@@ -16,9 +16,9 @@ import java.util.regex.Pattern;
  * @Author: wyh
  * @Date: 2024-05-13 14:07
  * @Description: ANT风格的路径规则匹配类。
- *               todo 该类的内容比较多，而且逻辑很复杂，因此就不去研究源码了
- *               todo 用到的核心方法：public boolean match(String pattern, String path)
- *               todo 以下是ANT风格路径中常用通配符的说明：
+ *               该类的内容比较多，而且逻辑很复杂，因此就不去研究源码了
+ *               用到的核心方法：public boolean match(String pattern, String path)
+ *               以下是ANT风格路径中常用通配符的说明：
  *               ?  匹配任何单字符
  *               *  匹配任意数量的字符（只能匹配单层目录）
  *               **	 匹配任意数量的字符（可以匹配多层目录）

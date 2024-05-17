@@ -15,7 +15,6 @@ import java.util.function.Consumer;
  */
 public interface IContext {
     //上下文的生命周期
-    // TODO: 目前定义了四个状态，考虑再定义一个初始化状态。此外，可以考虑用内部枚举类来表示状态。
     //运行中
     int RUNNING = 0;
     //请求完成或出现异常，需写回响应

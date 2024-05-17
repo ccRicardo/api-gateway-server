@@ -92,7 +92,6 @@ public class GatewayResponse {
         GatewayResponse gatewayResponse = new GatewayResponse();
         gatewayResponse.setHttpResponseStatus(code.getStatus());
         //设置响应头信息，主要是content-type
-        // TODO: 2024-01-11 这里感觉可以完善一下，在响应头中添加更多信息
         gatewayResponse.putResponseHeader(HttpHeaderNames.CONTENT_TYPE,
                 HttpHeaderValues.APPLICATION_JSON + ";charset=utf-8");
         //设置响应体。失败情况下主要是http状态码，业务状态码和业务状态信息
@@ -115,7 +114,6 @@ public class GatewayResponse {
         GatewayResponse gatewayResponse = new GatewayResponse();
         gatewayResponse.setHttpResponseStatus(ResponseCode.SUCCESS.getStatus());
         //设置响应头信息，主要是content-type
-        // TODO: 2024-01-11 这里感觉可以完善一下，在响应头中添加更多信息
         gatewayResponse.putResponseHeader(HttpHeaderNames.CONTENT_TYPE,
                 HttpHeaderValues.APPLICATION_JSON + ";charset=utf-8");
         //设置响应体。成功情况下主要是成功状态信息，以及响应返回的数据

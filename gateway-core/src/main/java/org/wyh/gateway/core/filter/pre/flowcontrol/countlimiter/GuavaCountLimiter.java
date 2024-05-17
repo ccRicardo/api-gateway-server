@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
                  本质上来说，该限流器就是对RateLimiter的包装，而RateLimiter是基于令牌桶实现的。
 
  */
-// TODO: 2024-03-05 经测试发现，该限流器的效果不如redis限流器好，准确。目前原因未知，在测试时需要注意。
 public class GuavaCountLimiter implements CountLimiter{
     /*
      * 补充说明：
