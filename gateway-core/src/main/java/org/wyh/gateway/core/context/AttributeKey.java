@@ -1,5 +1,6 @@
 package org.wyh.gateway.core.context;
 
+import io.micrometer.core.instrument.Timer;
 import org.wyh.gateway.common.config.ServiceInvoker;
 
 import java.util.HashMap;
@@ -26,10 +27,16 @@ public abstract class AttributeKey<T> {
     public static final AttributeKey<Set<String>> IP_ADDRESS = create(Set.class);
     //表示“http方法调用”（上下文）参数的key
     public static final AttributeKey<ServiceInvoker> HTTP_INVOKER = create(ServiceInvoker.class);
+    //表示”Prometheus Timer.Sample数据采集器“参数的key
+    public static final AttributeKey<Timer.Sample> PROMETHEUS_TIMER_SAMPLE = create(Timer.Sample.class);
+    //表示”灰度标记“参数的key
+    public static final AttributeKey<Boolean> GRAY_FLAG = create(Boolean.class);
     //静态代码块，用于将预定义好的AttributeKey对象及其名称放入namedMap集合中
     static{
         namedMap.put("IP_ADDRESS", IP_ADDRESS);
         namedMap.put("HTTP_INVOKER", HTTP_INVOKER);
+        namedMap.put("PROMETHEUS_TIMER_SAMPLE", PROMETHEUS_TIMER_SAMPLE);
+        namedMap.put("GRAY_FLAG", GRAY_FLAG);
     }
     /**
      * @BelongsProject: api-gateway-server

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.common.constant.FilterConst;
+import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
 import org.wyh.gateway.core.filter.common.base.FilterAspect;
@@ -70,10 +71,12 @@ public class GrayFilter extends AbstractGatewayFilter<GrayFilter.Config> {
          * 2、再从规则配置中获取灰度ip集合，判断发出请求的客户端ip是否包含在内。若在内，则标为灰度流量。
          */
         try{
+            //将灰度标记设置到上下文参数中，默认为false
+            ctx.setAttribute(AttributeKey.GRAY_FLAG, false);
             //尝试从请求头中获取灰度标记参数
             String grayFlag = ctx.getRequest().getHeaders().get(GRAY_FLAG_KEY);
             if("true".equals(grayFlag)){
-                ctx.setGray(true);
+                ctx.setAttribute(AttributeKey.GRAY_FLAG, true);
             }else{
                 //获取发出请求的客户端的ip地址
                 String clientIp = ctx.getRequest().getClientIp();
@@ -90,14 +93,14 @@ public class GrayFilter extends AbstractGatewayFilter<GrayFilter.Config> {
                         //判断当前ip是否在灰度ip数组中
                         for (String grayIp : grapIpArray) {
                             if(clientIp == grayIp){
-                                ctx.setGray(true);
+                                ctx.setAttribute(AttributeKey.GRAY_FLAG, true);
                                 break;
                             }
                         }
                     }
                 }
             }
-            if(ctx.isGray()){
+            if(ctx.getAttribute(AttributeKey.GRAY_FLAG)){
                 log.info("【灰度过滤器】当前流量属于灰度流量");
             }
         }catch (Exception e){

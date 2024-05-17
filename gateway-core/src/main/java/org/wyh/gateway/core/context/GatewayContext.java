@@ -29,14 +29,6 @@ public class GatewayContext extends BasicContext{
     @Setter
     @Getter
     private int currentRetryTimes;
-    //标识该请求是否属于灰度流量（也就是请求的是否为灰度服务）
-    @Setter
-    @Getter
-    private boolean gray = false;
-    //用于统计方法的执行耗时（在本系统中则是统计请求在过滤器链中的处理时间），是监控过滤器的数据采集器。
-    @Setter
-    @Getter
-    private Timer.Sample timerSample;
 
 
     /**
