@@ -12,6 +12,7 @@ import java.util.Set;
  * @Author: wyh
  * @Date: 2024-05-13 16:59
  * @Description: 本抽象类的作用就是表示/代表上下文参数的key。其实现类是它的一个静态内部类。
+                 其中，泛型T表示该参数value的类型
                  Q: 为什么不直接使用String作为上下文参数（以下简称为参数）key的类型
                  A: 若直接使用String作为参数key的类型，则参数value的类型只能是Object
                     这会导致在设置和获取参数value时不方便（设置时无法验证value的具体类型，获取时也无法得知value的具体类型）
@@ -56,7 +57,7 @@ public abstract class AttributeKey<T> {
     }
     /**
      * @date: 2024-05-14 9:36
-     * @description: 根据名称获取预定好的AttributeKey对象
+     * @description: 根据名称获取预先设定好的AttributeKey对象
      * @Param name:
      * @return: org.wyh.gateway.core.context.AttributeKey<?>
      */
@@ -65,7 +66,7 @@ public abstract class AttributeKey<T> {
     }
     /**
      * @date: 2024-05-14 9:39
-     * @description: 强制类型转换，用于将给定的对象转化成AttributeKey泛型指定的类型
+     * @description: 强制类型转换，将给定的对象转化成AttributeKey泛型指定的类型（也就是参数value的类型）
      * @Param value:
      * @return: T
      */
