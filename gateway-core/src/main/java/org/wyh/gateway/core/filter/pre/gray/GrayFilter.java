@@ -2,12 +2,17 @@ package org.wyh.gateway.core.filter.pre.gray;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.wyh.gateway.common.config.Rule;
+import org.wyh.gateway.common.constant.FilterConst;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.old_common.Filter;
-import org.wyh.gateway.core.filter.old_common.FilterAspect;
+import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
+import org.wyh.gateway.core.filter.common.base.FilterAspect;
+import org.wyh.gateway.core.filter.common.base.FilterConfig;
+import org.wyh.gateway.core.filter.common.base.FilterType;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,61 +37,77 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
 @Slf4j
 @FilterAspect(id=GRAY_FILTER_ID,
               name=GRAY_FILTER_NAME,
+              type=FilterType.PRE,
               order=GRAY_FILTER_ORDER)
-public class GrayFilter implements Filter {
+public class GrayFilter extends AbstractGatewayFilter<GrayFilter.Config> {
+    /**
+     * @BelongsProject: my-api-gateway
+     * @BelongsPackage: org.wyh.core.filter.gray
+     * @Author: wyh
+     * @Date: 2024-05-17 09:13
+     * @Description: （静态内部类）该过滤器的配置类。
+     */
+    @Setter
+    @Getter
+    public static class Config extends FilterConfig{
+        //灰度ip集合。ip之间通过";"符号分隔
+        private String grayIpSet;
+    }
+    /**
+     * @date: 2024-05-17 9:16
+     * @description: 无参构造器，负责初始化父类的filterConfigClass属性
+     * @return: null
+     */
+    public GrayFilter(){
+        super(GrayFilter.Config.class);
+    }
+
     @Override
-    public void doFilter(GatewayContext ctx) throws Exception {
+    public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
         /*
          * 灰度过滤的基本流程大致如下：
          * 1、先检查http请求头中是否携带灰度标记。若携带，则直接标记为灰度流量，并跳过第二步
          * 2、再从规则配置中获取灰度ip集合，判断发出请求的客户端ip是否包含在内。若在内，则标为灰度流量。
          */
-        //尝试从请求头中获取灰度标记
-        String grayFlag = ctx.getRequest().getHeaders().get("gray");
-        if("true".equals(grayFlag)){
-            ctx.setGray(true);
-            //直接返回
-            return;
-        }
-        //获取发出请求的客户端的ip地址
-        String clientIp = ctx.getRequest().getClientIp();
-        log.info("【灰度过滤器】客户端ip地址：{}", clientIp);
-        Rule rule = ctx.getRule();
-        if(rule != null){
-            //获取过滤器配置集合
-            Set<Rule.FilterConfig> filterConfigs = rule.getFilterConfigs();
-            Iterator<Rule.FilterConfig> iterator = filterConfigs.iterator();
-            Rule.FilterConfig filterConfig;
-            //遍历过滤器配置集合，找到灰度过滤器的配置信息
-            while(iterator.hasNext()){
-                filterConfig = iterator.next();
+        try{
+            //尝试从请求头中获取灰度标记参数
+            String grayFlag = ctx.getRequest().getHeaders().get(GRAY_FLAG_KEY);
+            if("true".equals(grayFlag)){
+                ctx.setGray(true);
+            }else{
+                //获取发出请求的客户端的ip地址
+                String clientIp = ctx.getRequest().getClientIp();
+                log.info("【灰度过滤器】客户端ip地址: {}", clientIp);
+                //args[0]其实就是该过滤器的配置类实例
+                GrayFilter.Config filterConfig = (GrayFilter.Config) args[0];
                 if(filterConfig == null){
-                    continue;
-                }
-                String filterId = filterConfig.getFilterId();
-                //找到灰度过滤器的配置信息，并对其进行解析，获取灰度ip集合
-                if(filterId.equals(GRAY_FILTER_ID)){
-                    String config = filterConfig.getConfig();
-                    if(StringUtils.isNotEmpty(config)){
-                        /*
-                         * 配置信息是一个json串，这里先将json串转换成了一个JSONObject对象
-                         * 然后使用JSONObject对象中的getString方法，获取字符串形式的“灰度ip集合”配置值
-                         */
-                        JSONObject jsonObject = JSONObject.parseObject(config);
-                        String grayIpInfo = jsonObject.getString(GRAY_IP_SET);
-                        if(StringUtils.isNotEmpty(grayIpInfo)){
-                            //此时的“灰度ip集合”值是一个json数组，因此要将其转换为一个set集合（先转list，再转set）
-                            Set<String> grayIpSet = new HashSet(JSON.parseArray(grayIpInfo, String.class));
-                            //判断当前ip是否属于灰度ip
-                            if(grayIpSet.contains(clientIp)){
+                    log.warn("【灰度过滤器】未设置配置信息");
+                }else{
+                    String grayIpSetStr = filterConfig.getGrayIpSet();
+                    if(StringUtils.isNotEmpty(grayIpSetStr)){
+                        String[] grapIpArray = grayIpSetStr.split(";");
+                        // TODO: 2024-05-17 ip地址匹配这一块感觉要重做，并且最好再加一个ip格式验证
+                        //判断当前ip是否在灰度ip数组中
+                        for (String grayIp : grapIpArray) {
+                            if(clientIp == grayIp){
                                 ctx.setGray(true);
+                                break;
                             }
                         }
                     }
-                    //读取完灰度过滤器的相关配置后，退出循环
-                    break;
                 }
             }
+            if(ctx.isGray()){
+                log.info("【灰度过滤器】当前流量属于灰度流量");
+            }
+        }catch (Exception e){
+            throw new RuntimeException("【灰度过滤器】过滤器执行异常");
+        }finally {
+            /*
+             * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
+             * （这是过滤器链能够顺序执行的关键）
+             */
+            super.fireNext(ctx, args);
         }
 
     }

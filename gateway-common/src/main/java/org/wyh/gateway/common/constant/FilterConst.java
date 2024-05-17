@@ -36,9 +36,6 @@ public interface FilterConst {
     String FLOW_CTRL_TYPE_SERVICE = "service";
     String FLOW_CTRL_MODE_DISTRIBUTED = "distributed";
     String FLOW_CTRL_MODE_SINGLETON = "singleton";
-    //下面这两个常量通常配合使用，来控制一段时间内的最大访问次数，即控制访问的流量。
-    String FLOW_CTRL_LIMIT_DURATION = "duration"; 
-    String FLOW_CTRL_LIMIT_PERMITS = "permits";
     /*
      * 用户鉴权过滤器相关常量
      */
@@ -54,6 +51,8 @@ public interface FilterConst {
     String GRAY_FILTER_NAME = "gray_filter";
     int GRAY_FILTER_ORDER = 1;
     String GRAY_IP_SET = "gray_ip_set";
+    //请求头中灰度标记参数的key
+    String GRAY_FLAG_KEY = "gray";
     /*
      * 监控（前置）过滤器相关常量
      */
