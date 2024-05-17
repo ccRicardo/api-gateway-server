@@ -1,14 +1,18 @@
-package org.wyh.gateway.core.filter.pre.loadbalance;
+package org.wyh.gateway.core.filter.pre.loadbalance.deprecated;
 
 import com.alibaba.fastjson.JSON;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.common.config.ServiceInstance;
 import org.wyh.gateway.common.exception.NotFoundException;
 import org.wyh.gateway.core.context.GatewayContext;
-import org.wyh.gateway.core.filter.old_common.Filter;
-import org.wyh.gateway.core.filter.old_common.FilterAspect;
+import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
+import org.wyh.gateway.core.filter.common.base.FilterAspect;
+import org.wyh.gateway.core.filter.common.base.FilterConfig;
+import org.wyh.gateway.core.filter.common.base.FilterType;
 import org.wyh.gateway.core.request.GatewayRequest;
 
 import java.util.Iterator;
@@ -28,8 +32,30 @@ import static org.wyh.gateway.common.enumeration.ResponseCode.SERVICE_INSTANCE_N
 @Slf4j
 @FilterAspect(id=LOAD_BALANCE_FILTER_ID,
               name=LOAD_BALANCE_FILTER_NAME,
+              type=FilterType.PRE,
               order=LOAD_BALANCE_FILTER_ORDER)
-public class LoadBalanceFilter implements Filter {
+public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.Config> {
+    /**
+     * @BelongsProject: my-api-gateway
+     * @BelongsPackage: org.wyh.core.filter.loadbalance
+     * @Author: wyh
+     * @Date: 2024-05-17 10:16
+     * @Description: （静态内部类）该过滤器的配置类。
+     */
+    @Setter
+    @Getter
+    public static class Config extends FilterConfig{
+        //采用的负载均衡策略
+        private String loadBalanceRule;
+    }
+    /**
+     * @date: 2024-05-17 10:17
+     * @description: 无参构造器，负责初始化父类的filterConfigClass属性
+     * @return: null
+     */
+    public LoadBalanceFilter(){
+        super(LoadBalanceFilter.Config.class);
+    }
     /**
      * @date: 2024-02-22 9:39
      * @description: 从网关上下文的规则配置中获取相应的负载均衡策略
@@ -89,7 +115,7 @@ public class LoadBalanceFilter implements Filter {
         return loadBalanceRule;
     }
     @Override
-    public void doFilter(GatewayContext ctx) throws Exception {
+    public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
         String uniqueId = ctx.getUniqueId();
         //通过网关上下文，获取相应的负载均衡策略
         IGatewayLoadBalanceRule loadBalanceRule = getLoadBalanceRule(ctx);

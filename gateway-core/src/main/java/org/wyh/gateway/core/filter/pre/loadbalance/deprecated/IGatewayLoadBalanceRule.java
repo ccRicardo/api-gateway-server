@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.pre.loadbalance;
+package org.wyh.gateway.core.filter.pre.loadbalance.deprecated;
 
 import org.wyh.gateway.common.config.ServiceInstance;
 import org.wyh.gateway.core.context.GatewayContext;

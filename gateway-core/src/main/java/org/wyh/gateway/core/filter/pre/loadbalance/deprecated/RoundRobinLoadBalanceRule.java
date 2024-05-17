@@ -1,4 +1,4 @@
-package org.wyh.gateway.core.filter.pre.loadbalance;
+package org.wyh.gateway.core.filter.pre.loadbalance.deprecated;
 
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.config.DynamicConfigManager;
