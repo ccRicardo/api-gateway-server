@@ -17,11 +17,9 @@ import java.util.function.Function;
  */
 // TODO: 2024-05-16 感觉缓存设计部分有问题 
 public class GatewayCacheManager {
-    //
     /*
      * 保存系统中需要用到的各种缓存。
-     * 其中，外层key是缓存的名称/id，外层value是真正保存数据的缓存实例。
-     * 内层key是数据项的id，内层value是对应项保存的具体数据
+     * 其中，key是缓存的名称/id，value是真正保存数据的缓存实例。
      */
     private final ConcurrentHashMap<String, Cache<String, ?>> cacheMap = new ConcurrentHashMap<>();
     /**
@@ -52,17 +50,20 @@ public class GatewayCacheManager {
     }
     /**
      * @date: 2024-03-27 14:08
-     * @description: 根据默认配置参数，创建指定缓存名称对应的缓存实例。
+     * @description: 获取指定缓存id对应的缓存实例
+                     若对应的缓存实例不存在，则根据默认配置参数，创建缓存实例，并放入cacheMap中。
                      其中，泛型V指缓存中数据的类型，后面的方法同理。
      * @Param cacheId:
      * @return: com.github.benmanes.caffeine.cache.Cache<java.lang.String, V>
      */
-    public <V> Cache<String, V> create(String cacheId){
-        //创建Caffeine缓存实例
-        Cache<String, V> cache = Caffeine.newBuilder().build();
-        //将该缓存实例添加到指定
-        cacheMap.put(cacheId, cache);
-        return (Cache<String, V>)cacheMap.get(cacheId);
+    public <V> Cache<String, V> getCache(String cacheId){
+        Cache<String, V> cache = (Cache<String, V>) cacheMap.get(cacheId);
+        if(cache == null){
+            //根据默认配置参数，创建Caffeine缓存实例
+            cache = Caffeine.newBuilder().build();
+            cacheMap.put(cacheId, cache);
+        }
+        return cache;
     }
     /**
      * @date: 2024-03-27 14:29
