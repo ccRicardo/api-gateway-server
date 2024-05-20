@@ -28,6 +28,7 @@ spec:
         name: my-gateway-backend
         ports:
         - containerPort: 8083
+        # 通过环境变量的方式注入参数值
         # 此处环境变量的值是my-nacos-server-service的clusterIP:port
         env: 
         - name: api.registerAddress
