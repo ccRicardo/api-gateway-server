@@ -44,12 +44,6 @@ public class NacosRegisterCenter implements RegisterCenter {
     private String registerAddress;
     //环境（本质上是作为nacos服务列表中的分组名使用）
     private String env;
-    /*
-     * 注意：
-     * NamingMaintainService和NamingService的api中，serviceName的含义并不相同
-     * 前者的serviceName就是网关服务定义对象中的serviceId属性
-     * 后者的serviceName则是由网关服务定义对象中的serviceId，分隔符（默认为@）和上述env属性拼接而成。
-     */
     //nacos注册服务相关类的实例，提供了一系列api，用于对服务/服务实例进行相关操作
     private NamingMaintainService namingMaintainService;
     //nacos注册服务相关类的实例，提供了一系列api，用于对服务/服务实例进行相关操作
@@ -172,12 +166,14 @@ public class NacosRegisterCenter implements RegisterCenter {
                     }
                     //创建nacos事件监听器实例。
                     EventListener nacosEventListener = new NacosEventListener();
+                    //获取该服务当前对应的服务实例集合
+                    List<Instance> allInstances = namingService.getAllInstances(service, env);
                     /*
                      * 由于订阅服务也属于服务状态发生变更，所以此处要创建一个NamingEvent事件对象
-                     * 并在对象中传入该服务的名称
-                     * 然后调用nacos事件监听器的onEvent方法，对其进行处理
+                     * 并在事件对象中传入该服务的名称和当前对应的服务实例集合
+                     * 然后调用nacos事件监听器的onEvent方法，对事件进行处理
                      */
-                    nacosEventListener.onEvent(new NamingEvent(service, null));
+                    nacosEventListener.onEvent(new NamingEvent(service, allInstances));
                     //订阅该服务。
                     namingService.subscribe(service, env, nacosEventListener);
                     log.info("【注册中心】订阅服务: {}", service);
@@ -200,7 +196,8 @@ public class NacosRegisterCenter implements RegisterCenter {
                      当nacos发现已订阅服务的状态发生变化时（主要是对应服务实例的状态发生变化），
                      便会触发事件，然后调用该监听器中的onEvent方法。
                      此外，上述doSubscribeServicesChange方法在订阅服务时，也会触发事件，调用该监听器的相应方法。
-                     onEvent方法的主要工作就是获取该服务当前对应的服务实例列表。
+                     onEvent方法的主要工作就是获取该服务的ServiceDefinition实例和当前对应的ServiceInstance实例集合，
+                     然后调用注册中心监听器实例，将数据传给网关。
      */
     public class NacosEventListener implements EventListener{
 
@@ -210,29 +207,28 @@ public class NacosRegisterCenter implements RegisterCenter {
              * 判断服务的状态是否发生变化。（当服务状态发生变化时，nacos会触发一个NamingEvent事件）
              */
             if(event instanceof NamingEvent){
-                /*
-                 * 注意：
-                 * NamingService和NamingMaintainService的api中，serviceName的含义并不相同
-                 * 前者的serviceName就是网关服务定义对象中的serviceId属性
-                 * 后者的serviceName则是由网关服务定义对象中的serviceId，分隔符（默认为@）和该类的env属性拼接而成。
-                 * NamingEvent中的serviceName属于后者，
-                 * 而Service中的name属于前者
-                 */
                 try{
                     NamingEvent namingEvent = (NamingEvent) event;
+                    /*
+                     * 注意，此处有个小细节：
+                     * doSubscribeServicesChange方法创建的NamingEvent对象中，serviceName就等于服务定义对象中的serviceId
+                     * 而nacos创建的NamingEvent对象中，serviceName是由serviceId，分隔符（默认为@）和该类的env属性拼接而成。
+                     * 但是，无论serviceName是上述哪种情况，NamingMaintainService.queryService方法都能查找到正确的Service对象。
+                     * 因此，这个“不完美的设计”并不影响最终的结果。
+                     */
                     String serviceName = namingEvent.getServiceName();
                     //获取Service实例
                     Service service = namingMaintainService.queryService(serviceName, env);
                     /*
-                     * Service实例的元数据属性就是ServiceDefinition对象序列化后得到的json串
-                     * 因此，这里要对其反序列化，得到对应的ServiceDefinition对象。
+                     * 获取该服务对应的ServiceDefinition实例。
+                     * Service实例的元数据属性就是ServiceDefinition实例序列化后得到的json串
+                     * 因此，这里要对其反序列化。
                      */
                     ServiceDefinition serviceDefinition = JSON.parseObject(service.getMetadata()
                             .get(GatewayConst.SERVICE_DEFINITION), ServiceDefinition.class);
-                    //通过服务名称获取该服务当前对应的服务实例信息。注意不要使用上述的serviceName！
-                    List<Instance> allInstances = namingService.getAllInstances(service.getName(), env);
                     Set<ServiceInstance> instanceSet = new HashSet<>();
-                    for (Instance instance : allInstances) {
+                    //构建该服务当前对应的ServiceInstance实例集合
+                    for (Instance instance : namingEvent.getInstances()) {
                         /*
                          * Instance中的元数据属性是ServiceInstance对象序列化后得到的json串
                          * 因此，这里要对其反序列化，得到对应的ServiceInstance对象。
