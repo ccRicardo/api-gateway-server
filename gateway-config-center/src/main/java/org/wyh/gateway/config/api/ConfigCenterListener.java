@@ -9,9 +9,9 @@ import java.util.List;
  * @BelongsPackage: org.wyh.gateway.config.center.api
  * @Author: wyh
  * @Date: 2024-01-30 14:42
- * @Description: 规则变更监听器。这是一个函数式接口，可以用lambda表达式来实现。
+ * @Description: 配置中心监听器。这是一个函数式接口，可以用lambda表达式来实现。
  */
-public interface RulesChangeListener {
+public interface ConfigCenterListener {
     /**
      * @date: 2024-01-30 14:43
      * @description: 回调函数，监听到规则配置变更时调用

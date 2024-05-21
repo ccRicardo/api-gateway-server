@@ -8,6 +8,7 @@ import com.alibaba.nacos.api.exception.NacosException;
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.config.api.ConfigCenter;
+import org.wyh.gateway.config.api.ConfigCenterListener;
 import org.wyh.gateway.config.api.RulesChangeListener;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class NacosConfigCenter implements ConfigCenter {
     }
 
     @Override
-    public void subscribeRulesChange(RulesChangeListener listener) {
+    public void subscribeRulesChange(ConfigCenterListener listener) {
         try{
             //获取网关系统的动态规则配置
             String config = configService.getConfig(DATA_ID, env, 5000);

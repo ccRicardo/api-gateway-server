@@ -37,9 +37,9 @@ public interface RegisterCenter {
     void deregister(ServiceDefinition serviceDefinition, ServiceInstance serviceInstance);
     /**
      * @date: 2024-01-23 9:55
-     * @description: 订阅所有服务，即监听所有服务实例的更新
+     * @description: 订阅所有服务的变更，即监听所有服务实例的更新
      * @Param listener: 
      * @return: void
      */
-    void subscribeAllServices(RegisterCenterListener listener);
+    void subscribeServicesChange(RegisterCenterListener listener);
 }

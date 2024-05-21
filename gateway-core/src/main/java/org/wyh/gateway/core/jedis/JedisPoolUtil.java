@@ -1,11 +1,10 @@
-package org.wyh.gateway.core.redis;
+package org.wyh.gateway.core.jedis;
 
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.core.config.Config;
 import org.wyh.gateway.core.config.ConfigLoader;
 import redis.clients.jedis.*;
 
-import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 

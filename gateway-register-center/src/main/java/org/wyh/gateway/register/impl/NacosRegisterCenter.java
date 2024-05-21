@@ -100,7 +100,7 @@ public class NacosRegisterCenter implements RegisterCenter {
     }
 
     @Override
-    public void subscribeAllServices(RegisterCenterListener listener) {
+    public void subscribeServicesChange(RegisterCenterListener listener) {
         //添加监听器
         listenerList.add(listener);
         //将服务订阅的实现委托给doSubscribeAllServices方法

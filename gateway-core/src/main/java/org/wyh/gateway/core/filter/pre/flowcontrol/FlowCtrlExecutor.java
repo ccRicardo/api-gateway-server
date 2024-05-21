@@ -1,12 +1,8 @@
 package org.wyh.gateway.core.filter.pre.flowcontrol;
 
 import lombok.extern.slf4j.Slf4j;
-import org.wyh.gateway.core.filter.common.chainfactory.GatewayFilterChainFactory;
-import org.wyh.gateway.core.redis.JedisUtil;
 import org.wyh.gateway.core.filter.pre.flowcontrol.countlimiter.GuavaCountLimiter;
 import org.wyh.gateway.core.filter.pre.flowcontrol.countlimiter.RedisCountLimiter;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.wyh.gateway.common.constant.FilterConst.*;
 
