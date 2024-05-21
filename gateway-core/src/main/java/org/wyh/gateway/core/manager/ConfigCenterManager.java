@@ -1,10 +1,14 @@
 package org.wyh.gateway.core.manager;
 
+import lombok.extern.slf4j.Slf4j;
+import org.wyh.gateway.common.config.DynamicConfigManager;
+import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.config.api.ConfigCenter;
 import org.wyh.gateway.config.api.ConfigCenterListener;
-import org.wyh.gateway.config.api.RulesChangeListener;
 import org.wyh.gateway.core.config.Config;
 import org.wyh.gateway.register.api.RegisterCenterListener;
+
+import java.util.ServiceLoader;
 
 /**
  * @BelongsProject: api-gateway-server
@@ -14,11 +18,19 @@ import org.wyh.gateway.register.api.RegisterCenterListener;
  * @Description: 配置中心管理类，
                  负责（通过SPI）加载配置中心实例，初始化配置中心和设置监听器等。
  */
+@Slf4j
 public class ConfigCenterManager {
     //配置中心实例
     private static ConfigCenter configCenter;
     //配置中心监听器的默认实现
-    private static final ConfigCenterListener DEFAULT_LISTENER =
+    public static final ConfigCenterListener DEFAULT_LISTENER = new ConfigCenterListener() {
+        @Override
+        public void onRulesChange(Rule rule) {
+            DynamicConfigManager manager = DynamicConfigManager.getInstance();
+            //将更新后的规则缓存到本地
+            manager.putRule(rule.getRuleId(), rule);
+        }
+    };
     /**
      * @BelongsProject: api-gateway-server
      * @BelongsPackage: org.wyh.gateway.core.manager
@@ -51,7 +63,23 @@ public class ConfigCenterManager {
      * @return: void
      */
     public void init(Config config){
-        todo
+        /*
+         * 以下这段代码的作用是通过java SPI机制来加载/构建配置中心实例
+         * SPI是JDK内置的一种服务提供发现机制，可以动态获取/发现接口的实现类
+         * 具体来说，服务提供者在提供了一种接口实现后，
+         * 需要在resources/META-INF/services目录下创建一个以接口（全类名）命名的文件
+         * 文件的内容就是该接口具体实现类的全类名
+         * 之后通过java.util.ServiceLoader，就可以根据文件中的实现类全类名，来构建/加载相应的实例
+         * ServiceLoader.findFirst方法返回的是第一个（种）实现类的实例。
+         */
+        ServiceLoader<ConfigCenter> configCenters = ServiceLoader.load(ConfigCenter.class);
+        configCenter = configCenters.findFirst().orElseThrow(() -> {
+            //如果没找到实现类，则执行以下lambda表达式，抛出异常
+            log.error("未找到配置中心实例");
+            return new RuntimeException("未找到配置中心实例");
+        });
+        //初始化
+        configCenter.init(config.getConfigAddress(), config.getEnv());
     }
     /**
      * @date: 2024-05-21 10:18
@@ -59,8 +87,8 @@ public class ConfigCenterManager {
      * @Param listener:
      * @return: void
      */
-    public void subscribeConfigCenter(RulesChangeListener listener){
-        todo
+    public void subscribeConfigCenter(ConfigCenterListener listener){
+        configCenter.subscribeRulesChange(listener);
     }
 
 }

@@ -8,6 +8,7 @@ package org.wyh.gateway.common.config;
  * @Description: 服务方法调用的抽象实现类（这里实际上并没有加abstract关键字）
                  方法调用指的是服务向外暴露/提供的可调用方法
  */
+
 public class AbstractServiceInvoker implements ServiceInvoker{
     //方法调用全路径
     protected String invokerPath;
@@ -56,5 +57,13 @@ public class AbstractServiceInvoker implements ServiceInvoker{
         return this.desc;
     }
 
-
+    @Override
+    public String toString() {
+        return "AbstractServiceInvoker{" +
+                "invokerPath='" + invokerPath + '\'' +
+                ", ruleId='" + ruleId + '\'' +
+                ", timeout=" + timeout +
+                ", desc='" + desc + '\'' +
+                '}';
+    }
 }

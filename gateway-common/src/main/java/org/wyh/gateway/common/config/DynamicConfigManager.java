@@ -206,6 +206,8 @@ public class DynamicConfigManager {
      * @return: void
      */
     public void putRule(String ruleId, Rule rule) {
+        //更新规则的最后修改时间属性
+        rule.setLastModifiedTime(TimeUtil.currentTimeMillis());
         ruleMap.put(ruleId, rule);
     }
     /**
@@ -219,8 +221,6 @@ public class DynamicConfigManager {
         //该方法除了要初始化ruleMap外，还要初始化pathRuleMap和serviceRuleMap
         ConcurrentHashMap<String,Rule> newRuleMap = new ConcurrentHashMap<>();
         for (Rule rule : ruleList) {
-            // TODO: 2024-05-16 目前这个方法很不好。更新一条规则，全部的规则都需要重新缓存。
-            // TODO: 2024-05-16 考虑将使用多个文件来存储规则，然后只更新发生变更的文件所对应的规则缓存
             //更新规则的最后修改时间属性
             rule.setLastModifiedTime(TimeUtil.currentTimeMillis());
             newRuleMap.put(rule.getRuleId(), rule);
