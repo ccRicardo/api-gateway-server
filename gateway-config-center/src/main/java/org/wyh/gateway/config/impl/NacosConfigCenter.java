@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.config.Rule;
 import org.wyh.gateway.config.api.ConfigCenter;
 import org.wyh.gateway.config.api.ConfigCenterListener;
-import org.wyh.gateway.config.api.RulesChangeListener;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -23,6 +22,7 @@ import java.util.concurrent.Executor;
  */
 @Slf4j
 public class NacosConfigCenter implements ConfigCenter {
+    // TODO: 2024-05-21 使用一个文件记录所有规则配置文件的data id 
     //配置的唯一标识符
     private static final String DATA_ID = "api-gateway";
     //配置中心服务器地址
@@ -36,10 +36,11 @@ public class NacosConfigCenter implements ConfigCenter {
         this.serverAddr = serverAddr;
         this.env = env;
         try {
-            //创建ConfigService实例，用于后续的配置获取
+            //创建ConfigService实例，用于从nacos配置中心获取规则配置
             configService = NacosFactory.createConfigService(serverAddr);
         } catch (NacosException e) {
-            throw new RuntimeException(e);
+            log.error("【配置中心】nacos配置服务创建失败，服务器地址: {}", serverAddr);
+            throw new RuntimeException("【配置中心】nacos配置服务创建失败", e);
         }
     }
 
