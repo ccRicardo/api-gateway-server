@@ -18,5 +18,5 @@ public interface ConfigCenterListener {
      * @Param rules: 变更后的规则配置列表
      * @return: void
      */
-    void onRulesChange(List<Rule> rules);
+    void onRulesChange(Rule rule);
 }
