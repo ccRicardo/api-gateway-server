@@ -19,13 +19,14 @@ import java.util.concurrent.Executor;
  * @Author: wyh
  * @Date: 2024-01-31 10:33
  * @Description: 配置中心的nacos实现（利用了nacos的配置服务）
-                 每个配置文件存放一个规则对象，其data id（即文件名）默认等于规则id
-                 RULES_DATA_ID对应的文件记录了所有规则配置文件的data id
+                 每个配置文件存放一个规则对象，其data id（即文件名）默认等于规则id（非强制性要求）
+                 METADATA_DATA_ID对应的元数据文件记录了所有规则配置文件的data id
+                 注意：修改规则配置文件的内容不需要重启网关，但是修改元数据文件的内容后需要重启网关！
  */
 @Slf4j
 public class NacosConfigCenter implements ConfigCenter {
-    //该data id对应的文件（以json数组的形式）记录了所有规则配置文件的data id
-    private static final String RULE_DATA_IDS = "rule_data_ids";
+    //元数据文件的data id。该元数据文件（以json数组的形式）记录了所有规则配置文件的data id
+    private static final String METADATA_DATA_ID = "rule_data_ids";
     //配置中心的服务器地址
     private String serverAddr;
     //配置所属环境（本质上是作为nacos配置列表中的组名使用）
@@ -51,8 +52,8 @@ public class NacosConfigCenter implements ConfigCenter {
     @Override
     public void subscribeRulesChange(ConfigCenterListener listener) {
         try{
-            //获取指定配置文件的内容，该内容就是网关系统所有规则配置文件的data id
-            String ruleDataIdsStr = configService.getConfig(RULE_DATA_IDS, env, timeout);
+            //获取元数据文件的内容，该内容就是网关系统所有规则配置文件的data id
+            String ruleDataIdsStr = configService.getConfig(METADATA_DATA_ID, env, timeout);
             log.info("【配置中心】当前已配置的规则: {}", ruleDataIdsStr);
             //将上述json串形式的配置内容转换为java字符串列表形式
             List<String> ruleDataIds = JSON.parseArray(ruleDataIdsStr, String.class);
@@ -60,8 +61,8 @@ public class NacosConfigCenter implements ConfigCenter {
              * 遍历ruleDataIds中每一个data id对应的规则配置文件，
              * 并将其内容转换成相应的Rule对象，然后传给配置中心监听器实例
              * （该监听器实例由网关传入，所以规则对象最后会传入到网关中）
-             * 此外，还需给每个规则配置文件添加nacos监听器
-             * 注意：修改规则配置文件的内容不需要重启网关，但是添加新的规则配置文件需要重启网关！
+             * 此外，还需给每个规则配置文件添加nacos监听器（元数据文件不需要添加监听器）
+             * 注意：修改规则配置文件的内容不需要重启网关，但是修改元数据文件的内容后需要重启网关！
              */
             for (String ruleDataId : ruleDataIds) {
                 String ruleStr = configService.getConfig(ruleDataId, env, timeout);
