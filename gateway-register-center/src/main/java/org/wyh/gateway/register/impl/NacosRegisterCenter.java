@@ -129,9 +129,9 @@ public class NacosRegisterCenter implements RegisterCenter {
          * 然后按照指定的时间延迟定期执行doSubscribeServicesChange方法
          */
         ScheduledExecutorService scheduledThreadPool = Executors
-                .newScheduledThreadPool(1, new NameThreadFactory("doSubscribeAllServices"));
-        scheduledThreadPool.scheduleWithFixedDelay(() -> doSubscribeServicesChange(),
-                delay, delay, TimeUnit.SECONDS);
+                .newScheduledThreadPool(1, new NameThreadFactory("doSubscribeServicesChange"));
+        scheduledThreadPool.scheduleWithFixedDelay(
+                () -> doSubscribeServicesChange(), delay, delay, TimeUnit.SECONDS);
 
     }
     /**
@@ -153,31 +153,34 @@ public class NacosRegisterCenter implements RegisterCenter {
             //设置分页的当前页码
             int pageNo = 1;
             //设置分页的页大小
-            int pageSize = 100;
-            //从nacos服务器中分页获取（已注册）服务列表
+            int pageSize = 128;
+            //从nacos服务器中分页获取已注册服务的列表
             List<String> serviceList = namingService
                     .getServicesOfServer(pageNo, pageSize, env).getData();
             while (CollectionUtils.isNotEmpty(serviceList)) {
-                log.info("【注册中心】服务列表大小: {}", serviceList.size());
                 for (String service : serviceList) {
                     //如果该服务已经订阅，则跳过
                     if (subscribeService.contains(service)) {
                         continue;
                     }
                     //设置nacos事件监听器。
-                    EventListener eventListener = new NacosRegisterListener();
-                    //由于服务状态即将发生变化（订阅新服务），所以要调用nacos事件监听器的onEvent方法。
-                    eventListener.onEvent(new NamingEvent(service, null));
+                    EventListener nacosEventListener = new NacosEventListener();
+                    /*
+                     * 由于订阅新服务也属于服务状态发生变更，所以此处要创建一个事件对象
+                     * 并调用事件监听器的onEvent方法，对其进行处理
+                     */
+                    nacosEventListener.onEvent(new NamingEvent(service, null));
                     //订阅该服务。
-                    namingService.subscribe(service, env, eventListener);
-                    log.info("【注册中心】订阅服务 {} {}", service, env);
+                    namingService.subscribe(service, env, nacosEventListener);
+                    log.info("【注册中心】订阅服务: {}", service);
                 }
                 //分页获取剩下的服务列表
                 serviceList = namingService
                         .getServicesOfServer(++pageNo, pageSize, env).getData();
             }
         }catch (NacosException e){
-            throw new RuntimeException(e);
+            log.error("【注册中心】服务订阅过程异常");
+            throw new RuntimeException("【注册中心】服务订阅过程异常", e);
         }
     }
     /**
@@ -185,10 +188,10 @@ public class NacosRegisterCenter implements RegisterCenter {
      * @BelongsPackage: org.wyh.gateway.register.center.nacos
      * @Author: wyh
      * @Date: 2024-01-24 15:43
-     * @Description: nacos事件监听器实现类（内部类）
+     * @Description: （内部类）nacos事件监听器的实现类
                      当已订阅服务的状态发生变化时，Nacos会触发一个事件，然后调用该监听器中的onEvent方法。
      */
-    public class NacosRegisterListener implements EventListener{
+    public class NacosEventListener implements EventListener{
 
         @Override
         public void onEvent(Event event) {
