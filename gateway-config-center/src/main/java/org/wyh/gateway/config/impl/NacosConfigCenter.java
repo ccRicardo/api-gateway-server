@@ -22,7 +22,8 @@ import java.util.concurrent.Executor;
  */
 @Slf4j
 public class NacosConfigCenter implements ConfigCenter {
-    // TODO: 2024-05-21 使用一个文件记录所有规则配置文件的data id 
+    // TODO: 2024-05-21 使用一个文件记录所有规则配置文件的data id
+    private static final String RULES_DATA_ID = "gateway-rules";
     //配置的唯一标识符
     private static final String DATA_ID = "api-gateway";
     //配置中心服务器地址
