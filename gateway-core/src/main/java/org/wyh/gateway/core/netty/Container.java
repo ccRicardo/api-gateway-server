@@ -70,5 +70,6 @@ public class Container implements LifeCycle{
         nettyHttpServer.shutdown();
         nettyProcessor.shutdown();
         nettyHttpClient.shutdown();
+        log.info("API网关容器关闭");
     }
 }
