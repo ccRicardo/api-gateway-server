@@ -36,20 +36,27 @@ import java.util.stream.Collectors;
  * @BelongsPackage: org.wyh.gateway.register.center.nacos
  * @Author: wyh
  * @Date: 2024-01-24 10:51
- * @Description: 注册中心的nacos实现
+ * @Description: 注册中心的nacos实现（利用了nacos的注册服务）
  */
 @Slf4j
 public class NacosRegisterCenter implements RegisterCenter {
     //注册中心的地址（具体指Nacos服务器的地址）
     private String registerAddress;
-    //环境（例如开发/测试环境）
+    //环境（本质上是作为nacos服务列表中的分组名使用）
     private String env;
-    //用于维护和管理服务定义信息
+    /*
+     * 注意：
+     * NamingMaintainService和NamingService的api中，serviceName的含义并不相同
+     * todo 将注释补充完整
+     */
+    //nacos注册服务相关类的实例，提供了一系列api，用于对服务/服务实例进行相关操作
     private NamingMaintainService namingMaintainService;
-    //用于维护和管理服务实例信息
+    //nacos注册服务相关类的实例，提供了一系列api，用于对服务/服务实例进行相关操作
     private NamingService namingService;
-    //（自定义）监听器列表（这些监听器会在nacos事件监听器中的onEvent方法中被调用）
-    private List<RegisterCenterListener> listenerList = new CopyOnWriteArrayList<>();
+    //注册中心监听器实例（该监听器实例由网关传入，所以它会将监听到的数据传给网关）
+    private RegisterCenterListener registerCenterListener;
+    //定期执行doSubscribeServicesChange方法的时间间隔/延迟
+    private long delay = 10;
 
     @Override
     public void init(String registerAddress, String env) {
@@ -60,32 +67,39 @@ public class NacosRegisterCenter implements RegisterCenter {
             this.namingMaintainService = NamingMaintainFactory.createMaintainService(registerAddress);
             this.namingService = NamingFactory.createNamingService(registerAddress);
         }catch (NacosException e){
-            throw new RuntimeException(e);
+            log.error("【注册中心】nacos注册服务创建失败，服务器地址: {}", registerAddress);
+            throw new RuntimeException("【注册中心】nacos注册服务创建失败", e);
         }
     }
 
     @Override
     public void register(ServiceDefinition serviceDefinition, ServiceInstance serviceInstance) {
         try{
-            //构造nacos服务实例。Instance代表nacos中的一个服务实例
-            Instance nacosInstance = new Instance();
-            //设置nacos服务实例的相关信息
-            nacosInstance.setInstanceId(serviceInstance.getServiceInstanceId());
-            nacosInstance.setPort(serviceInstance.getPort());
-            nacosInstance.setIp(serviceInstance.getIp());
-            //设置元数据，通常是添加一些自定义的属性。（这里直接把自定义的ServiceInstance对象当成了元数据）
-            nacosInstance.setMetadata(Map.of(GatewayConst.META_DATA_KEY,
+            //构建ServiceInstance实例对应的Instance实例。Instance是nacos中表示服务实例的类。
+            Instance instance = new Instance();
+            //设置Instance实例的相关信息
+            instance.setInstanceId(serviceInstance.getServiceInstanceId());
+            instance.setPort(serviceInstance.getPort());
+            instance.setIp(serviceInstance.getIp());
+            instance.setWeight(serviceInstance.getWeight());
+            instance.setEnabled(serviceInstance.isEnable());
+            //设置元数据（即Instance不具备的额外属性，这里为了方便，直接把对应的ServiceInstance对象当成了元数据）
+            instance.setMetadata(Map.of(GatewayConst.META_DATA_KEY,
                     JSON.toJSONString(serviceInstance)));
-            //注册nacos服务实例。三个参数分别是：服务的名称，服务所属的分组名称和服务实例
-            namingService.registerInstance(serviceDefinition.getServiceId(), env, nacosInstance);
-            //更新服务定义信息。四个参数分别是：服务名称，服务所属分组名称，
-            //服务的保护阈值（若服务的健康实例数低于该值，Nacos会拒绝所有实例的注销请求），元数据
-            namingMaintainService.updateService(serviceDefinition.getServiceId(), env, 0,
-                    Map.of(GatewayConst.META_DATA_KEY, JSON.toJSONString(serviceDefinition)));
-            log.info("【注册中心】注册服务 {} {}", serviceDefinition, serviceInstance);
-            //System.out.println("********************************");
+            //注册服务实例（若服务不存在，则先创建服务）。三个参数分别是：服务的名称，服务所属的分组名称和服务实例
+            namingService.registerInstance(serviceDefinition.getServiceId(), env, instance);
+            /*
+             * 更新服务定义信息。四个参数分别是：服务名称，服务所属分组名称，
+             * 服务的保护阈值（若服务的健康实例数低于该值，Nacos会拒绝其所有实例的注销请求），元数据
+             * todo 此处我将源码中updateService的第四个参数删除了，目前还未测试
+             */
+            namingMaintainService.updateService(serviceDefinition.getServiceId(), env, 0);
+            log.info("【注册中心】服务: {} 的实例: {} 注册成功",
+                    serviceDefinition.getUniqueId(), serviceInstance.getServiceInstanceId());
         }catch (NacosException e){
-            throw new RuntimeException(e);
+            log.error("【注册中心】服务: {} 的实例: {} 注册失败",
+                    serviceDefinition.getUniqueId(), serviceInstance.getServiceInstanceId());
+            throw new RuntimeException("【注册中心】服务实例注册失败", e);
         }
     }
 
@@ -94,35 +108,38 @@ public class NacosRegisterCenter implements RegisterCenter {
         try{
             namingService.deregisterInstance(serviceDefinition.getServiceId(),
                     env, serviceInstance.getIp(), serviceInstance.getPort());
+            log.info("【注册中心】服务: {} 的实例: {} 注销成功",
+                    serviceDefinition.getUniqueId(), serviceInstance.getServiceInstanceId());
         }catch (NacosException e){
-            throw new RuntimeException(e);
+            log.info("【注册中心】服务: {} 的实例: {} 注销失败",
+                    serviceDefinition.getUniqueId(), serviceInstance.getServiceInstanceId());
+            throw new RuntimeException("【注册中心】服务实例注销失败", e);
         }
     }
 
     @Override
     public void subscribeServicesChange(RegisterCenterListener listener) {
-        //添加监听器
-        listenerList.add(listener);
-        //将服务订阅的实现委托给doSubscribeAllServices方法
-        doSubscribeAllServices();
+        registerCenterListener = listener;
+        //将订阅服务变更功能的具体实现委托给doSubscribeServicesChange方法
+        doSubscribeServicesChange();
         /*
-         * 由于可能会有新的服务加入，所以需要设置定时任务来定期执行doSubscribeAllServices方法，
-         * 以免遗漏了后续新增服务的订阅
+         * 由于未来可能会有新服务加入，所以需要设置定时任务来定期执行doSubscribeServicesChange方法，
+         * 以免遗漏了对后续新增服务的订阅
          * 下面的代码先是创建了一个包含一个线程的定时任务线程池。
-         * 然后将定时任务设为每隔10s执行一次doSubscribeAllServices方法
+         * 然后按照指定的时间延迟定期执行doSubscribeServicesChange方法
          */
         ScheduledExecutorService scheduledThreadPool = Executors
                 .newScheduledThreadPool(1, new NameThreadFactory("doSubscribeAllServices"));
-        scheduledThreadPool.scheduleWithFixedDelay(() -> doSubscribeAllServices(),
-                10, 10, TimeUnit.SECONDS);
+        scheduledThreadPool.scheduleWithFixedDelay(() -> doSubscribeServicesChange(),
+                delay, delay, TimeUnit.SECONDS);
 
     }
     /**
      * @date: 2024-01-24 15:20
-     * @description: 实现服务订阅的业务逻辑。服务订阅就是监听服务实例的变动/更新，然后进行相应的处理。
+     * @description: 订阅/监听服务实例的变动/更新。
      * @return: void
      */
-    private void doSubscribeAllServices(){
+    private void doSubscribeServicesChange(){
         try{
             /*
              * namingService.getSubscribeServices方法能够获取所有已订阅服务的服务信息

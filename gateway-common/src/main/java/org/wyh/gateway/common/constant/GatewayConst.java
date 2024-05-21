@@ -14,6 +14,6 @@ public interface GatewayConst {
 
     String PROTOCOL_KEY = "protocol";
 
-    String META_DATA_KEY = "meta";
+    String META_DATA_KEY = "service_instance";
     int DEFAULT_WEIGHT = 100;
 }
