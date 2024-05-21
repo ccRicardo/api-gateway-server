@@ -13,7 +13,7 @@ public interface GatewayConst {
     String DEFAULT_VERSION = "1.0.0";
 
     String PROTOCOL_KEY = "protocol";
-
-    String META_DATA_KEY = "service_instance";
+    String SERVICE_INSTANCE = "service_instance";
+    String SERVICE_DEFINITION = "service_definition";
     int DEFAULT_WEIGHT = 100;
 }

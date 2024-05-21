@@ -47,7 +47,8 @@ public class NacosRegisterCenter implements RegisterCenter {
     /*
      * 注意：
      * NamingMaintainService和NamingService的api中，serviceName的含义并不相同
-     * todo 将注释补充完整
+     * 前者的serviceName就是网关服务定义对象中的serviceId属性
+     * 后者的serviceName则是由网关服务定义对象中的serviceId，分隔符（默认为@）和上述env属性拼接而成。
      */
     //nacos注册服务相关类的实例，提供了一系列api，用于对服务/服务实例进行相关操作
     private NamingMaintainService namingMaintainService;
@@ -83,17 +84,23 @@ public class NacosRegisterCenter implements RegisterCenter {
             instance.setIp(serviceInstance.getIp());
             instance.setWeight(serviceInstance.getWeight());
             instance.setEnabled(serviceInstance.isEnable());
-            //设置元数据（即Instance不具备的额外属性，这里为了方便，直接把对应的ServiceInstance对象当成了元数据）
-            instance.setMetadata(Map.of(GatewayConst.META_DATA_KEY,
-                    JSON.toJSONString(serviceInstance)));
+            /*
+             * 设置元数据
+             * （元数据通常是一些Instance不具备的额外属性，
+             * 这里为了方便，直接把ServiceInstance对象序列化后得到的json串当成了元数据）
+             * 后面也有一些类似的操作
+             */
+            //
+            instance.setMetadata(Map.of(GatewayConst.SERVICE_INSTANCE, JSON.toJSONString(serviceInstance)));
             //注册服务实例（若服务不存在，则先创建服务）。三个参数分别是：服务的名称，服务所属的分组名称和服务实例
             namingService.registerInstance(serviceDefinition.getServiceId(), env, instance);
             /*
              * 更新服务定义信息。四个参数分别是：服务名称，服务所属分组名称，
              * 服务的保护阈值（若服务的健康实例数低于该值，Nacos会拒绝其所有实例的注销请求），元数据
-             * todo 此处我将源码中updateService的第四个参数删除了，目前还未测试
+             * 注意：此处的元数据就是ServiceDefinition对象序列化后得到的json串
              */
-            namingMaintainService.updateService(serviceDefinition.getServiceId(), env, 0);
+            namingMaintainService.updateService(serviceDefinition.getServiceId(), env, 0,
+                    Map.of(GatewayConst.SERVICE_DEFINITION, JSON.toJSONString(serviceDefinition)));
             log.info("【注册中心】服务: {} 的实例: {} 注册成功",
                     serviceDefinition.getUniqueId(), serviceInstance.getServiceInstanceId());
         }catch (NacosException e){
@@ -163,12 +170,12 @@ public class NacosRegisterCenter implements RegisterCenter {
                     if (subscribeService.contains(service)) {
                         continue;
                     }
-                    //设置nacos事件监听器。
-                    // TODO: 2024-05-21 继续改进 
+                    //创建nacos事件监听器实例。
                     EventListener nacosEventListener = new NacosEventListener();
                     /*
-                     * 由于订阅新服务也属于服务状态发生变更，所以此处要创建一个事件对象
-                     * 并调用事件监听器的onEvent方法，对其进行处理
+                     * 由于订阅服务也属于服务状态发生变更，所以此处要创建一个NamingEvent事件对象
+                     * 并在对象中传入该服务的名称
+                     * 然后调用nacos事件监听器的onEvent方法，对其进行处理
                      */
                     nacosEventListener.onEvent(new NamingEvent(service, null));
                     //订阅该服务。
@@ -190,38 +197,59 @@ public class NacosRegisterCenter implements RegisterCenter {
      * @Author: wyh
      * @Date: 2024-01-24 15:43
      * @Description: （内部类）nacos事件监听器的实现类
-                     当已订阅服务的状态发生变化时，Nacos会触发一个事件，然后调用该监听器中的onEvent方法。
+                     当nacos发现已订阅服务的状态发生变化时（主要是对应服务实例的状态发生变化），
+                     便会触发事件，然后调用该监听器中的onEvent方法。
+                     此外，上述doSubscribeServicesChange方法在订阅服务时，也会触发事件，调用该监听器的相应方法。
+                     onEvent方法的主要工作就是获取该服务当前对应的服务实例列表。
      */
     public class NacosEventListener implements EventListener{
 
         @Override
         public void onEvent(Event event) {
-            //判断服务的状态是否发生变化。（当服务状态发生变化时，nacos会触发一个NamingEvent事件）
+            /*
+             * 判断服务的状态是否发生变化。（当服务状态发生变化时，nacos会触发一个NamingEvent事件）
+             */
             if(event instanceof NamingEvent){
-                NamingEvent namingEvent = (NamingEvent) event;
-                //获取namingEvent中的“服务名称”属性。该名称由环境名与服务名拼接而成，形如dev@@http-service
-                String serviceName = namingEvent.getServiceName();
+                /*
+                 * 注意：
+                 * NamingService和NamingMaintainService的api中，serviceName的含义并不相同
+                 * 前者的serviceName就是网关服务定义对象中的serviceId属性
+                 * 后者的serviceName则是由网关服务定义对象中的serviceId，分隔符（默认为@）和该类的env属性拼接而成。
+                 * NamingEvent中的serviceName属于后者，
+                 * 而Service中的name属于前者
+                 */
                 try{
-                    //获取服务定义信息
+                    NamingEvent namingEvent = (NamingEvent) event;
+                    String serviceName = namingEvent.getServiceName();
+                    //获取Service实例
                     Service service = namingMaintainService.queryService(serviceName, env);
-                    //nacos Service中的元数据是序列化后的ServiceDefinition对象。因此，这里要反序列化。
+                    /*
+                     * Service实例的元数据属性就是ServiceDefinition对象序列化后得到的json串
+                     * 因此，这里要对其反序列化，得到对应的ServiceDefinition对象。
+                     */
                     ServiceDefinition serviceDefinition = JSON.parseObject(service.getMetadata()
-                            .get(GatewayConst.META_DATA_KEY), ServiceDefinition.class);
-                    //通过服务名称获取服务实例信息。注意不要使用serviceName！
+                            .get(GatewayConst.SERVICE_DEFINITION), ServiceDefinition.class);
+                    //通过服务名称获取该服务当前对应的服务实例信息。注意不要使用上述的serviceName！
                     List<Instance> allInstances = namingService.getAllInstances(service.getName(), env);
                     Set<ServiceInstance> instanceSet = new HashSet<>();
                     for (Instance instance : allInstances) {
-                        //nacos Instance中的元数据是序列化后的ServiceInstance对象
+                        /*
+                         * Instance中的元数据属性是ServiceInstance对象序列化后得到的json串
+                         * 因此，这里要对其反序列化，得到对应的ServiceInstance对象。
+                         */
                         ServiceInstance serviceInstance = JSON.parseObject(instance.getMetadata()
-                                .get(GatewayConst.META_DATA_KEY), ServiceInstance.class);
+                                .get(GatewayConst.SERVICE_INSTANCE), ServiceInstance.class);
                         instanceSet.add(serviceInstance);
                     }
-                    //调用（自定义）监听器列表中各监听器的onChange方法
-                    //forEach方法能够对流中的每个元素执行lambda表达式（以元素本身作为入参）
-                    listenerList.stream()
-                            .forEach(listener -> listener.onChange(serviceDefinition, instanceSet));
+                    /*
+                     * 调用（网关传入的）注册中心监听器实例的onServicesChange方法，
+                     * 将状态发生变更的服务的服务定义及服务实例信息传给该监听器
+                     * forEach方法能够对流中的每个元素执行lambda表达式（以元素本身作为入参）
+                     */
+                    registerCenterListener.onServicesChange(serviceDefinition, instanceSet);
                 }catch (NacosException e){
-                    throw new RuntimeException(e);
+                    log.error("nacos事件监听器执行错误");
+                    throw new RuntimeException("nacos事件监听器执行错误", e);
                 }
             }
         }
