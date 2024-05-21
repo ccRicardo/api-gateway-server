@@ -164,6 +164,7 @@ public class NacosRegisterCenter implements RegisterCenter {
                         continue;
                     }
                     //设置nacos事件监听器。
+                    // TODO: 2024-05-21 继续改进 
                     EventListener nacosEventListener = new NacosEventListener();
                     /*
                      * 由于订阅新服务也属于服务状态发生变更，所以此处要创建一个事件对象
