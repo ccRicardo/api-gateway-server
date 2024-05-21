@@ -64,7 +64,7 @@ public class NettyCoreProcessor implements NettyProcessor{
             //解析请求对象，构建该请求在网关中的上下文对象（GatewayContext对象）
             GatewayContext gatewayContext = RequestHelper.doContext(fullRequest, nettyCtx);
             //构建并执行过滤器链，对网关上下文进行过滤处理，最终通过路由过滤器发送和接收请求，并将响应写回。
-            // TODO: 2024-05-16 等待实现
+            // TODO: 2024-05-16 等待实现和补充
             待实现
         } catch (BaseException e) {
             //捕获已定义的异常
