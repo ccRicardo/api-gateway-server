@@ -79,7 +79,7 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
             if(selectedInstance == null){
                 // TODO: 2024-05-22 此时将上下文状态设置终止合理吗，与其他部分冲突吗
                 //不存在对应的服务实例，因此请求结束，设置上下文状态，抛出相应异常
-                ctx.setTerminated();
+                ctx.setWritten();
                 throw new ResponseException(ResponseCode.SERVICE_INSTANCE_NOT_FOUND);
             }
             //设置最终服务的地址（这一步非常关键！！！）
