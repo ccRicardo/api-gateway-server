@@ -237,8 +237,9 @@ public class deprecated_RouteFilter implements Filter {
          * HystrixCommand.Setter、HystrixCommandProperties.Setter以及其他类似Setter的作用都是
          * 设置/配置HystrixCommand的相关属性，以控制Hystrix框架的相关行为。
          * 没有显式设置的属性均采用默认的配置值。
-         * HystrixCommand的作用是对服务/依赖调用进行封装。
-         * 它是一个抽象类，其中有两个需要重写的方法：run和getFallback。
+         * Hystrix使用的是命令模式，即事先将服务调用逻辑封装到命令对象HystrixCommand中，
+         * 之后执行该命令对象即可完成服务调用操作。
+         * HystrixCommand中有两个需要重写的方法：run和getFallback。
          * 前者包含/定义了服务调用的主要逻辑，后者包含/定义了服务调用失败时的降级回退逻辑。
          */
         //通过HystrixCommand.Setter设置/配置HystrixCommand的基本属性

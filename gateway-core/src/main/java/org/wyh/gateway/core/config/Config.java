@@ -44,8 +44,9 @@ public class Config {
     private int maxContentLength = 64 * 1024 * 1024;
     /*
      * 单/双异步模式，默认单异步模式。
-     * 实际上这里的单/双异步指的是completableFuture中使用whenComplete还是whenCompleteAysnc
-     * 也就是说，单/双异步的差异就是异步请求中的回调函数不同
+     * 实际上这里的单/双异步指的是使用whenComplete还是whenCompleteAysnc来处理请求的响应结果
+     * 前者使用同一个工作线程来负责发送请求和接收响应
+     * 后者使用一个线程负责发送，另一个线程负责接收
      */
     private boolean whenComplete = true;
 

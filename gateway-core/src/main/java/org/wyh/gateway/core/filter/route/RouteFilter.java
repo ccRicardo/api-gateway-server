@@ -4,13 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.asynchttpclient.Request;
+import org.asynchttpclient.Response;
+import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
 import org.wyh.gateway.core.filter.common.base.FilterAspect;
 import org.wyh.gateway.core.filter.common.base.FilterConfig;
 import org.wyh.gateway.core.filter.common.base.FilterType;
+import org.wyh.gateway.core.helper.AsyncHttpHelper;
 
 import javax.xml.crypto.dsig.spec.XPathType;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.wyh.gateway.common.constant.FilterConst.*;
 
@@ -55,5 +60,12 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
         Request request = ctx.getRequest().build();
         // TODO: 2024-05-22 源码这里设置了一下上下文的RS属性
         //通过AsyncHttpHelper封装的AsyncHttpClient发送异步http请求
+        CompletableFuture<Response> future = AsyncHttpHelper.getInstance().executeRequest(request);
+        //单/双异步模式的标识。单异步使用whenComplete，双异步使用whenCompleteAsync
+        boolean whenComplete = ConfigLoader.getConfig().isWhenComplete();
+        if(whenComplete){
+            // TODO: 2024-05-22 完成该类 
+        }
+
     }
 }
