@@ -245,7 +245,7 @@ public class deprecated_RouteFilter implements Filter {
         //通过HystrixCommand.Setter设置/配置HystrixCommand的基本属性
         HystrixCommand.Setter setter = HystrixCommand.Setter
                 //将该HystrixCommand分组的key设为对应服务的uniqueId
-                //一个HystrixCommand分组对应一个服务，一个线程池（默认使用线程池隔离），以及一个断路器（这点存疑）
+                //一个HystrixCommand分组对应一个服务，一个线程池（默认使用线程池隔离），以及一个断路器
                 // （默认情况下也是该服务线程池的key）
                 .withGroupKey(HystrixCommandGroupKey.Factory.asKey(ctx.getUniqueId()))
                 //一个HystrixCommand对应一个/一次请求。
@@ -254,7 +254,7 @@ public class deprecated_RouteFilter implements Filter {
                 .andCommandKey(HystrixCommandKey.Factory.asKey(ctx.getRequest().getPath()))
                 //通过HystrixCommandProperties.Setter设置/配置HystrixCommand的行为属性
                 .andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
-                        //将服务/依赖隔离的方式设置为线程池隔离
+                        //将服务/依赖隔离的方式设置为线程池隔离（也就是不同服务的调用由不同的线程池来负责执行）
                         .withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.THREAD)
                         //是否给HystrixCommand的执行设置超时时间
                         .withExecutionTimeoutEnabled(true)
