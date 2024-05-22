@@ -23,7 +23,6 @@ public interface FilterConst {
      */
     String ROUTER_FILTER_ID = "router_filter";
     String ROUTER_FILTER_NAME = "router_filter";
-    //由于路由过滤器必须位于除监控（后置）过滤器之外的所有过滤器之后，所以这里将order值设为int的最大值减1
     int ROUTER_FILTER_ORDER = Integer.MAX_VALUE - 1;
     /*
      * 流量控制过滤器相关常量
