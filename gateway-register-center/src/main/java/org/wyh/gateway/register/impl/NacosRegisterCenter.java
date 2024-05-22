@@ -76,7 +76,6 @@ public class NacosRegisterCenter implements RegisterCenter {
             instance.setInstanceId(serviceInstance.getServiceInstanceId());
             instance.setPort(serviceInstance.getPort());
             instance.setIp(serviceInstance.getIp());
-            instance.setWeight(serviceInstance.getWeight());
             instance.setEnabled(serviceInstance.isEnable());
             /*
              * 设置元数据

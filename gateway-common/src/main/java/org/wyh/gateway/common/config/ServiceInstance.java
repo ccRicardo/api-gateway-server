@@ -28,7 +28,7 @@ public class ServiceInstance implements Serializable {
     //标签信息
     protected String tags;
     //权重信息（负载均衡时可能用到）
-    protected Integer weight = 1;
+    protected Integer weight;
     //服务注册时间
     protected long registerTime;
     //服务实例启用/禁用

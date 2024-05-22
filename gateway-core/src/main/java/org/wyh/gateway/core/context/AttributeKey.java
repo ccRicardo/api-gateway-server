@@ -1,6 +1,7 @@
 package org.wyh.gateway.core.context;
 
 import io.micrometer.core.instrument.Timer;
+import org.wyh.gateway.common.config.ServiceInstance;
 import org.wyh.gateway.common.config.ServiceInvoker;
 
 import java.util.HashMap;
@@ -23,9 +24,11 @@ import java.util.Set;
 public abstract class AttributeKey<T> {
     //保存预定义好（即已经命名好）的AttributeKey对象。其中，key是AttributeKey的名称。
     private static Map<String, AttributeKey<?>> namedMap = new HashMap<>();
-    //表示“ip地址列表”（上下文）参数的key
-    public static final AttributeKey<Set<String>> IP_ADDRESS = create(Set.class);
-    //表示“http方法调用”（上下文）参数的key
+    //表示“匹配的服务实例集合”参数的key
+    public static final AttributeKey<Set<ServiceInstance>> MATCHED_INSTANCES = create(Set.class);
+    //表示“负载均衡选中的服务实例”参数的key
+    public static final AttributeKey<ServiceInstance> SELECTED_INSTANCE = create(ServiceInstance.class);
+    //表示“http方法调用”参数的key
     public static final AttributeKey<ServiceInvoker> HTTP_INVOKER = create(ServiceInvoker.class);
     //表示”Prometheus Timer.Sample数据采集器“参数的key
     public static final AttributeKey<Timer.Sample> PROMETHEUS_TIMER_SAMPLE = create(Timer.Sample.class);
@@ -33,7 +36,8 @@ public abstract class AttributeKey<T> {
     public static final AttributeKey<Boolean> GRAY_FLAG = create(Boolean.class);
     //静态代码块，用于将预定义好的AttributeKey对象及其名称放入namedMap集合中
     static{
-        namedMap.put("IP_ADDRESS", IP_ADDRESS);
+        namedMap.put("MATCHED_INSTANCES", MATCHED_INSTANCES);
+        namedMap.put("SELECTED_INSTANCE", SELECTED_INSTANCE);
         namedMap.put("HTTP_INVOKER", HTTP_INVOKER);
         namedMap.put("PROMETHEUS_TIMER_SAMPLE", PROMETHEUS_TIMER_SAMPLE);
         namedMap.put("GRAY_FLAG", GRAY_FLAG);

@@ -1,4 +1,4 @@
-org.wyh.gateway.core.filter.pre.loadbalance.deprecated.LoadBalanceFilter
+# 已弃用 org.wyh.gateway.core.filter.pre.loadbalance.deprecated.LoadBalanceFilter
 org.wyh.gateway.core.filter.route.RouteFilter
 org.wyh.gateway.core.filter.pre.flowcontrol.FlowCtrlFilter
 org.wyh.gateway.core.filter.pre.authentication.UserAuthFilter
