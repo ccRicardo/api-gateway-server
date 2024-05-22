@@ -244,8 +244,12 @@ public class deprecated_RouteFilter implements Filter {
          */
         //通过HystrixCommand.Setter设置/配置HystrixCommand的基本属性
         HystrixCommand.Setter setter = HystrixCommand.Setter
-                //将该HystrixCommand分组的key设为对应服务的uniqueId（默认情况下也是该服务线程池的key）
+                //将该HystrixCommand分组的key设为对应服务的uniqueId
+                //一个HystrixCommand分组对应一个服务，一个线程池（默认使用线程池隔离），以及一个断路器（这点存疑）
+                // （默认情况下也是该服务线程池的key）
                 .withGroupKey(HystrixCommandGroupKey.Factory.asKey(ctx.getUniqueId()))
+                //一个HystrixCommand对应一个/一次请求。
+                //综上所属，可知HystrixCommand所属的分组，正好对应了请求要访问的服务
                 //将该HystrixCommand的key设为对应的请求路径
                 .andCommandKey(HystrixCommandKey.Factory.asKey(ctx.getRequest().getPath()))
                 //通过HystrixCommandProperties.Setter设置/配置HystrixCommand的行为属性
