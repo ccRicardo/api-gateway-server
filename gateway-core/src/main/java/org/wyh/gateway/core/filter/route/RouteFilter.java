@@ -44,7 +44,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     @Setter
     @Getter
     public static class Config extends FilterConfig{
-        // TODO: 2024-05-22 修改rule
+        // TODO: 2024-05-22 补充完整，并修改rule
     }
     /**
      * @date: 2024-05-22 20:16
@@ -64,8 +64,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
         //单/双异步模式的标识。单异步使用whenComplete，双异步使用whenCompleteAsync
         boolean whenComplete = ConfigLoader.getConfig().isWhenComplete();
         if(whenComplete){
-            // TODO: 2024-05-22 完成该类 
+            // TODO: 2024-05-22 参考废弃类，完成该类。（上面这段应该放到route中）
         }
-
     }
 }
