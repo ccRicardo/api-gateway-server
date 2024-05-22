@@ -35,6 +35,7 @@ public final class TimeUtil {
     }
 
     public static long currentTimeMillis() {
+        //此处获得的时间其实是一个时间戳
         return currentTimeMillis;
     }
 }

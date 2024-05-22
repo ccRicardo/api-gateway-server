@@ -1,6 +1,7 @@
 package org.wyh.gateway.core.filter.pre.loadbalance;
 
 import org.wyh.gateway.common.config.ServiceInstance;
+import org.wyh.gateway.common.utils.TimeUtil;
 import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
 
@@ -44,13 +45,31 @@ public abstract class AbstractLoadBalance implements LoadBalance{
      */
     protected abstract ServiceInstance doSelect(GatewayContext ctx, List<ServiceInstance> instances);
     /**
-     * @date: 2024-05-22 14:39
+     * @date: 2024-05-22 15:13
      * @description: 获取服务实例的权重（若该服务实例处于预热期，则需要计算其预热权重）
      * @Param instance:
+     * @Param warmUpTime: 预热时间。其值应该大于等于0，若小于0，则使用默认值。
      * @return: int
      */
     protected static int getWeight(ServiceInstance instance){
-        if(instance.getWeight() )
+        int weight;
+        //若未设置实例的权重，或者权重值不合理，则使用接口中定义的默认权重
+        if(instance.getWeight() == null || instance.getWeight() < 0){
+            weight = LoadBalance.DEFAULT_WEIGHT;
+        }else{
+            weight = instance.getWeight();
+        }
+        long registerTime = instance.getRegisterTime();
+        //获取该服务实例当前的已运行时间（这个值一般用int类型表示就够了）
+        int upTime = (int)(TimeUtil.currentTimeMillis() - registerTime);
+        //获取预热时间。若给定的预热时间warmUpTime小于0，则使用默认值。
+        int warmUp = (instance.getWarmUpTime() < 0 ? LoadBalance.DEFAULT_WARMUP_MS : instance.getWarmUpTime());
+        //判断该服务实例是否处于预热期
+        if(upTime < warmUp){
+            weight = calculateWramUpWeight(upTime, warmUp, weight);
+        }
+        return weight;
+
     }
     /**
      * @date: 2024-05-22 14:40
@@ -61,7 +80,9 @@ public abstract class AbstractLoadBalance implements LoadBalance{
      * @return: int
      */
     protected static int calculateWramUpWeight(int upTime, int warmUp, int weight){
-
+        //预热权重与运行时间成正比
+        int ww = (int)((float)weight / (float)warmUp * upTime);
+        return ww;
     }
 
 }
