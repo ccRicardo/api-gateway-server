@@ -247,7 +247,7 @@ public class deprecated_RouteFilter implements Filter {
                 //将该HystrixCommand分组的key设为对应服务的uniqueId
                 //一个HystrixCommand分组对应一个服务，一个线程池（默认使用线程池隔离），以及一个断路器
                 //一个HystrixCommand实例执行完毕后，其对应的断路器实例并不会跟着释放，
-                //而是继续运行在内存中，对同一分组后续的HystrixCommand实例执行进行控制和监控。
+                //而是继续运行在内存中，对同一分组后续HystrixCommand实例的执行进行控制和监控。
                 // （默认情况下也是该服务线程池的key）
                 .withGroupKey(HystrixCommandGroupKey.Factory.asKey(ctx.getUniqueId()))
                 //一个HystrixCommand对应一个/一次请求。
