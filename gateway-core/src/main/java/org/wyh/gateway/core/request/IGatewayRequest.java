@@ -84,7 +84,7 @@ public interface IGatewayRequest {
     String getFinalUrl();
     /**
      * @date: 2024-01-08 14:49
-     * @description: 构造请求对象
+     * @description: 构造AsyncHttpClient的请求对象
                      该项目底层使用了AsyncHttpClient，因此构造的请求对象是org.asynchttpclient.Request类型
      * @return: Request
      */

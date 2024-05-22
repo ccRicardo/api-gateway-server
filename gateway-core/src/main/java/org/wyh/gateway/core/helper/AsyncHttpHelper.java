@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
  * @BelongsPackage: org.wyh.core.helper
  * @Author: wyh
  * @Date: 2024-01-17 9:48
- * @Description: 实现异步http请求的辅助类
+ * @Description: 发送异步http请求的辅助类
                  该项目底层使用了AsyncHttpClient框架来实现异步http请求的发送
                  因此该类实际上是对AsyncHttpClient中相关api的封装
  */
