@@ -29,16 +29,16 @@ public class ServiceInstance implements Serializable {
     protected String tags;
     //权重信息（负载均衡时要用到）
     protected Integer weight;
-    //服务实例的预热时间，单位为ms（负载均衡时要用到）
-    protected Integer warmUpTime;
+    //服务实例的预热时间，单位为ms，默认为0（负载均衡时要用到）
+    protected Integer warmUpTime = 0;
     //服务实例注册时间
     protected long registerTime;
-    //服务实例启用/禁用
+    //服务实例启用/禁用，默认为启用
     protected boolean enable = true;
     //服务实例的版本号
     protected String version;
-    //标识是否为灰度服务实例
-    protected boolean gray;
+    //标识是否为灰度服务实例，默认为false
+    protected boolean gray = false;
     /**
      * @date: 2024-01-22 14:23
      * @description: 无参构造器
