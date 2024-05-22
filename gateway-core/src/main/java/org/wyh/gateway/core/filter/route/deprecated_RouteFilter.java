@@ -235,7 +235,7 @@ public class deprecated_RouteFilter implements Filter {
     private void routeWithHystrix(GatewayContext ctx, Optional<Rule.HystrixConfig> hystrixConfig){
         /*
          * HystrixCommand.Setter、HystrixCommandProperties.Setter以及其他类似Setter的作用都是
-         * 设置/配置HystrixCommand的相关属性，以控制Hystrix框架的相关行为。
+         * 设置/配置HystrixCommand的相关属性
          * 没有显式设置的属性均采用默认的配置值。
          * Hystrix使用的是命令模式，即事先将服务调用逻辑封装到命令对象HystrixCommand中，
          * 之后执行该命令对象即可完成服务调用操作。
@@ -246,6 +246,8 @@ public class deprecated_RouteFilter implements Filter {
         HystrixCommand.Setter setter = HystrixCommand.Setter
                 //将该HystrixCommand分组的key设为对应服务的uniqueId
                 //一个HystrixCommand分组对应一个服务，一个线程池（默认使用线程池隔离），以及一个断路器
+                //一个HystrixCommand实例执行完毕后，其对应的断路器实例并不会跟着释放，
+                //而是继续运行在内存中，对同一分组后续的HystrixCommand实例执行进行控制和监控。
                 // （默认情况下也是该服务线程池的key）
                 .withGroupKey(HystrixCommandGroupKey.Factory.asKey(ctx.getUniqueId()))
                 //一个HystrixCommand对应一个/一次请求。
