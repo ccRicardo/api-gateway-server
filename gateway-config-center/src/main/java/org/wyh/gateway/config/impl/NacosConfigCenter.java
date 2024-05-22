@@ -47,8 +47,6 @@ public class NacosConfigCenter implements ConfigCenter {
             throw new RuntimeException("【配置中心】nacos配置服务创建失败", e);
         }
     }
-
-    // TODO: 2024-05-21 给RULE_DATA_IDS添加监听器。并且给ConfigCenterListener添加一个订阅元数据文件变更的方法
     @Override
     public void subscribeRulesChange(ConfigCenterListener listener) {
         try{

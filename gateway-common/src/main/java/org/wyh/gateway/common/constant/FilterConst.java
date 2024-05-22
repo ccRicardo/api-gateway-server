@@ -50,27 +50,6 @@ public interface FilterConst {
     String GRAY_FILTER_ID = "gray_filter";
     String GRAY_FILTER_NAME = "gray_filter";
     int GRAY_FILTER_ORDER = 1;
-    String GRAY_IP_SET = "gray_ip_set";
     //请求头中灰度标记参数的key
     String GRAY_FLAG_KEY = "gray";
-    /*
-     * 监控（前置）过滤器相关常量
-     */
-    String MONITOR_FILTER_ID = "monitor_filter";
-    String MONITOR_FILTER_NAME = "monitor_filter";
-    int MONITOR_FILTER_ORDER = 0;
-    /*
-     * 监控（后置）过滤器相关常量
-     */
-    String MONITOR_END_FILTER_ID = "monitor_end_filter";
-    String MONITOR_END_FILTER_NAME = "monitor_end_filter";
-    //由于监控（后置）过滤器必须位于过滤器来链的末尾，所以这里将order值设为int的最大值
-    int MONITOR_END_FILTER_ORDER = Integer.MAX_VALUE;
-//    /*
-//     * （已弃用）mock过滤器相关常量
-//     */
-//    String MOCK_FILTER_ID = "mock_filter";
-//    String MOCK_FILTER_NAME = "mock_filter";
-//    //mock接口只是个用于联调测试的”模拟“接口，所以不进行真实的过滤器链处理。因此mock过滤器应该放在过滤器链的开头。
-//    int MOCK_FILTER_ORDER = -1;
 }
