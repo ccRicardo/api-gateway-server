@@ -3,11 +3,18 @@ package org.wyh.gateway.core.filter.pre.loadbalance;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.wyh.gateway.common.config.DynamicConfigManager;
+import org.wyh.gateway.common.config.ServiceInstance;
+import org.wyh.gateway.common.enumeration.ResponseCode;
+import org.wyh.gateway.common.exception.ResponseException;
+import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
 import org.wyh.gateway.core.filter.common.base.FilterAspect;
 import org.wyh.gateway.core.filter.common.base.FilterConfig;
 import org.wyh.gateway.core.filter.common.base.FilterType;
+
+import java.util.Set;
 
 import static org.wyh.gateway.common.constant.FilterConst.*;
 
@@ -50,7 +57,33 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
     @Override
     public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
         try{
-
+            //args[0]其实就是该过滤器的配置类实例
+            LoadBalanceFilter.Config filterConfig = (LoadBalanceFilter.Config) args[0];
+            String strategy = filterConfig.getLoadBalanceStrategy();
+            //获取灰度标记
+            Boolean grayFlag = ctx.getAttribute(AttributeKey.GRAY_FLAG);
+            //获取请求要访问的服务的唯一id
+            String uniqueId = ctx.getUniqueId();
+            //从动态配置管理器中获取该唯一id匹配的服务实例集合
+            Set<ServiceInstance> matchedInstances = DynamicConfigManager.getInstance()
+                    .getServiceInstanceByUniqueId(uniqueId, grayFlag);
+            //将该服务实例集合放入对应的上下文参数中，供之后使用
+            ctx.setAttribute(AttributeKey.MATCHED_INSTANCES, matchedInstances);
+            //获取指定负载均衡策略对应的实例。默认使用随机负载均衡。
+            LoadBalance loadBalance = LoadBalanceFactory.getLoadBalance(strategy);
+            if(loadBalance == null){
+                loadBalance = LoadBalanceFactory.getLoadBalance(LOAD_BALANCE_STRATEGY_RANDOM);
+            }
+            //调用负载均衡实例的select方法，选择一个服务实例（该实例就是最后要访问的对象）
+            ServiceInstance selectedInstance = loadBalance.select(ctx);
+            if(selectedInstance == null){
+                // TODO: 2024-05-22 此时将上下文状态设置终止合理吗，与其他部分冲突吗
+                //不存在对应的服务实例，因此请求结束，设置上下文状态，抛出相应异常
+                ctx.setTerminated();
+                throw new ResponseException(ResponseCode.SERVICE_INSTANCE_NOT_FOUND);
+            }
+            //设置最终服务的地址（这一步非常关键！！！）
+            ctx.getRequest().setModifyHost(selectedInstance.getAddress());
         }catch (Exception e){
             throw new RuntimeException("【负载均衡过滤器】过滤器执行异常", e);
         }finally {

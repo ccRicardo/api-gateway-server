@@ -78,7 +78,7 @@ public class GatewayRequest implements IGatewayRequest{
      */
     //可修改的schema，默认为 http://
     private String modifySchema;
-    //可修改的主机地址，用于记录服务的真实地址
+    //可修改的主机地址，用于记录服务的真实地址（ip:port）
     private String modifyHost;
     //可修改的路径
     private String modifyPath;
