@@ -25,6 +25,7 @@ import java.io.IOException;
  * @Description: netty http客户端。主要作用是将请求转发给相应的后台服务。
                  由于项目底层使用了AsyncHttpClient来发送异步请求，
                  所以这个类本质上就是用来初始化和关闭AsyncHttpClient对象的。
+                 （初始化后的AsyncHttpClient对象会传入
  */
 @Slf4j
 public class NettyHttpClient implements LifeCycle {

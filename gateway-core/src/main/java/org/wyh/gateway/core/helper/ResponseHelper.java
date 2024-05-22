@@ -21,7 +21,7 @@ import java.util.Objects;
 public class ResponseHelper {
     /**
      * @date: 2024-01-18 10:33
-     * @description: 请求失败时调用（准确来说，是网关内部出现了异常，导致未能成功发送请求）。
+     * @description: 网关内部出现了异常，导致未能成功发送请求时调用。
                      根据ResponseCode对象，构建FullHttpResponse响应对象
      * @Param responseCode:
      * @return: io.netty.handler.codec.http.FullHttpResponse
@@ -39,7 +39,7 @@ public class ResponseHelper {
     }
     /**
      * @date: 2024-01-18 10:34
-     * @description: 请求成功时调用（准确来说，是接收异步请求的响应之前不出现异常）。
+     * @description: 网关内部未出现异常，请求发送成功时调用。
                      根据上下文对象和GatewayResponse对象，构建FullHttpResponse响应对象
      * @Param ctx:
      * @Param gatewayResponse:
@@ -93,7 +93,8 @@ public class ResponseHelper {
     }
     /**
      * @date: 2024-01-18 10:34
-     * @description: 请求成功时调用（准确来说，是接收异步请求的响应之前不出现异常）。向客户端写回响应信息
+     * @description: 网关内部未出现异常，请求发送成功时调用。
+                     向客户端写回FullHttpResponse响应对象
      * @Param ctx:
      * @return: void
      */

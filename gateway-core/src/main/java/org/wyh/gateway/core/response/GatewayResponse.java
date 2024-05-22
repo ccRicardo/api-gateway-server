@@ -62,8 +62,8 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 15:57
-     * @description: 根据AsyncHttpClient的异步响应结果来构建网关响应对象
-     * @Param futureResponse: 网关接收到的后台服务响应
+     * @description: 根据AsyncHttpClient接收的异步响应结果来构建网关响应对象
+     * @Param futureResponse: AsyncHttpClient接收的异步响应结果
      * @return: org.wyh.core.response.GatewayResponse
      */
     public static GatewayResponse buildGatewayResponse(Response futureResponse){
@@ -75,7 +75,8 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 16:00
-     * @description: 根据响应码，构建一个JSON类型响应信息的网关响应对象，请求失败时使用（实际上是网关内部出现异常时调用）
+     * @description: 根据响应码，构建一个响应信息为json类型的网关响应对象
+                     网关内部出现了异常，导致未能成功发送请求时调用。
      * @Param code: 响应代码
      * @return: org.wyh.core.response.GatewayResponse
      */
@@ -100,7 +101,8 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 16:01
-     * @description: 根据响应数据对象，构建一个JSON类型响应信息的网关响应对象，请求成功时使用
+     * @description: 根据响应的数据对象，构建一个响应信息为json类型的网关响应对象。
+                     网关内部未出现异常，请求发送成功时调用。
      * @Param data: 响应数据内容
      * @return: org.wyh.core.response.GatewayResponse
      */
