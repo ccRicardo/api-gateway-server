@@ -29,8 +29,8 @@ public class ServiceInstance implements Serializable {
     protected String tags;
     //权重信息（负载均衡时要用到）
     protected Integer weight;
-    //服务实例的预热时间，单位为ms，默认为0（负载均衡时要用到）
-    protected Integer warmUpTime = 0;
+    //服务实例的预热时间，单位为ms，默认为3分钟（负载均衡时要用到）
+    protected Integer warmUpTime = 3 * 60 * 1000;
     //服务实例注册时间
     protected long registerTime;
     //服务实例启用/禁用，默认为启用
