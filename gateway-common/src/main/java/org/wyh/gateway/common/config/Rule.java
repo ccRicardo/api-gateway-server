@@ -35,11 +35,6 @@ public class Rule implements Comparable<Rule>, Serializable{
     private Integer order;
     //规则的过滤器配置集合（其实就是在定义一条过滤器链）。
     private Set<FilterConfig> filterConfigs = new HashSet<>();
-    //规则的熔断配置集合
-    private Set<HystrixConfig> hystrixConfigs = new HashSet<>();
-    //规则的请求重试配置信息
-    private RetryConfig retryConfig = new RetryConfig();
-
     /**
      * @date: 2024-01-11 14:04
      * @description: 无参构造器
@@ -90,39 +85,6 @@ public class Rule implements Comparable<Rule>, Serializable{
                     ", Config='" + Config + '\'' +
                     '}';
         }
-    }
-    /**
-     * @BelongsProject: my-api-gateway
-     * @BelongsPackage: org.wyh.common.config
-     * @Author: wyh
-     * @Date: 2024-02-26 14:08
-     * @Description: 内部类，用于定义请求重试机制的配置信息
-     */
-    @Setter
-    @Getter
-    public static class RetryConfig{
-        //请求重试的次数
-        private int times;
-        // TODO: 2024-05-17 感觉重试这个机制可以去掉
-    }
-    /**
-     * @BelongsProject: my-api-gateway
-     * @BelongsPackage: org.wyh.common.config
-     * @Author: wyh
-     * @Date: 2024-03-05 14:47
-     * @Description: 内部类，用于定义熔断降级相关的配置信息
-     */
-    @Setter
-    @Getter
-    public static class HystrixConfig{
-        //需要加断路器的请求路径
-        private String path;
-        //请求的超时时间（准确来说，是HystrixCommand中run方法的超时时间），以ms为单位
-        private int timeoutInMilliseconds;
-        //线程池的核心线程数
-        private int threadCoreSize;
-        //降级回退时的响应内容
-        private String fallbackResponse;
     }
     /**
      * @date: 2024-01-11 14:38
@@ -202,8 +164,6 @@ public class Rule implements Comparable<Rule>, Serializable{
                 ", protocol='" + protocol + '\'' +
                 ", order=" + order +
                 ", filterConfigs=" + filterConfigs +
-                ", hystrixConfigs=" + hystrixConfigs +
-                ", retryConfig=" + retryConfig +
                 '}';
     }
 }

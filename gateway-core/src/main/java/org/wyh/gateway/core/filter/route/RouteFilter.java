@@ -45,6 +45,18 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     @Getter
     public static class Config extends FilterConfig{
         // TODO: 2024-05-22 补充完整，并修改rule
+        //是否使用hystrix进行熔断降级。只有启用了hystrix，以下与hystrix相关的配置才会生效。
+        private boolean useHystrix;
+        //HystrixCommand的执行超时时间。若HystrixCommand执行耗时超过该时间，便会进入降级逻辑。
+        private int timeoutInMilliseconds;
+        //启用断路器的请求量阈值。当窗口时间内的请求数量大于该阈值时，才启用断路器功能（建议保持默认值）
+        private int requestVolumeThreshold = 20;
+        //断路器熔断的错误率阈值。当窗口时间内请求的错误率高于该阈值时，才对服务进行熔断（建议保持默认值）
+        private int errorThresholdPercentage = 50;
+        //线程池（此线程池指的是该命令对应分组所使用的线程池）的核心线程数
+        private int threadPoolCoreSize;
+        //降级回退逻辑中的响应消息
+        private String fallbackMessage;
     }
     /**
      * @date: 2024-05-22 20:16
@@ -67,4 +79,5 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
             // TODO: 2024-05-22 参考废弃类，完成该类。（上面这段应该放到route中）
         }
     }
+    private
 }
