@@ -274,7 +274,7 @@ public class deprecated_RouteFilter implements Filter {
                 .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()
                         //设置线程池的核心线程数（也就是常驻线程数）
                         .withCoreSize(hystrixConfig.get().getThreadCoreSize()));
-        //通过匿名内部类的方式实现HystrixCommand抽象类
+        //通过匿名内部类的方式实现HystrixCommand抽象类。由于不需要返回值，所以泛型指定为Void
         new HystrixCommand<Void>(setter){
             @Override
             protected Void run() throws Exception {
