@@ -187,8 +187,9 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                  * 调用doRoute方法来异步发送请求和处理响应
                  * 注意：
                  * 这里要使用get方法，来阻塞等待请求的响应结果。
-                 * 因为doRoute方法是异步接收响应结果的，这会导致hystrix无法正确判断此次请求是否超时，
-                 * 从而不能正确地触发熔断降级功能
+                 * 因为响应结果的接收是异步的，主线程中doRoute方法执行完毕并不意味着工作线程就接收到了响应结果
+                 * 如果不加get方法，hystrix实际监控到的只是doRoute方法的执行时间，而不是等待响应的时间。
+                 * 进而无法正确地触发熔断降级功能
                  */
                 doRoute(ctx, filterConfig).get();
                 return null;
@@ -202,7 +203,15 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                  * 释放请求，判断异常类型，设置异常或响应信息，设置上下文状态，最后激发下一个过滤器
                  */
                 // TODO: 2024-05-23 该方法的处理逻辑不知道玩不完善
-                // TODO: 2024-05-23 待实现
+                //释放FullHttpRequest请求对象
+                ctx.releaseRequest();
+                log.warn("【路由过滤器】请求: {} 触发降级回退", ctx.getRequest().getFinalUrl());
+                //这里做了简化处理：只要走了降级回退逻辑，一律认为是“服务不可用”异常
+                ctx.setThrowable(new ResponseException(ResponseCode.SERVICE_UNAVAILABLE));
+                //请求结束，设置上下文状态
+                ctx.setWritten();
+                // TODO: 2024-05-23 为啥这里不设置一下网关响应
+                // TODO: 2024-05-23 完成剩下部分
             }
         }.execute();
 
@@ -210,7 +219,8 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     /**
      * @date: 2024-05-23 14:48
      * @description: 负责对响应结果进行处理，并且激发下一个过滤器组件
-                     注意：该方法不会向上抛异常
+                     注意：该方法是在工作线程中执行的，所以不能向上层抛异常
+                     （因为上层调用者是在主线程中执行的。当该方法执行时，其调用者早就执行完毕了）
      * @Param request:
      * @Param response:
      * @Param throwable:
@@ -219,7 +229,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
      * @return: void
      */
     private void complete(Request request, Response response, Throwable throwable,
-                          GatewayContext ctx, RouteFilter.Config filterConfig){
+                          GatewayContext ctx, RouteFilter.Config filterConfig) {
         try{
             //释放FullHttpRequest请求对象
             ctx.releaseRequest();
@@ -235,6 +245,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                                     request.getRequestTimeout()));
                     //在上下文中设置异常信息
                     ctx.setThrowable(new ResponseException(ResponseCode.REQUEST_TIMEOUT));
+                    // TODO: 2024-05-23 为啥这里不设置一下网关响应
                 }else{
                     //其他异常情况
                     log.warn("【路由过滤器】请求: {} 出现响应异常");
@@ -246,16 +257,23 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 ctx.setResponse(GatewayResponse.buildGatewayResponse(response));
             }
         }catch (Exception e){
-            //如果执行上述代码时出现了异常，则将其设置为网关内部服务异常
-            log.error("【路由过滤器】过滤器执行异常", e);
+            //此处不能抛异常
+            log.error("【路由过滤器】出现内部错误，无法正常处理响应");
             ctx.setThrowable(new ResponseException(ResponseCode.INTERNAL_ERROR));
         }finally {
-            // TODO: 2024-05-23 完成方法 
-            /*
-             * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
-             * （这是过滤器链能够顺序执行的关键）
-             */
-            super.fireNext(ctx, filterConfig);
+            try{
+                //请求完成，设置上下文状态
+                ctx.setWritten();
+                /*
+                 * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
+                 * （这是过滤器链能够顺序执行的关键）
+                 */
+                // TODO: 2024-05-23 还是同样的疑问：fireNext应该放到finally中吗
+                super.fireNext(ctx, filterConfig);
+            }catch (Throwable e){
+                log.error("【路由过滤器】后续过滤组件执行异常", e);
+                ctx.setThrowable(new ResponseException(ResponseCode.INTERNAL_ERROR));
+            }
         }
     }
 }
