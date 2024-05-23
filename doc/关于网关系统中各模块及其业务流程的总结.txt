@@ -115,7 +115,6 @@ RoundRobinLoadBalanceRule：轮询
 
 6、路由
 路由的主要作用是调用AsyncHttpClient的executeRequest方法发送异步http请求。
-todo 感觉可以将熔断降级过滤器从中拆分出来
 路由的主要类是RouterFilter
 
 （三）服务接入/客户端模块
