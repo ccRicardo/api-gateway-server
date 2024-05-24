@@ -60,12 +60,13 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
             nettyCoreProcessor.process(eventValue);
         }
 
+        // TODO: 2024-05-24 此处不应该自立门户，应该使用辅助类写回响应
         @Override
         public void onException(Throwable ex, long sequence, HttpRequestWrapper eventValue) {
             FullHttpRequest httpRequest = eventValue.getFullHttpRequest();
             ChannelHandlerContext nettyCtx = eventValue.getNettyCtx();
             try{
-                log.error("Disruptor缓冲队列处理过程中出现错误！请求：{}，错误信息：{}",
+                log.error("Disruptor缓冲队列处理过程中出现错误！请求: {}，错误信息: {}",
                         httpRequest, ex.getMessage(), ex);
                 //构建响应对象
                 FullHttpResponse httpResponse = ResponseHelper.getHttpResponse(ResponseCode.INTERNAL_ERROR);
@@ -80,7 +81,7 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
                     nettyCtx.writeAndFlush(httpResponse);
                 }
             }catch(Exception e){
-                log.error("请求响应写回失败！请求：{}，错误信息：{}",
+                log.error("请求响应写回失败！请求: {}，错误信息: {}",
                         httpRequest, e.getMessage(), e);
             }
 

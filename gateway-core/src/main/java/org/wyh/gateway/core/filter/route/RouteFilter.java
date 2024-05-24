@@ -34,7 +34,8 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
  * @Date: 2024-05-22 19:15
  * @Description: 路由过滤器，负责发送请求给目标服务，并接收和处理其响应结果。
                  （在此之前，已经通过负载均衡过滤器确定了要访问的服务实例）
-                 注：该过滤器是通过AsyncHttpClient框架向目标发送http请求的。
+                 该过滤器实际上是通过AsyncHttpClient框架向目标异步发送http请求的。
+                 注意：发送请求和接收响应的工作都是在工作线程中执行的，因此complete方法不是运行在主线程中的。
  */
 @Slf4j
 @FilterAspect(id=ROUTER_FILTER_ID,
@@ -135,6 +136,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
      * @Param filterConfig:
      * @return: void
      */
+    // TODO: 2024-05-24 hystrix与异步似乎是相冲突的。
     private void doRouteWithHystrix(GatewayContext ctx, RouteFilter.Config filterConfig){
         /*
          * Hystrix基础知识：
@@ -186,7 +188,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 /*
                  * 调用doRoute方法来异步发送请求和处理响应
                  * 注意：
-                 * 这里要使用get方法，来阻塞等待请求的响应结果。
+                 * 这里要使用get方法，来阻塞等待请求的响应结果（异步转同步）。
                  * 因为响应结果的接收是异步的，主线程中doRoute方法执行完毕并不意味着工作线程就接收到了响应结果
                  * 如果不加get方法，hystrix实际监控到的只是doRoute方法的执行时间，而不是等待响应的时间。
                  * 进而无法正确地触发熔断降级功能
@@ -200,7 +202,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 /*
                  * 当断路器熔断、线程池资源不足，run方法执行超时或出现其他异常时，会调用该降级回退方法
                  * 降级回退方法的处理逻辑与complete方法相似：
-                 * 释放请求，判断异常类型，设置异常或响应信息，设置上下文状态，最后激发下一个过滤器
+                 * 释放请求，检查响应结果中的异常，设置响应信息，设置上下文状态，最后激发下一个过滤器
                  */
                 // TODO: 2024-05-23 该方法的处理逻辑不知道玩不完善
                 //释放FullHttpRequest请求对象
@@ -219,7 +221,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     /**
      * @date: 2024-05-23 14:48
      * @description: 负责对响应结果进行处理，并且激发下一个过滤器组件
-                     注意：该方法是在工作线程中执行的，所以不能向上层抛异常
+                     注意：该方法是在工作线程中执行的，内部的异常都属于后台服务异常，所以向上层抛这些异常没有意义
                      （因为上层调用者是在主线程中执行的。当该方法执行时，其调用者早就执行完毕了）
      * @Param request:
      * @Param response:
@@ -233,7 +235,10 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
         try{
             //释放FullHttpRequest请求对象
             ctx.releaseRequest();
-            //检查请求过程中是否有异常产生。若有，则进一步判断异常的类型
+            /*
+             * 检查响应结果中是否有存在异常。若有，则进一步判断异常的类型
+             * 注意：此处的异常是由后台服务抛出的，而不是由网关本身抛出的
+             */
             if(Objects.nonNull(throwable)){
                 String url = request.getUrl();
                 //超时异常
@@ -262,7 +267,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
             ctx.setThrowable(new ResponseException(ResponseCode.INTERNAL_ERROR));
         }finally {
             try{
-                //请求完成，设置上下文状态
+                //接收到响应结果，需将其写回，因此将上下文状态设置为written
                 ctx.setWritten();
                 /*
                  * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件

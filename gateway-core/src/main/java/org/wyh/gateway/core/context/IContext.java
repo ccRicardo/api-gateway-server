@@ -14,14 +14,17 @@ import java.util.function.Consumer;
  * @Description: 网关中一次请求的上下文接口
  */
 public interface IContext {
-    //上下文的生命周期
-    //运行中
+    /*
+     * 上下文的生命周期
+     *
+     */
+    //正在处理对应请求
     int RUNNING = 0;
-    //请求完成或出现异常，需写回响应
+    //网关内部出现异常，或接收到请求的响应结果，需向客户端写回响应
     int WRITTEN = 1;
-    //写回完成
+    //响应结果写回完成
     int COMPLETED = 2;
-    //请求结束
+    //对该次请求的处理完全结束
     int TERMINATED = -1;
 
     //设置上下文状态

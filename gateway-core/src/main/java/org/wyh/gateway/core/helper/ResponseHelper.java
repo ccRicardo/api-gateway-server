@@ -16,13 +16,13 @@ import java.util.Objects;
  * @BelongsPackage: org.wyh.core.helper
  * @Author: wyh
  * @Date: 2024-01-17 9:47
- * @Description: 处理响应对象的辅助类
+ * @Description: 构建FullHttpResponse响应对象的辅助类
  */
+// TODO: 2024-05-24 需要大修改 
 public class ResponseHelper {
     /**
      * @date: 2024-01-18 10:33
-     * @description: 网关内部出现了异常，导致未能成功发送请求时调用。
-                     根据ResponseCode对象，构建FullHttpResponse响应对象
+     * @description: 根据ResponseCode异常响应码对象，构建FullHttpResponse响应对象
      * @Param responseCode:
      * @return: io.netty.handler.codec.http.FullHttpResponse
      */
@@ -30,7 +30,7 @@ public class ResponseHelper {
         GatewayResponse gatewayResponse = GatewayResponse.buildGatewayResponse(responseCode);
         //Unpooled.wrappedBuffer的作用是创建相应的ByteBuf对象
         DefaultFullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                responseCode.getStatus(),
                 Unpooled.wrappedBuffer(gatewayResponse.getContent().getBytes()));
         //设置响应头内容
         httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON + ";charset=utf-8");
@@ -39,8 +39,7 @@ public class ResponseHelper {
     }
     /**
      * @date: 2024-01-18 10:34
-     * @description: 网关内部未出现异常，请求发送成功时调用。
-                     根据上下文对象和GatewayResponse对象，构建FullHttpResponse响应对象
+     * @description: 根据上下文和GatewayResponse网关响应对象，构建FullHttpResponse响应对象
      * @Param ctx:
      * @Param gatewayResponse:
      * @return: io.netty.handler.codec.http.FullHttpResponse
@@ -93,11 +92,11 @@ public class ResponseHelper {
     }
     /**
      * @date: 2024-01-18 10:34
-     * @description: 网关内部未出现异常，请求发送成功时调用。
-                     向客户端写回FullHttpResponse响应对象
+     * @description: 向客户端写回FullHttpResponse响应对象
      * @Param ctx:
      * @return: void
      */
+    // TODO: 2024-05-24 所有响应写回都调用该方法
     public static void writeResponse(IContext ctx){
         //释放请求对象
         ctx.releaseRequest();

@@ -75,8 +75,7 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 16:00
-     * @description: 根据响应码，构建一个响应信息为json类型的网关响应对象
-                     网关内部出现了异常，导致未能成功发送请求时调用。
+     * @description: 根据异常响应码，构建一个响应信息为json类型的网关响应对象
      * @Param code: 响应代码
      * @return: org.wyh.core.response.GatewayResponse
      */
@@ -102,7 +101,6 @@ public class GatewayResponse {
     /**
      * @date: 2024-01-10 16:01
      * @description: 根据响应的数据对象，构建一个响应信息为json类型的网关响应对象。
-                     网关内部未出现异常，请求发送成功时调用。
      * @Param data: 响应数据内容
      * @return: org.wyh.core.response.GatewayResponse
      */

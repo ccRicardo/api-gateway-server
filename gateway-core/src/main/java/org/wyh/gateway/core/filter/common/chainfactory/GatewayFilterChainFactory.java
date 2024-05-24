@@ -14,7 +14,7 @@ import java.util.*;
  * @BelongsPackage: org.wyh.gateway.core.filter.common.chainfactory
  * @Author: wyh
  * @Date: 2024-05-15 16:56
- * @Description: 网关的过滤器链工厂类，主要负责实现过滤器实例的SPI加载，以及过滤器链的执行。
+ * @Description: 网关的过滤器链工厂类，主要负责实现过滤器实例的SPI加载和过滤器链实例的构建，以及过滤器链的执行。
  */
 @Slf4j
 public class GatewayFilterChainFactory extends AbstractFilterChainFactory{

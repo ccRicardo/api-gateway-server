@@ -49,7 +49,8 @@ public class NettyCoreProcessor implements NettyProcessor{
      */
     private void doWriteAndRelease(ChannelHandlerContext nettyCtx, FullHttpRequest fullRequest,
                                    FullHttpResponse fullResponse){
-        //写回请求失败情况下的响应信息，之后通过ChannelFutureListener.CLOSE关闭连接/channel
+        //写回响应，之后通过ChannelFutureListener.CLOSE关闭连接
+        // TODO: 2024-05-24 这里是否需要判断长连接
         nettyCtx.writeAndFlush(fullResponse)
                 .addListener(ChannelFutureListener.CLOSE);
         //将fullRequest对象的引用计数减1。如果该对象引用计数为0，则释放该对象。
@@ -63,22 +64,20 @@ public class NettyCoreProcessor implements NettyProcessor{
         try {
             //解析请求对象，构建该请求在网关中的上下文对象（GatewayContext对象）
             GatewayContext gatewayContext = RequestHelper.doContext(fullRequest, nettyCtx);
-            //构建并执行过滤器链，对网关上下文进行过滤处理，最终通过路由过滤器发送和接收请求，并将响应写回。
-            // TODO: 2024-05-16 等待实现和补充
-            待实现
-        } catch (BaseException e) {
-            //捕获已定义的异常
-            log.error("Netty核心处理器出现错误 {} {}", e.getCode().getCode(), e.getCode().getMessage());
-            //构建响应对象
-            FullHttpResponse fullResponse = ResponseHelper.getHttpResponse(e.getCode());
-            //写回异常信息，并且释放连接。
-            doWriteAndRelease(nettyCtx, fullRequest, fullResponse);
+            //执行（正常情况的）过滤器链，对网关上下文进行过滤处理，最终通过路由过滤器发送请求和接收响应。
+            filterChainFactory.doFilterChain(gatewayContext);
+            // TODO: 2024-05-24 此处异常捕获需要完善
         } catch (Throwable t) {
-            //捕获未定义（未知）异常
-            log.error("Netty核心处理器出现未知错误", t);
-            //构建响应对象
+            /*
+             * 这里负责捕获的是网关内部异常。
+             * 网关发送请求前出现的异常都视为内部异常
+             * 网关发送请求后，处理响应的工作线程中的异常都视为后台服务抛出的异常。
+             * 后台服务异常在这里是捕获不到的，只有在路由过滤器的complete方法中才能捕获和处理。
+             */
+            log.error("网关内部出现未知异常", t);
+            //构建FullHttpResponse响应对象
             FullHttpResponse fullResponse = ResponseHelper.getHttpResponse(ResponseCode.INTERNAL_ERROR);
-            //写回异常信息，并且释放连接。
+            //写回响应，并且释放请求对象。
             doWriteAndRelease(nettyCtx, fullRequest, fullResponse);
         }
     }

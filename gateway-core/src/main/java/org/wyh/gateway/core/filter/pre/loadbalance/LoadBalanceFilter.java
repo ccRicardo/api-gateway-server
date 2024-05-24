@@ -78,7 +78,7 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
             ServiceInstance selectedInstance = loadBalance.select(ctx);
             if(selectedInstance == null){
                 // TODO: 2024-05-22 此时将上下文状态设置终止合理吗，与其他部分冲突吗
-                //不存在对应的服务实例，因此请求结束，设置上下文状态，抛出相应异常
+                //不存在对应的服务实例，网关抛出异常，将上下文状态设置为written
                 ctx.setWritten();
                 throw new ResponseException(ResponseCode.SERVICE_INSTANCE_NOT_FOUND);
             }
