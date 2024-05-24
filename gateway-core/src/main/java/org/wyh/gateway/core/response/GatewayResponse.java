@@ -28,7 +28,7 @@ public class GatewayResponse {
     private String content;
     //响应状态码
     private HttpResponseStatus httpResponseStatus;
-    //AsyncHttpClient框架的异步响应结果
+    //AsyncHttpClient框架接收的原始响应对象
     private Response futureResponse;
 
 
