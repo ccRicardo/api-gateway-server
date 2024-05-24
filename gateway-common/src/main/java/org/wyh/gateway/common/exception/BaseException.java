@@ -11,7 +11,7 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
  */
 public class BaseException extends RuntimeException{
     //序列化版本号
-    private static final long serialVersionUID = -5658789202563433456L;
+    private static final long serialVersionUID = 1L;
     //网关响应状态码
     protected ResponseCode code;
 

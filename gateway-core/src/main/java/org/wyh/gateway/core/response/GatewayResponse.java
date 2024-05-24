@@ -100,7 +100,7 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 16:01
-     * @description: 根据响应的数据对象，构建一个响应信息为json类型的网关响应对象。
+     * @description: 根据响应的数据对象，构建一个响应信息为json类型的网关响应对象。（默认为请求成功）
      * @Param data: 响应数据内容
      * @return: org.wyh.core.response.GatewayResponse
      */

@@ -3,7 +3,9 @@ package org.wyh.gateway.core.helper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
+import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.asynchttpclient.Response;
 import org.wyh.gateway.common.constant.BasicConst;
@@ -11,6 +13,7 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.utils.AssertUtil;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.context.IContext;
+import org.wyh.gateway.core.request.HttpRequestWrapper;
 import org.wyh.gateway.core.response.GatewayResponse;
 
 import java.util.Objects;
@@ -102,28 +105,20 @@ public class ResponseHelper {
     }
     /**
      * @date: 2024-05-24 14:45
-     * @description: 根据上下文和异常响应码（可选），向客户端写回FullHttpResponse响应对象
-                     注意：异常响应码参数是可选的！
+     * @description: 根据网关上下文，向客户端写回FullHttpResponse响应对象。
+                     该方法必须提供网关上下文，才可以调用
      * @Param ctx:
-     * @Param codeOptional: 异常响应码，它是一个可选参数，默认为null
-                             （Optional类的最佳应用场景就是作为方法的可选参数）
      * @return: void
      */
-    public static void writeResponse(GatewayContext ctx, Optional<ResponseCode> codeOptional){
+    public static void writeResponse(GatewayContext ctx){
         try{
             //释放请求对象
             ctx.releaseRequest();
             //判断上下文状态是否是写回
             if(ctx.isWritten()) {
-                FullHttpResponse httpResponse;
-                //如果codeOptional可选参数存在，则优先使用异常响应码来构建FullHttpResponse响应对象
-                if(codeOptional.isPresent()){
-                    httpResponse = ResponseHelper.getHttpResponse(codeOptional.get());
-                }else{
-                    //如果可选参数不存在，则使用上下文中的网关响应对象，来构建对应的FullHttpResponse响应对象
-                    AssertUtil.notNull(ctx.getResponse(), "上下文的网关响应对象为空");
-                    httpResponse = ResponseHelper.getHttpResponse(ctx.getResponse());
-                }
+                //使用上下文中的网关响应对象，来构建对应的FullHttpResponse响应对象
+                AssertUtil.notNull(ctx.getResponse(), "上下文的网关响应对象为空");
+                FullHttpResponse httpResponse = ResponseHelper.getHttpResponse(ctx.getResponse());
                 /*
                  * 判断是否为长连接
                  * 如果不是长连接，则添加一个监听器，当write和flush操作完成后，自动关闭该连接
@@ -131,9 +126,8 @@ public class ResponseHelper {
                 if(!ctx.isKeepAlive()) {
                     ctx.getNettyCtx()
                             .writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
-                }
-                //如果是长连接，则在响应头中加上相应信息，并且不关闭连接
-                else {
+                } else {
+                    //如果是长连接，则在响应头中加上相应信息，并且不关闭连接
                     httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
                     ctx.getNettyCtx().writeAndFlush(httpResponse);
                 }
@@ -141,13 +135,45 @@ public class ResponseHelper {
                 ctx.setCompleted();
                 //调用回调函数，完成相关的后处理
                 ctx.invokeCompletedCallBack();
-                // TODO: 2024-05-24 这里的逻辑是否合理？
+                // TODO: 2024-05-24 这里的逻辑改动是否合理？
             } else {
-                log.warn("请求: {} 的结果已写回！");
+                log.warn("请求: {} 的结果已写回！", ctx.getRequest().getPath());
             }
         }catch (Exception e){
-            log.error("写回失败！请求: {} 写回过程出现异常", e);
-            // TODO: 2024-05-24 该异常属于网关内部异常，其实可以考虑返回一个网关异常响应
+            log.error("写回失败！请求: {} 的写回过程出现异常", ctx.getRequest().getPath(), e);
+        }
+    }
+    /**
+     * @date: 2024-05-24 15:54
+     * @description: 重载方法。根据请求包装对象和异常响应码，向客户端写回响应的FullHttpResponse响应对象。
+                     该方法与上述方法最大的不同在于：
+                     该方法不需要提供网关上下文。也就是说，如果网关在构建上下文之前就出现了异常，
+                     就只能使用该方法来写回响应。
+     * @Param httpRequestWrapper:
+     * @Param responseCode:
+     * @return: void
+     */
+    public static void writeResponse(HttpRequestWrapper httpRequestWrapper, ResponseCode responseCode){
+        FullHttpRequest httpRequest = httpRequestWrapper.getFullHttpRequest();
+        ChannelHandlerContext nettyCtx = httpRequestWrapper.getNettyCtx();
+        try{
+            //根据异常响应码构建对应的FullHttpRequest响应对象
+            FullHttpResponse httpResponse = ResponseHelper.getHttpResponse(responseCode);
+            /*
+             * 判断是否为长连接
+             * 如果不是长连接，则添加一个监听器，当write和flush操作完成后，自动关闭该连接
+             */
+            if(!HttpUtil.isKeepAlive(httpRequest)){
+                nettyCtx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+            }else{
+                //如果是长连接，则在响应头中加上相应信息，并且不关闭连接
+                httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+                nettyCtx.writeAndFlush(httpResponse);
+            }
+            //释放请求对象
+            ReferenceCountUtil.release(httpRequest);
+        }catch (Exception e){
+            log.error("写回失败！请求: {} 的写回过程出现异常", httpRequest, e);
         }
     }
 }

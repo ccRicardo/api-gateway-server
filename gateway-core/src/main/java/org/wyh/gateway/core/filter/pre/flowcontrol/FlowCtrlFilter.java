@@ -3,6 +3,8 @@ package org.wyh.gateway.core.filter.pre.flowcontrol;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.wyh.gateway.common.enumeration.ResponseCode;
+import org.wyh.gateway.common.exception.FilterProcessingException;
 import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
@@ -77,7 +79,8 @@ public class FlowCtrlFilter extends AbstractGatewayFilter<FlowCtrlFilter.Config>
                 }
             }
         }catch (Exception e){
-            throw new RuntimeException("【流量控制过滤器】过滤器执行异常", e);
+            log.error("【流量控制过滤器】过滤器执行异常", e);
+            throw new FilterProcessingException(FLOW_CTRL_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
         }finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件

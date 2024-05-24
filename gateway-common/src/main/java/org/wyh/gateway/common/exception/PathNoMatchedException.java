@@ -10,7 +10,7 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
  * @Description: 路径不匹配（不存在匹配的路径）异常
  */
 public class PathNoMatchedException extends BaseException{
-    private static final long serialVersionUID = -6695383751311763169L;
+    private static final long serialVersionUID = 1L;
 
     /*
      * 以下是一系列不同参数的构造函数

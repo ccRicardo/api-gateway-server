@@ -11,7 +11,7 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
  * @Description: 连接异常类
  */
 public class ConnectException extends BaseException{
-    private static final long serialVersionUID = -8503239867913964958L;
+    private static final long serialVersionUID = 1L;
     //请求的后台服务的唯一id
     @Getter
     private final String uniqueId;

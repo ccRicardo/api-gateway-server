@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.enumeration.ResponseCode;
+import org.wyh.gateway.common.exception.FilterProcessingException;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
@@ -97,7 +98,8 @@ public class UserAuthFilter extends AbstractGatewayFilter<UserAuthFilter.Config>
             ctx.getRequest().setUserId(userId);
             log.info("【用户鉴权过滤器】用户鉴权成功：{}", userId);
         }catch(Exception e){
-            throw new RuntimeException("【用户鉴权过滤器】过滤器执行异常", e);
+            log.error("【用户鉴权过滤器】过滤器执行异常", e);
+            throw new FilterProcessingException(USER_AUTH_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
         } finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件

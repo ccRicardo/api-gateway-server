@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.config.DynamicConfigManager;
 import org.wyh.gateway.common.config.ServiceInstance;
 import org.wyh.gateway.common.enumeration.ResponseCode;
+import org.wyh.gateway.common.exception.FilterProcessingException;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
@@ -85,7 +86,8 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
             //设置最终服务的地址（这一步非常关键！！！）
             ctx.getRequest().setModifyHost(selectedInstance.getAddress());
         }catch (Exception e){
-            throw new RuntimeException("【负载均衡过滤器】过滤器执行异常", e);
+            log.error("【负载均衡过滤器】过滤器执行异常", e);
+            throw new FilterProcessingException(LOAD_BALANCE_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
         }finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件

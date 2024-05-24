@@ -59,33 +59,13 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
             //调用NettyCoreProcessor（请求处理器）来真正处理请求事件
             nettyCoreProcessor.process(eventValue);
         }
-
-        // TODO: 2024-05-24 此处不应该自立门户，应该使用辅助类写回响应
         @Override
         public void onException(Throwable ex, long sequence, HttpRequestWrapper eventValue) {
+            //注意：此处还没有构建网关上下文
             FullHttpRequest httpRequest = eventValue.getFullHttpRequest();
-            ChannelHandlerContext nettyCtx = eventValue.getNettyCtx();
-            try{
-                log.error("Disruptor缓冲队列处理过程中出现错误！请求: {}，错误信息: {}",
-                        httpRequest, ex.getMessage(), ex);
-                //构建响应对象
-                FullHttpResponse httpResponse = ResponseHelper.getHttpResponse(ResponseCode.INTERNAL_ERROR);
-                //判断是否为长连接
-                if(!HttpUtil.isKeepAlive(httpRequest)){
-                    //如果不是长连接，则在写回响应信息后，通过ChannelFutureListener.CLOSE关闭连接/channel
-                    nettyCtx.writeAndFlush(httpResponse)
-                            .addListener(ChannelFutureListener.CLOSE);
-                }else{
-                    //如果是长连接，则需要设置一下CONNECTION响应头
-                    httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-                    nettyCtx.writeAndFlush(httpResponse);
-                }
-            }catch(Exception e){
-                log.error("请求响应写回失败！请求: {}，错误信息: {}",
-                        httpRequest, e.getMessage(), e);
-            }
-
-
+            log.error("Disruptor缓冲队列处理请求: {} 时出现异常！", httpRequest, ex);
+            //写回响应。异常类型为网关内部错误。
+            ResponseHelper.writeResponse(eventValue, ResponseCode.INTERNAL_ERROR);
         }
     }
     @Trace

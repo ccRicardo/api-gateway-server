@@ -9,6 +9,7 @@ import org.asynchttpclient.Response;
 import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.exception.BaseException;
 import org.wyh.gateway.common.exception.ConnectException;
+import org.wyh.gateway.common.exception.FilterProcessingException;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
@@ -59,12 +60,16 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
         private boolean useHystrix;
         //HystrixCommand的执行超时时间。若HystrixCommand执行耗时超过该时间，便会进入降级逻辑。
         private int timeoutInMilliseconds;
+        //是否强制打开断路器（即让断路器始终处于熔断状态）
+        private boolean breakerForceOpen = false;
         //启用断路器的请求量阈值。当窗口时间内的请求数量大于该阈值时，才启用断路器功能（建议保持默认值）
         private int requestVolumeThreshold = 20;
-        //断路器熔断的错误率阈值。当窗口时间内请求的错误率高于该阈值时，才对服务进行熔断（建议保持默认值）
+        //断路器熔断/打开的错误率阈值。当窗口时间内请求的错误率高于该阈值时，才对服务进行熔断（建议保持默认值）
         private int errorThresholdPercentage = 50;
         //线程池（此线程池指的是该命令对应分组所使用的线程池）的核心线程数
         private int threadPoolCoreSize;
+        //是否开启降级回退逻辑
+        private boolean fallbackEnabled;
         //降级回退逻辑中的响应消息
         private String fallbackMessage;
     }
@@ -174,10 +179,14 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                         .withExecutionIsolationThreadInterruptOnTimeout(true)
                         //启用断路器
                         .withCircuitBreakerEnabled(true)
+                        //是否强制打开断路器
+                        .withCircuitBreakerForceOpen(filterConfig.isBreakerForceOpen())
                         //设置启用断路器的请求量阈值（只有当窗口时间内的请求数量大于该阈值时，才启用断路器功能）
                         .withCircuitBreakerRequestVolumeThreshold(filterConfig.getRequestVolumeThreshold())
                         //设置断路器熔断的错误率阈值（当窗口时间内请求的错误率高于该阈值时，断路器对服务进行熔断）
-                        .withCircuitBreakerErrorThresholdPercentage(filterConfig.getErrorThresholdPercentage()))
+                        .withCircuitBreakerErrorThresholdPercentage(filterConfig.getErrorThresholdPercentage())
+                        //是否启用降级处理
+                        .withFallbackEnabled(filterConfig.isFallbackEnabled()))
                 .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()
                         //设置分组对应的线程池的核心线程数
                         .withCoreSize(filterConfig.getThreadPoolCoreSize()));
@@ -188,23 +197,24 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 /*
                  * 调用doRoute方法来异步发送请求和处理响应
                  * 注意：
-                 * 这里要使用get方法，来阻塞等待请求的响应结果（异步转同步）。
+                 * 这里要使用get方法，来阻塞等待请求的响应结果（即异步转同步）。
                  * 因为响应结果的接收是异步的，主线程中doRoute方法执行完毕并不意味着工作线程就接收到了响应结果
-                 * 如果不加get方法，hystrix实际监控到的只是doRoute方法的执行时间，而不是等待响应的时间。
-                 * 进而无法正确地触发熔断降级功能
+                 * 如果不加get方法，hystrix实际监控到的是doRoute方法的执行时间，而不是等待响应的时间。
+                 * 这样会导致熔断降级功能无法正常触发
+                 * 注意：该方法仍然是执行在主线程中的，而complete方法是执行在工作线程中的，两者之间并不会相互干扰。
                  */
                 doRoute(ctx, filterConfig).get();
                 return null;
             }
 
             @Override
-            protected Void getFallback() {
+                protected Void getFallback() {
                 /*
-                 * 当断路器熔断、线程池资源不足，run方法执行超时或出现其他异常时，会调用该降级回退方法
-                 * 降级回退方法的处理逻辑与complete方法相似：
-                 * 释放请求，检查响应结果中的异常，设置响应信息，设置上下文状态，最后激发下一个过滤器
+                 * 当服务对应的断路器熔断，线程池资源不足；run方法执行超时，出现异常时，会调用该降级回退方法
+                 * 触发降级时，网关应该抛出相应异常，并根据配置值设置相应的响应消息
+                 * 注意：该方法仍然是执行在主线程中的，而complete方法是执行在工作线程中的，两者之间并不会相互干扰。
                  */
-                // TODO: 2024-05-23 该方法的处理逻辑不知道玩不完善
+
                 //释放FullHttpRequest请求对象
                 ctx.releaseRequest();
                 log.warn("【路由过滤器】请求: {} 触发降级回退", ctx.getRequest().getFinalUrl());
@@ -220,9 +230,8 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     }
     /**
      * @date: 2024-05-23 14:48
-     * @description: 负责对响应结果进行处理，并且激发下一个过滤器组件
-                     注意：该方法是在工作线程中执行的，内部的异常都属于后台服务异常，所以向上层抛这些异常没有意义
-                     （因为上层调用者是在主线程中执行的。当该方法执行时，其调用者早就执行完毕了）
+     * @description: 回调方法，负责对响应结果进行处理，并且激发下一个过滤器组件
+                     注意：该方法只有当AsyncHttpClient接收到响应时才会被调用，并且是在工作线程中执行
      * @Param request:
      * @Param response:
      * @Param throwable:
@@ -262,9 +271,12 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 ctx.setResponse(GatewayResponse.buildGatewayResponse(response));
             }
         }catch (Exception e){
-            //此处不能抛异常
+            /*
+             * 此处抛异常没有意义
+             * 因为处理器类根本就捕获不到该方法抛出的异常
+             */
             log.error("【路由过滤器】出现内部错误，无法正常处理响应");
-            ctx.setThrowable(new ResponseException(ResponseCode.INTERNAL_ERROR));
+            ctx.setThrowable(new FilterProcessingException(ROUTER_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR));
         }finally {
             try{
                 //接收到响应结果，需将其写回，因此将上下文状态设置为written
@@ -274,10 +286,19 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                  * （这是过滤器链能够顺序执行的关键）
                  */
                 // TODO: 2024-05-23 还是同样的疑问：fireNext应该放到finally中吗
+                /*
+                 * 过滤器链实际上是以异步发送请求为分界点，分为两段执行的：
+                 * 前段在主线程中执行，执行完毕后就结束了，并不会激发下一个过滤器组件
+                 * 所以此处要负责激发下一个过滤器组件，使过滤器后端执行下去。
+                 */
                 super.fireNext(ctx, filterConfig);
             }catch (Throwable e){
+                /*
+                 * 此处抛异常没有意义
+                 * 因为处理器类根本就捕获不到该方法抛出的异常
+                 */
                 log.error("【路由过滤器】后续过滤组件执行异常", e);
-                ctx.setThrowable(new ResponseException(ResponseCode.INTERNAL_ERROR));
+                ctx.setThrowable(new FilterProcessingException(ROUTER_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR));
             }
         }
     }

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.skywalking.apm.toolkit.trace.Trace;
 import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.exception.BaseException;
+import org.wyh.gateway.common.exception.ConnectException;
 import org.wyh.gateway.core.config.Config;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.chainfactory.GatewayFilterChainFactory;
@@ -39,24 +40,6 @@ public class NettyCoreProcessor implements NettyProcessor{
         this.config = config;
         init();
     }
-    /**
-     * @date: 2024-01-18 15:11
-     * @description: 请求失败时调用（准确来说，是网关内部出现了异常，导致未能成功发送请求）。写回异常信息，并且释放连接。
-     * @Param nettyCtx:
-     * @Param fullRequest:
-     * @Param fullResponse:
-     * @return: void
-     */
-    private void doWriteAndRelease(ChannelHandlerContext nettyCtx, FullHttpRequest fullRequest,
-                                   FullHttpResponse fullResponse){
-        //写回响应，之后通过ChannelFutureListener.CLOSE关闭连接
-        // TODO: 2024-05-24 这里是否需要判断长连接
-        nettyCtx.writeAndFlush(fullResponse)
-                .addListener(ChannelFutureListener.CLOSE);
-        //将fullRequest对象的引用计数减1。如果该对象引用计数为0，则释放该对象。
-        ReferenceCountUtil.release(fullRequest);
-    }
-    @Trace
     @Override
     public void process(HttpRequestWrapper requestWrapper) {
         ChannelHandlerContext nettyCtx = requestWrapper.getNettyCtx();
@@ -66,19 +49,20 @@ public class NettyCoreProcessor implements NettyProcessor{
             GatewayContext gatewayContext = RequestHelper.doContext(fullRequest, nettyCtx);
             //执行（正常情况的）过滤器链，对网关上下文进行过滤处理，最终通过路由过滤器发送请求和接收响应。
             filterChainFactory.doFilterChain(gatewayContext);
-            // TODO: 2024-05-24 此处异常捕获需要完善
-        } catch (Throwable t) {
             /*
-             * 这里负责捕获的是网关内部异常。
-             * 网关发送请求前出现的异常都视为内部异常
-             * 网关发送请求后，处理响应的工作线程中的异常都视为后台服务抛出的异常。
-             * 后台服务异常在这里是捕获不到的，只有在路由过滤器的complete方法中才能捕获和处理。
+             * 注意：这里只能捕获到路由过滤器异步发送请求之前出现的异常
+             * 因为上述过滤器链实际上是以异步发送请求为分界点，分为两段执行的：
+             * 前段在主线程中执行，执行完毕后，该处理器类的执行也就结束了，所以捕获不到后端抛出的异常。
+             * 只有当AsyncHttpClient接收到响应结果，相应工作线程中的complete方法被调用时，才会开始执行后段
              */
+            // TODO: 2024-05-24 此处异常捕获需要完善
+        }catch (ConnectException ce){
+            log.error("");
+        }
+        catch (Throwable t) {
             log.error("网关内部出现未知异常", t);
-            //构建FullHttpResponse响应对象
-            FullHttpResponse fullResponse = ResponseHelper.getHttpResponse(ResponseCode.INTERNAL_ERROR);
-            //写回响应，并且释放请求对象。
-            doWriteAndRelease(nettyCtx, fullRequest, fullResponse);
+            //写回响应。异常类型为网关内部错误。
+            ResponseHelper.writeResponse(requestWrapper, ResponseCode.INTERNAL_ERROR);
         }
     }
     @Override

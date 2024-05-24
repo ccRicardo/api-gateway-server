@@ -10,7 +10,7 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
  * @Description: 响应异常类
  */
 public class ResponseException extends BaseException{
-    private static final long serialVersionUID = -5658789202509039759L;
+    private static final long serialVersionUID = 1L;
     /*
      * 以下是一系列不同参数的构造函数
      */

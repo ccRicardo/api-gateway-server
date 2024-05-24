@@ -10,7 +10,7 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
  * @Description: 未找到异常类
  */
 public class NotFoundException extends BaseException{
-    private static final long serialVersionUID = -5534700534739261761L;
+    private static final long serialVersionUID = 1L;
     /*
      * 以下是一系列不同参数的构造函数
      */
