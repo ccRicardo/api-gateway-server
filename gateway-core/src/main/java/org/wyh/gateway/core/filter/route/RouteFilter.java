@@ -211,19 +211,20 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 protected Void getFallback() {
                 /*
                  * 当服务对应的断路器熔断，线程池资源不足；run方法执行超时，出现异常时，会调用该降级回退方法
-                 * 触发降级时，网关应该抛出相应异常，并根据配置值设置相应的响应消息
+                 * 触发降级时，网关应该并根据配置值设置响应消息，并写回响应
                  * 注意：该方法仍然是执行在主线程中的，而complete方法是执行在工作线程中的，两者之间并不会相互干扰。
                  */
-
-                //释放FullHttpRequest请求对象
-                ctx.releaseRequest();
-                log.warn("【路由过滤器】请求: {} 触发降级回退", ctx.getRequest().getFinalUrl());
-                //这里做了简化处理：只要走了降级回退逻辑，一律认为是“服务不可用”异常
-                ctx.setThrowable(new ResponseException(ResponseCode.SERVICE_UNAVAILABLE));
-                //请求结束，设置上下文状态
-                ctx.setWritten();
-                // TODO: 2024-05-23 为啥这里不设置一下网关响应
+                log.warn("【路由过滤器】请求: {} 触发降级", ctx.getRequest().getPath());
                 // TODO: 2024-05-23 完成剩下部分
+
+//                //释放FullHttpRequest请求对象
+//                ctx.releaseRequest();
+//                log.warn("【路由过滤器】请求: {} 触发降级回退", ctx.getRequest().getFinalUrl());
+//                //这里做了简化处理：只要走了降级回退逻辑，一律认为是“服务不可用”异常
+//                ctx.setThrowable(new ResponseException(ResponseCode.SERVICE_UNAVAILABLE));
+//                //请求结束，设置上下文状态
+//                ctx.setWritten();
+
             }
         }.execute();
 
