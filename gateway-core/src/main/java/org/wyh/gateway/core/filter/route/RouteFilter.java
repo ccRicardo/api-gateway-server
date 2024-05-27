@@ -75,6 +75,20 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
         private String fallbackMessage;
     }
     /**
+     * @BelongsProject: api-gateway-server
+     * @BelongsPackage: org.wyh.gateway.core.filter.route
+     * @Author: wyh
+     * @Date: 2024-05-27 18:55
+     * @Description: AsyncHttpClient响应的包装类，
+                     包含了AsyncHttpClient接受的响应对象和请求过程中的异常（其中有一个为空）
+     */
+    @Setter
+    @Getter
+    public static class ResponseWrapper{
+        private Response response;
+        private Throwable throwable;
+    }
+    /**
      * @date: 2024-05-22 20:16
      * @description: 无参构造器，负责初始化父类的filterConfigClass属性
      * @return: null
@@ -167,31 +181,25 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                     .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()
                             //设置分组对应的线程池的核心线程数
                             .withCoreSize(filterConfig.getThreadPoolCoreSize()));
-                //AsyncHttpClient接收的响应结果
-                Response response;
-                //AsyncHttpClient请求过程中的异常
-                Throwable throwable;
-                //通过匿名内部类的方式创建HystrixCommand实例，并执行该命令实例。由于不需要返回值，所以泛型指定为Void。
-                new HystrixCommand<Void>(setter){
+                //通过匿名内部类的方式创建HystrixCommand实例，并执行该命令实例。
+                HystrixCommand<ResponseWrapper> hystrixCommand = new HystrixCommand<>(setter){
                     @Override
-                    protected Void run() throws Exception {
-                        // TODO: 2024-05-27 调整该方法
+                    protected ResponseWrapper run() throws Exception {
+                        ResponseWrapper wrapper = new ResponseWrapper();
                         /*
                          * 使用get方法，来阻塞等待请求的响应结果（即异步转同步）。
                          * 若请求失败，该方法会返回一个异常对象
-                         * 然后再调用complete方法完成响应的处理，并激发下一个过滤器组件
-                         * 注：complete方法不会抛异常
                          */
                         try{
-                            response = futureResponse.get();
-                            complete(request, response, null, ctx, filterConfig);
+                            Response response = futureResponse.get();
+                            wrapper.setResponse(response);
                         }catch (Throwable t){
-                            complete(request, null, t, ctx, filterConfig);
+                            wrapper.setThrowable(t);
                         }
-                        return null;
+                        return wrapper;
                     }
                     @Override
-                    protected Void getFallback() {
+                    protected ResponseWrapper getFallback() {
                         /*
                          * 当服务对应的断路器熔断，线程池资源不足；run方法执行超时，出现异常时，会调用该降级回退方法
                          * 触发降级时，网关应该并根据配置值设置响应消息，然后调用complete方法完成响应的处理
@@ -201,7 +209,11 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                         // TODO: 2024-05-27 完成该降级回退逻辑！！！
 
                     }
-                }.execute();
+                };
+                ResponseWrapper responseWrapper = hystrixCommand.execute();
+                //调用complete方法完成响应的处理，并激发下一个过滤器组件
+                complete(request, responseWrapper.getResponse(),
+                        responseWrapper.getThrowable(), ctx, filterConfig);
             }
         }catch (Exception e){
             log.error("【路由过滤器】过滤器执行异常", e);
@@ -220,7 +232,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                      注意：该方法具体执行在哪个线程，取决于是否使用了hystrix。
                      若未使用hystrix，则该方法执行在工作线程，并且只有当AsyncHttpClient接收到响应时才会被调用
                      此外，由于complete方法有可能执行在工作线程中，无法把异常抛给主线程中的相应方法，
-                     所以complete不应该抛出任何异常。
+                     所以complete不应该向上层抛出任何异常。
 
      * @Param request:
      * @Param response:
