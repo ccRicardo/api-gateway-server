@@ -1,6 +1,7 @@
 package org.wyh.gateway.core.filter.common;
 
 import org.wyh.gateway.core.context.GatewayContext;
+import org.wyh.gateway.core.helper.ResponseHelper;
 
 /**
  * @BelongsProject: api-gateway-server
@@ -43,11 +44,19 @@ public abstract class AbstractLinkedFilter implements Filter {
 
     @Override
     public void fireNext(GatewayContext ctx, Object... args) throws Throwable{
+        //根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
+        if(ctx.isTerminated()){
+            //（过滤器链中的某个组件执行异常）该过滤器链执行结束
+            return;
+        }
+        if(ctx.isWritten()){
+            //将响应结果写回客户端
+            ResponseHelper.writeResponse(ctx);
+        }
         //判断该过滤器是否是最后一个
         if(next != null){
             //检查是否要执行下一个过滤器
             if(next.check(ctx)){
-
                 /*
                  * 执行下一个过滤器。
                  * 实际情况下，next指向的是一个过滤器实现类的实例，因此会尝试调用实现类实例的filter方法。
@@ -62,7 +71,8 @@ public abstract class AbstractLinkedFilter implements Filter {
                 next.fireNext(ctx, args);
             }
         }else{
-            //由于没有下一个过滤器了，所以直接返回
+            //由于没有下一个过滤器了，所以将上下文状态设置为terminated
+            ctx.setTerminated();
             return;
         }
     }

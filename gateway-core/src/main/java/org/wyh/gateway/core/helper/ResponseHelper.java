@@ -140,7 +140,8 @@ public class ResponseHelper {
                 log.warn("请求: {} 的结果已写回！", ctx.getRequest().getPath());
             }
         }catch (Exception e){
-            log.error("写回失败！请求: {} 的写回过程出现异常", ctx.getRequest().getPath(), e);
+            log.error("写回失败！请求: {} 的写回过程出现异常: {}",
+                    ctx.getRequest().getPath(), e.getMessage(), e);
         }
     }
     /**

@@ -199,6 +199,8 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
             }
         }catch (Exception e){
             log.error("【路由过滤器】过滤器执行异常", e);
+            //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
+            ctx.setTerminated();
             throw new FilterProcessingException(e, ROUTER_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
         }
         /*
@@ -211,6 +213,9 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
      * @description: 负责对响应结果进行处理，并且激发下一个过滤器组件
                      注意：该方法具体执行在哪个线程，取决于是否使用了hystrix。
                      若未使用hystrix，则该方法执行在工作线程，并且只有当AsyncHttpClient接收到响应时才会被调用
+                     此外，由于complete方法有可能执行在工作线程中，无法把异常抛给主线程中的相应方法，
+                     所以complete不会抛出任何异常。
+
      * @Param request:
      * @Param response:
      * @Param throwable:
@@ -258,7 +263,8 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 //需将响应结果写回客户端，将上下文状态设置为written
                 ctx.setWritten();
                 /*
-                 * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
+                 * 调用父类AbstractLinkedFilter的fireNext方法，
+                 * 根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
                  * （这是过滤器链能够顺序执行的关键）
                  */
                 super.fireNext(ctx, filterConfig);

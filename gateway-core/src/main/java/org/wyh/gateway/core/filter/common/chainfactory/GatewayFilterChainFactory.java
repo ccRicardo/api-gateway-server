@@ -107,16 +107,16 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
             super.defaultFilterChain.start(ctx);
         }catch (Throwable e){
             /*
-             * todo 修改注释
-             * 注意：这里只能捕获到路由过滤器异步发送请求之前出现的异常
-             * 因为上述过滤器链实际上是以异步发送请求为分界点，分为两段执行的：
-             * 前段在主线程中执行，执行完毕后，该处理器类的执行也就结束了，所以捕获不到后端抛出的异常。
-             * 只有当AsyncHttpClient接收到响应结果，相应工作线程中的complete方法被调用时，才会开始执行后段
+             * 这里只负责捕获前置和路由过滤器中的异常
+             * 对于后置过滤器中的异常，在complete方法中做简单处理即可
              */
             log.error("过滤器链执行异常: {}", e.getMessage(), e);
             //在网关上下文中设置异常信息
             ctx.setThrowable(e);
-            // TODO: 2024-05-16 此处还有关键步骤未实现，应该是异常响应的写回操作
+            //正常过滤器链执行结束后，开始执行异常过滤器链，所以要更改上下文状态
+            if(ctx.isTerminated()){
+                ctx.setRunning();
+            }
             //执行异常情况下的过滤器链
             doErrorFilterChain(ctx);
         }

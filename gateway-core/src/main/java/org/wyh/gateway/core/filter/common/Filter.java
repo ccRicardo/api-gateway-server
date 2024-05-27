@@ -36,7 +36,7 @@ public interface Filter{
     void doFilter(GatewayContext ctx, Object... args) throws Throwable;
     /**
      * @date: 2024-05-14 15:53
-     * @description: 触发/激发下一个过滤器组件
+     * @description: 根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
      * @Param ctx:
      * @Param args: args[0]实际上就是过滤器组件的配置类实例
      * @return: void

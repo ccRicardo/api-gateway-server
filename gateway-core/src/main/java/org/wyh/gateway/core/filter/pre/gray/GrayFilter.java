@@ -107,13 +107,15 @@ public class GrayFilter extends AbstractGatewayFilter<GrayFilter.Config> {
             }
         }catch (Exception e){
             log.error("【灰度过滤器】过滤器执行异常", e);
+            //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
+            ctx.setTerminated();
             throw new FilterProcessingException(e, GRAY_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
         }finally {
             /*
-             * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
+             * 调用父类AbstractLinkedFilter的fireNext方法，
+             * 根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
              * （这是过滤器链能够顺序执行的关键）
              */
-            // TODO: 2024-05-17 感觉这句代码不应该写在try里吗，目前还不是很明白。
             super.fireNext(ctx, args);
         }
 

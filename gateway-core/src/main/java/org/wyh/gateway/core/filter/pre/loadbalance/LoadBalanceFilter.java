@@ -78,23 +78,25 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
             //调用负载均衡实例的select方法，选择一个服务实例（该实例就是最后要访问的对象）
             ServiceInstance selectedInstance = loadBalance.select(ctx);
             if(selectedInstance == null){
-                //不存在对应的服务实例，（正常）过滤器链无法执行下去，将上下文状态设置为terminated
-                ctx.setTerminated();
                 throw new ResponseException(ctx.getUniqueId(), ResponseCode.SERVICE_INSTANCE_NOT_FOUND);
             }
             //设置最终服务的地址（这一步非常关键！！！）
             ctx.getRequest().setModifyHost(selectedInstance.getAddress());
         }catch(ResponseException re){
+            //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
+            ctx.setTerminated();
             throw re;
         } catch (Exception e){
             log.error("【负载均衡过滤器】过滤器执行异常", e);
+            //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
+            ctx.setTerminated();
             throw new FilterProcessingException(e, LOAD_BALANCE_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
         }finally {
             /*
-             * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件
+             * 调用父类AbstractLinkedFilter的fireNext方法，
+             * 根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
              * （这是过滤器链能够顺序执行的关键）
              */
-            // TODO: 2024-05-23 总感觉这句代码应该写在try中，当该过滤器出现异常，就不再往下执行了 
             super.fireNext(ctx, args);
         }
     }
