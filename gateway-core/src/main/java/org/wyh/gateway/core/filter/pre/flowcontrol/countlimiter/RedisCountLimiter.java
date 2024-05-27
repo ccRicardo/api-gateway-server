@@ -66,7 +66,7 @@ public class RedisCountLimiter implements CountLimiter{
                 return true;
             }
         }catch (Exception e){
-            throw new RuntimeException("【流量控制过滤器】redis分布式限流异常");
+            throw new RuntimeException("【流量控制过滤器】redis分布式限流异常", e);
         }
     }
 }

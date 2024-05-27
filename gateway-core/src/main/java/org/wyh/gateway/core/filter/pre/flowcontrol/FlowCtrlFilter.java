@@ -80,7 +80,7 @@ public class FlowCtrlFilter extends AbstractGatewayFilter<FlowCtrlFilter.Config>
             }
         }catch (Exception e){
             log.error("【流量控制过滤器】过滤器执行异常", e);
-            throw new FilterProcessingException(FLOW_CTRL_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
+            throw new FilterProcessingException(e, FLOW_CTRL_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
         }finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件

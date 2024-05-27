@@ -107,6 +107,7 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
             super.defaultFilterChain.start(ctx);
         }catch (Throwable e){
             /*
+             * todo 修改注释
              * 注意：这里只能捕获到路由过滤器异步发送请求之前出现的异常
              * 因为上述过滤器链实际上是以异步发送请求为分界点，分为两段执行的：
              * 前段在主线程中执行，执行完毕后，该处理器类的执行也就结束了，所以捕获不到后端抛出的异常。

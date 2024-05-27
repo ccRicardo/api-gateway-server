@@ -78,16 +78,17 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
             //调用负载均衡实例的select方法，选择一个服务实例（该实例就是最后要访问的对象）
             ServiceInstance selectedInstance = loadBalance.select(ctx);
             if(selectedInstance == null){
-                // TODO: 2024-05-22 此时将上下文状态设置终止合理吗，与其他部分冲突吗
-                //不存在对应的服务实例，网关抛出异常，将上下文状态设置为written
-                ctx.setWritten();
+                //不存在对应的服务实例，（正常）过滤器链无法执行下去，将上下文状态设置为terminated
+                ctx.setTerminated();
                 throw new ResponseException(ctx.getUniqueId(), ResponseCode.SERVICE_INSTANCE_NOT_FOUND);
             }
             //设置最终服务的地址（这一步非常关键！！！）
             ctx.getRequest().setModifyHost(selectedInstance.getAddress());
-        }catch (Exception e){
+        }catch(ResponseException re){
+            throw re;
+        } catch (Exception e){
             log.error("【负载均衡过滤器】过滤器执行异常", e);
-            throw new FilterProcessingException(LOAD_BALANCE_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
+            throw new FilterProcessingException(e, LOAD_BALANCE_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
         }finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，激发下一个过滤器组件

@@ -135,7 +135,7 @@ public class NettyHttpServer implements LifeCycle {
             this.serverBootstrap.bind().sync();
             log.info("NettyHttp服务端启动成功，端口: {}", this.config.getPort());
         }catch (Exception e){
-            throw new RuntimeException();
+            throw new RuntimeException("NettyHttp服务端启动失败", e);
         }
     }
 
