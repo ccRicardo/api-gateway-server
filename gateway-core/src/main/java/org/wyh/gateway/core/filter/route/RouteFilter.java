@@ -142,7 +142,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
      * @Param filterConfig:
      * @return: void
      */
-    // TODO: 2024-05-24 hystrix与异步似乎是相冲突的。
+    // TODO: 2024-05-24 将设置hystrix的部分融入到route中，不要单独写成一个方法
     private void doRouteWithHystrix(GatewayContext ctx, RouteFilter.Config filterConfig){
         /*
          * Hystrix基础知识：
@@ -210,7 +210,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
 
             @Override
             protected Void getFallback() {
-                // TODO: 2024-05-27 此处需要修改 
+                // TODO: 2024-05-27 此处需要修改
                 /*
                  * 当服务对应的断路器熔断，线程池资源不足；run方法执行超时，出现异常时，会调用该降级回退方法
                  * 触发降级时，网关应该并根据配置值设置响应消息，并写回响应
