@@ -49,8 +49,8 @@ public class NettyCoreProcessor implements NettyProcessor{
             //执行（正常情况的）过滤器链，对网关上下文进行过滤处理，最终通过路由过滤器发送请求和接收响应。
             filterChainFactory.doFilterChain(gatewayContext);
             /*
-             * 注：过滤器执行异常已经在FilterChainFactory.doFilterChain方法中捕获了，
-             * 所以这里就不要再捕获了
+             * 注意：FilterChainFactory.doFilterChain方法并不会向上抛异常
+             * 所以此处捕获的实际上是RequestHelper.doContext抛出的异常
              */
         }catch (ConnectException ce){
             log.error("服务: {}的连接请求: {}出现异常", ce.getUniqueId(), ce.getRequestUrl(), ce);
