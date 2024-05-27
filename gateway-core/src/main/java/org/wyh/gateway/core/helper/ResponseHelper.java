@@ -87,7 +87,7 @@ public class ResponseHelper {
             httpResponse.headers().add(gatewayResponse.getResponseHeaders());
             //将额外响应头信息添加到FullHttpResponse对象的响应头中
             httpResponse.headers().add(gatewayResponse.getExtraResponseHeaders());
-            httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON + ";charset=utf-8")
+            httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON + ";charset=utf-8");
             httpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
             return httpResponse;
         } else {
