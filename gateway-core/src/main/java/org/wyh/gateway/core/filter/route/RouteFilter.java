@@ -167,17 +167,23 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                     .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()
                             //设置分组对应的线程池的核心线程数
                             .withCoreSize(filterConfig.getThreadPoolCoreSize()));
+                //AsyncHttpClient接收的响应结果
+                Response response;
+                //AsyncHttpClient请求过程中的异常
+                Throwable throwable;
                 //通过匿名内部类的方式创建HystrixCommand实例，并执行该命令实例。由于不需要返回值，所以泛型指定为Void。
                 new HystrixCommand<Void>(setter){
                     @Override
                     protected Void run() throws Exception {
+                        // TODO: 2024-05-27 调整该方法
                         /*
                          * 使用get方法，来阻塞等待请求的响应结果（即异步转同步）。
                          * 若请求失败，该方法会返回一个异常对象
                          * 然后再调用complete方法完成响应的处理，并激发下一个过滤器组件
+                         * 注：complete方法不会抛异常
                          */
                         try{
-                            Response response = futureResponse.get();
+                            response = futureResponse.get();
                             complete(request, response, null, ctx, filterConfig);
                         }catch (Throwable t){
                             complete(request, null, t, ctx, filterConfig);
