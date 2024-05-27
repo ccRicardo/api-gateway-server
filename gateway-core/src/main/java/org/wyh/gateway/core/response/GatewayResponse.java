@@ -100,19 +100,18 @@ public class GatewayResponse {
     }
     /**
      * @date: 2024-01-10 16:01
-     * @description: 根据响应的数据对象，构建一个响应信息为json类型的网关响应对象。（默认为请求成功）
+     * @description: 根据响应的数据对象，构建一个响应信息为json类型的网关响应对象。
      * @Param data: 响应数据内容
      * @return: org.wyh.core.response.GatewayResponse
      */
-    public static GatewayResponse buildGatewayResponse(Object data){
+    public static GatewayResponse buildGatewayResponse(ResponseCode code, Object data){
         ObjectNode objectNode = JSONUtil.createObjectNode();
-        //设置成功情况下的状态信息
-        objectNode.put(JSONUtil.STATUS, ResponseCode.SUCCESS.getStatus().code());
-        objectNode.put(JSONUtil.CODE, ResponseCode.SUCCESS.getCode());
-        objectNode.put(JSONUtil.MESSAGE, ResponseCode.SUCCESS.getMessage());
+        objectNode.put(JSONUtil.STATUS, code.getStatus().code());
+        objectNode.put(JSONUtil.CODE, code.getCode());
+        objectNode.put(JSONUtil.MESSAGE, code.getMessage());
         objectNode.putPOJO(JSONUtil.DATA, data);
         GatewayResponse gatewayResponse = new GatewayResponse();
-        gatewayResponse.setHttpResponseStatus(ResponseCode.SUCCESS.getStatus());
+        gatewayResponse.setHttpResponseStatus(code.getStatus());
         //设置响应头信息，主要是content-type
         gatewayResponse.putResponseHeader(HttpHeaderNames.CONTENT_TYPE,
                 HttpHeaderValues.APPLICATION_JSON + ";charset=utf-8");

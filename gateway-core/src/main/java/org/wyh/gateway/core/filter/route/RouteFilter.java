@@ -18,6 +18,7 @@ import org.wyh.gateway.core.filter.common.base.FilterAspect;
 import org.wyh.gateway.core.filter.common.base.FilterConfig;
 import org.wyh.gateway.core.filter.common.base.FilterType;
 import org.wyh.gateway.core.helper.AsyncHttpHelper;
+import org.wyh.gateway.core.helper.ResponseHelper;
 import org.wyh.gateway.core.response.GatewayResponse;
 
 import javax.xml.crypto.dsig.spec.XPathType;
@@ -208,23 +209,22 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
             }
 
             @Override
-                protected Void getFallback() {
+            protected Void getFallback() {
                 /*
                  * 当服务对应的断路器熔断，线程池资源不足；run方法执行超时，出现异常时，会调用该降级回退方法
                  * 触发降级时，网关应该并根据配置值设置响应消息，并写回响应
                  * 注意：该方法仍然是执行在主线程中的，而complete方法是执行在工作线程中的，两者之间并不会相互干扰。
                  */
                 log.warn("【路由过滤器】请求: {} 触发降级", ctx.getRequest().getPath());
-                // TODO: 2024-05-23 完成剩下部分
-
-//                //释放FullHttpRequest请求对象
-//                ctx.releaseRequest();
-//                log.warn("【路由过滤器】请求: {} 触发降级回退", ctx.getRequest().getFinalUrl());
-//                //这里做了简化处理：只要走了降级回退逻辑，一律认为是“服务不可用”异常
-//                ctx.setThrowable(new ResponseException(ResponseCode.SERVICE_UNAVAILABLE));
-//                //请求结束，设置上下文状态
-//                ctx.setWritten();
-
+                //设置网关响应
+                ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.SERVICE_UNAVAILABLE,
+                        filterConfig.getFallbackMessage()));
+                //设置异常信息
+                ctx.setThrowable(new ResponseException(ctx.getUniqueId(), ResponseCode.SERVICE_UNAVAILABLE));
+                //将该请求的网关上下文状态设置为需写回
+                ctx.setWritten();
+                ResponseHelper.writeResponse(ctx);
+                return null;
             }
         }.execute();
 
@@ -259,7 +259,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                                     ConfigLoader.getConfig().getHttpRequestTimeout() :
                                     request.getRequestTimeout()));
                     //在上下文中设置异常信息
-                    ctx.setThrowable(new ResponseException(ResponseCode.REQUEST_TIMEOUT));
+                    ctx.setThrowable(new ResponseException(ctx.getUniqueId(), ResponseCode.REQUEST_TIMEOUT));
                     // TODO: 2024-05-23 为啥这里不设置一下网关响应
                 }else{
                     //其他异常情况
@@ -279,6 +279,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
             log.error("【路由过滤器】出现内部错误，无法正常处理响应");
             ctx.setThrowable(new FilterProcessingException(ROUTER_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR));
         }finally {
+            // TODO: 2024-05-27 此方法目前还没调用响应写回方法
             try{
                 //接收到响应结果，需将其写回，因此将上下文状态设置为written
                 ctx.setWritten();

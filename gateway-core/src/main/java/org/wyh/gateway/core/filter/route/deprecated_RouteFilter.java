@@ -296,7 +296,7 @@ public class deprecated_RouteFilter implements Filter {
                  * 释放请求（此处忽略），判断异常类型（此处忽略），设置异常和响应信息，设置状态，最后返回响应
                  */
                 //这里做了简化处理，只要走了降级回退逻辑，一律认为是“服务不可用”异常
-                ctx.setThrowable(new ResponseException(ResponseCode.SERVICE_UNAVAILABLE));
+                ctx.setThrowable(new ResponseException(ctx.getUniqueId(), ResponseCode.SERVICE_UNAVAILABLE));
                 //设置请求失败时的响应结果
                 ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.SERVICE_UNAVAILABLE));
                 //将该请求的网关上下文状态设置为需写回

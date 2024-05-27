@@ -52,7 +52,8 @@ public class RequestHelper {
                 DynamicConfigManager.getInstance().getServiceDefinition(gatewayRequest.getUniqueId());
         //将服务定义中的ANT风格（匹配）规则与请求中的请求路径进行匹配，如果匹配失败，则直接抛出相应异常（这就是快速失败策略）
         if(!antPathMatcher.match(serviceDefinition.getPatternPath(), gatewayRequest.getPath())){
-            throw new PathNoMatchedException(PATH_NO_MATCHED);
+            throw new PathNoMatchedException(gatewayRequest.getPath(),
+                    serviceDefinition.getUniqueId(),serviceDefinition.getPatternPath(), PATH_NO_MATCHED);
         }
         //根据请求对象中的路径信息，获取对应的方法调用对象
         ServiceInvoker serviceInvoker = getServiceInvoker(gatewayRequest, serviceDefinition);
@@ -86,7 +87,7 @@ public class RequestHelper {
         String uniqueId = headers.get(GatewayConst.UNIQUE_ID);
         //请求头中必须带有uniqueId属性
         if(StringUtils.isBlank(uniqueId)){
-            throw new ResponseException(ResponseCode.REQUEST_PARSE_ERROR_NO_UNIQUEID);
+            throw new ResponseException(uniqueId, ResponseCode.REQUEST_PARSE_ERROR_NO_UNIQUEID);
         }
         String host = headers.get(HttpHeaderNames.HOST);
         HttpMethod method = request.method();
@@ -144,7 +145,7 @@ public class RequestHelper {
         //根据请求对象中的路径信息，获取对应的方法调用对象
         ServiceInvoker serviceInvoker = invokerMap.get(request.getPath());
         if(serviceInvoker == null){
-            throw new NotFoundException(ResponseCode.SERVICE_INVOKER_NOT_FOUND);
+            throw new NotFoundException(request.getUniqueId(), ResponseCode.SERVICE_INVOKER_NOT_FOUND);
         }
         return serviceInvoker;
     }

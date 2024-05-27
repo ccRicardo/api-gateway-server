@@ -8,8 +8,7 @@ import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.skywalking.apm.toolkit.trace.Trace;
 import org.wyh.gateway.common.enumeration.ResponseCode;
-import org.wyh.gateway.common.exception.BaseException;
-import org.wyh.gateway.common.exception.ConnectException;
+import org.wyh.gateway.common.exception.*;
 import org.wyh.gateway.core.config.Config;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.chainfactory.GatewayFilterChainFactory;
@@ -54,14 +53,27 @@ public class NettyCoreProcessor implements NettyProcessor{
              * 因为上述过滤器链实际上是以异步发送请求为分界点，分为两段执行的：
              * 前段在主线程中执行，执行完毕后，该处理器类的执行也就结束了，所以捕获不到后端抛出的异常。
              * 只有当AsyncHttpClient接收到响应结果，相应工作线程中的complete方法被调用时，才会开始执行后段
+             * 此外，这里还未构建网关上下文对象
              */
-            // TODO: 2024-05-24 此处异常捕获需要完善
         }catch (ConnectException ce){
-            log.error("");
-        }
-        catch (Throwable t) {
+            log.error("服务: {}的连接请求: {}出现异常", ce.getUniqueId(), ce.getRequestUrl(), ce);
+            ResponseHelper.writeResponse(requestWrapper, ce.getCode());
+        }catch(FilterProcessingException fpe){
+            log.error("过滤器组件: {}执行出现异常", fpe.getFilterId(), fpe);
+            ResponseHelper.writeResponse(requestWrapper, fpe.getCode());
+        }catch (NotFoundException nfe){
+            log.error("未找到服务: {}的资源实例", nfe.getUniqueId(), nfe);
+            ResponseHelper.writeResponse(requestWrapper, nfe.getCode());
+        }catch (PathNoMatchedException pe){
+            log.error("请求路径: {} 与服务: {} 的规则: {} 不匹配",
+                    pe.getPath(), pe.getUniqueId(), pe.getPatternPath(), pe);
+            ResponseHelper.writeResponse(requestWrapper, pe.getCode());
+        }catch (ResponseException re){
+            log.error("服务: {}响应异常 :{}", re.getUniqueId(), re.getCode().getMessage(), re);
+            ResponseHelper.writeResponse(requestWrapper, re.getCode());
+        } catch (Throwable t) {
             log.error("网关内部出现未知异常", t);
-            //写回响应。异常类型为网关内部错误。
+            //写回响应。异常类型为网关内部错误。（注意：此时还未构建上下文对象）
             ResponseHelper.writeResponse(requestWrapper, ResponseCode.INTERNAL_ERROR);
         }
     }

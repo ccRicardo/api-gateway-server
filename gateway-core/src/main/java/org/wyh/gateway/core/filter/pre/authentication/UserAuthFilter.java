@@ -89,7 +89,7 @@ public class UserAuthFilter extends AbstractGatewayFilter<UserAuthFilter.Config>
             //若存放jwt的cookie不存在，则说明用户未登录
             if(cookie == null){
                 //抛出用户未登录异常
-                throw new ResponseException(ResponseCode.UNAUTHORIZED);
+                throw new ResponseException(ctx.getUniqueId(), ResponseCode.UNAUTHORIZED);
             }
             String token = cookie.value();
             //解析jwt，获取用户id

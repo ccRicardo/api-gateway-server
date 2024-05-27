@@ -64,7 +64,7 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
             //注意：此处还没有构建网关上下文
             FullHttpRequest httpRequest = eventValue.getFullHttpRequest();
             log.error("Disruptor缓冲队列处理请求: {} 时出现异常！", httpRequest, ex);
-            //写回响应。异常类型为网关内部错误。
+            //写回响应。异常类型为网关内部错误。（注意：此时还未构建上下文对象）
             ResponseHelper.writeResponse(eventValue, ResponseCode.INTERNAL_ERROR);
         }
     }
