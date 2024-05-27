@@ -49,11 +49,12 @@ public class NettyCoreProcessor implements NettyProcessor{
             //执行（正常情况的）过滤器链，对网关上下文进行过滤处理，最终通过路由过滤器发送请求和接收响应。
             filterChainFactory.doFilterChain(gatewayContext);
             /*
-             * 这里只负责捕获前置和路由过滤器中的异常
-             * 对于后置过滤器中的异常，在complete方法中做简单处理即可
+             * 注：过滤器执行异常已经在FilterChainFactory.doFilterChain方法中捕获了，
+             * 所以这里就不要再捕获了
              */
         }catch (ConnectException ce){
             log.error("服务: {}的连接请求: {}出现异常", ce.getUniqueId(), ce.getRequestUrl(), ce);
+            //写回响应。（注意：此时还不一定构建了上下文对象）
             ResponseHelper.writeResponse(requestWrapper, ce.getCode());
         }catch(FilterProcessingException fpe){
             log.error("过滤器组件: {}执行出现异常", fpe.getFilterId(), fpe);
@@ -70,7 +71,6 @@ public class NettyCoreProcessor implements NettyProcessor{
             ResponseHelper.writeResponse(requestWrapper, re.getCode());
         } catch (Throwable t) {
             log.error("网关内部出现未知异常", t);
-            //写回响应。异常类型为网关内部错误。（注意：此时还未构建上下文对象）
             ResponseHelper.writeResponse(requestWrapper, ResponseCode.INTERNAL_ERROR);
         }
     }

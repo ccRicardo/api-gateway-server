@@ -85,8 +85,8 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     @Setter
     @Getter
     public static class ResponseWrapper{
-        private Response response;
-        private Throwable throwable;
+        private Response response = null;
+        private Throwable throwable = null;
     }
     /**
      * @date: 2024-05-22 20:16
@@ -200,14 +200,11 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                     }
                     @Override
                     protected ResponseWrapper getFallback() {
-                        /*
-                         * 当服务对应的断路器熔断，线程池资源不足；run方法执行超时，出现异常时，会调用该降级回退方法
-                         * 触发降级时，网关应该并根据配置值设置响应消息，然后调用complete方法完成响应的处理
-                         * 注意：此种情况下，complete方法是在主线程中执行的
-                         */
-                        log.warn("【路由过滤器】请求: {} 触发降级", ctx.getRequest().getPath());
-                        // TODO: 2024-05-27 完成该降级回退逻辑！！！
-
+                        //当服务对应的断路器熔断，线程池资源不足；run方法执行超时，出现异常时，会调用该降级回退方法
+                        log.error("【路由过滤器】请求: {} 触发降级: {}",
+                                ctx.getRequest().getPath(), filterConfig.getFallbackMessage());
+                        //注：降级回退默认不属于异常
+                        return new ResponseWrapper();
                     }
                 };
                 ResponseWrapper responseWrapper = hystrixCommand.execute();
@@ -270,8 +267,17 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                             url, ResponseCode.HTTP_RESPONSE_ERROR));
                 }
             }else{
-                //请求成功，根据AsyncHttpClient接收到的响应结果，构建网关响应对象
-                ctx.setResponse(GatewayResponse.buildGatewayResponse(response));
+                /*
+                 * 请求成功，根据AsyncHttpClient接收到的响应结果，
+                 * 或者过滤器配置中的降级返回信息，构建网关响应对象
+                 */
+                if(Objects.nonNull(response)){
+                    ctx.setResponse(GatewayResponse.buildGatewayResponse(response));
+                }else{
+                    //降级回退默认不属于异常
+                    ctx.setResponse(GatewayResponse.buildGatewayResponse(
+                            ResponseCode.SUCCESS, filterConfig.getFallbackMessage()));
+                }
             }
         }catch (Exception e){
             log.error("【路由过滤器】出现内部错误，无法正常处理响应");
