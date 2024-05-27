@@ -106,6 +106,12 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
             //启动正常情况下的过滤器链。
             super.defaultFilterChain.start(ctx);
         }catch (Throwable e){
+            /*
+             * 注意：这里只能捕获到路由过滤器异步发送请求之前出现的异常
+             * 因为上述过滤器链实际上是以异步发送请求为分界点，分为两段执行的：
+             * 前段在主线程中执行，执行完毕后，该处理器类的执行也就结束了，所以捕获不到后端抛出的异常。
+             * 只有当AsyncHttpClient接收到响应结果，相应工作线程中的complete方法被调用时，才会开始执行后段
+             */
             log.error("过滤器链执行异常: {}", e.getMessage(), e);
             //在网关上下文中设置异常信息
             ctx.setThrowable(e);

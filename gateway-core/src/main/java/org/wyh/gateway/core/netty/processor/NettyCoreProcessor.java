@@ -53,7 +53,7 @@ public class NettyCoreProcessor implements NettyProcessor{
              * 因为上述过滤器链实际上是以异步发送请求为分界点，分为两段执行的：
              * 前段在主线程中执行，执行完毕后，该处理器类的执行也就结束了，所以捕获不到后端抛出的异常。
              * 只有当AsyncHttpClient接收到响应结果，相应工作线程中的complete方法被调用时，才会开始执行后段
-             * 此外，这里还未构建网关上下文对象
+             * 此外，这里还未构建网关上下文对象，所以不需要设置上下文状态
              */
         }catch (ConnectException ce){
             log.error("服务: {}的连接请求: {}出现异常", ce.getUniqueId(), ce.getRequestUrl(), ce);
