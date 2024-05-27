@@ -214,7 +214,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                      注意：该方法具体执行在哪个线程，取决于是否使用了hystrix。
                      若未使用hystrix，则该方法执行在工作线程，并且只有当AsyncHttpClient接收到响应时才会被调用
                      此外，由于complete方法有可能执行在工作线程中，无法把异常抛给主线程中的相应方法，
-                     所以complete不会抛出任何异常。
+                     所以complete不应该抛出任何异常。
 
      * @Param request:
      * @Param response:
