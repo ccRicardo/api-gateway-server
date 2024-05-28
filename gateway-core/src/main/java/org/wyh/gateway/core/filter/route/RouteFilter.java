@@ -66,9 +66,9 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
         //线程池（此线程池指的是该命令对应分组所使用的线程池）的核心线程数
         private int threadPoolCoreSize;
         //是否开启降级回退逻辑
-        private boolean fallbackEnabled;
+        private boolean fallbackEnabled = true;
         //降级回退逻辑中的响应消息
-        private String fallbackMessage;
+        private String fallbackMessage = "降级消息";
     }
     /**
      * @BelongsProject: api-gateway-server
