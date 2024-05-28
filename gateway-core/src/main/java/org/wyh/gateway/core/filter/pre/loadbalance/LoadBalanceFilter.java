@@ -74,6 +74,7 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
             //获取指定负载均衡策略对应的实例。默认使用随机负载均衡。
             LoadBalance loadBalance = LoadBalanceFactory.getLoadBalance(strategy);
             if(loadBalance == null){
+                log.warn("【负载均衡过滤器】不支持该负载均衡策略: {} 默认使用随机负载均衡", strategy);
                 loadBalance = LoadBalanceFactory.getLoadBalance(LOAD_BALANCE_STRATEGY_RANDOM);
             }
             //调用负载均衡实例的select方法，选择一个服务实例（该实例就是最后要访问的对象）
@@ -82,6 +83,7 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
                 throw new ResponseException(ctx.getUniqueId(), ResponseCode.SERVICE_INSTANCE_NOT_FOUND);
             }
             //设置最终服务的地址（这一步非常关键！！！）
+            log.info("【负载均衡过滤器】最终访问实例地址: {}", selectedInstance.getAddress());
             ctx.getRequest().setModifyHost(selectedInstance.getAddress());
         } catch (Exception e){
             //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated

@@ -87,7 +87,7 @@ public class GrayFilter extends AbstractGatewayFilter<GrayFilter.Config> {
                         // TODO: 2024-05-17 ip地址匹配这一块感觉要重做，并且最好再加一个ip格式验证
                         //判断当前ip是否在灰度ip数组中
                         for (String grayIp : grapIpArray) {
-                            if(clientIp == grayIp){
+                            if(clientIp.equals(grayIp)){
                                 ctx.setAttribute(AttributeKey.GRAY_FLAG, true);
                                 break;
                             }
