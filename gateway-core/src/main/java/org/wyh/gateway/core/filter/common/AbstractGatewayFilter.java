@@ -47,10 +47,9 @@ public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
      * @date: 2024-05-15 10:05
      * @description: 从上下文中加载本过滤器的配置信息，并以C类型对象的形式返回结果
      * @Param ctx:
-     * @Param args:
      * @return: C
      */
-    private C loadFilterConfig(GatewayContext ctx, Object... args){
+    private C loadFilterConfig(GatewayContext ctx){
         String ruleId = ctx.getRule().getRuleId();
         long lastModifiedTime = ctx.getRule().getLastModifiedTime();
         /*
@@ -90,13 +89,9 @@ public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
     }
 
     @Override
-    public void filter(GatewayContext ctx, Object... args) throws Throwable{
-        //从上下文中加载过本滤器配置信息，并作为参数传递给父类filter方法，父类filter再调用具体过滤器对象的doFilter方法，完成过滤处理
-        C filterConfig = loadFilterConfig(ctx, args);
-        /*
-         * 这里看似是把参数args给丢了，但实际上，上层的过滤器链根本就不会传递args参数。
-         * 也就是说，args参数从设计之初就是用来传递过滤器配置信息的
-         */
-        super.filter(ctx, filterConfig);
+    public void filter(GatewayContext ctx) throws Throwable{
+        //从上下文中加载过本滤器配置信息，再调用具体过滤器对象的doFilter方法，完成过滤处理
+        C filterConfig = loadFilterConfig(ctx);
+        doFilter(ctx, filterConfig);
     }
 }

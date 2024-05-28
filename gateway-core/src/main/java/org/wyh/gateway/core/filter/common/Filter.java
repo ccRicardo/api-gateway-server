@@ -22,10 +22,9 @@ public interface Filter{
      * @date: 2024-05-14 15:49
      * @description: 执行过滤器，对指定内容进行过滤处理。（核心过滤逻辑其实是调用doFilter方法完成的）
      * @Param ctx:
-     * @Param args: args[0]实际上就是过滤器组件的配置类实例
      * @return: void
      */
-    void filter(GatewayContext ctx, Object... args) throws Throwable;
+    void filter(GatewayContext ctx) throws Throwable;
     /**
      * @date: 2024-05-14 15:51
      * @description: 真正执行过滤处理逻辑的核心方法
@@ -38,10 +37,9 @@ public interface Filter{
      * @date: 2024-05-14 15:53
      * @description: 根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
      * @Param ctx:
-     * @Param args: args[0]实际上就是过滤器组件的配置类实例
      * @return: void
      */
-    void fireNext(GatewayContext ctx, Object... args) throws Throwable;
+    void fireNext(GatewayContext ctx) throws Throwable;
     /**
      * @date: 2024-05-14 15:55
      * @description: 默认方法，用于过滤器初始化。父类方法只是占位，若子类有需求，可以重写覆盖。

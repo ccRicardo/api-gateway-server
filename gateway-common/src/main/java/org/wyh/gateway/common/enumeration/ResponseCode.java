@@ -25,7 +25,6 @@ public enum ResponseCode {
     SERVICE_INVOKER_NOT_FOUND(HttpResponseStatus.NOT_FOUND,10004, "未找到对应的方法调用实例"),
     SERVICE_INSTANCE_NOT_FOUND(HttpResponseStatus.NOT_FOUND,10005, "未找到对应的服务实例"),
     FILTER_CONFIG_PARSE_ERROR(HttpResponseStatus.INTERNAL_SERVER_ERROR,10006, "过滤器配置解析异常"),
-    FILTER_PROCESSING_ERROR(HttpResponseStatus.INTERNAL_SERVER_ERROR, 10007, "过滤器处理异常"),
     REQUEST_TIMEOUT(HttpResponseStatus.GATEWAY_TIMEOUT, 10008, "连接下游服务超时"),
     HTTP_RESPONSE_ERROR(HttpResponseStatus.INTERNAL_SERVER_ERROR, 10030, "服务返回异常"),
     VERIFICATION_FAILED(HttpResponseStatus.BAD_REQUEST,10030, "请求参数校验失败"),

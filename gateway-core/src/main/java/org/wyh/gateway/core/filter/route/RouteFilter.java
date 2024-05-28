@@ -7,9 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.asynchttpclient.Request;
 import org.asynchttpclient.Response;
 import org.wyh.gateway.common.enumeration.ResponseCode;
-import org.wyh.gateway.common.exception.BaseException;
 import org.wyh.gateway.common.exception.ConnectException;
-import org.wyh.gateway.common.exception.FilterProcessingException;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
@@ -18,10 +16,7 @@ import org.wyh.gateway.core.filter.common.base.FilterAspect;
 import org.wyh.gateway.core.filter.common.base.FilterConfig;
 import org.wyh.gateway.core.filter.common.base.FilterType;
 import org.wyh.gateway.core.helper.AsyncHttpHelper;
-import org.wyh.gateway.core.helper.ResponseHelper;
 import org.wyh.gateway.core.response.GatewayResponse;
-
-import javax.xml.crypto.dsig.spec.XPathType;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -41,10 +36,10 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
                  而处理响应的complete方法具体执行在哪个线程，取决于是否使用hystrix
  */
 @Slf4j
-@FilterAspect(id=ROUTER_FILTER_ID,
-              name=ROUTER_FILTER_NAME,
+@FilterAspect(id=ROUTE_FILTER_ID,
+              name=ROUTE_FILTER_NAME,
               type= FilterType.ROUTE,
-              order=ROUTER_FILTER_ORDER)
+              order=ROUTE_FILTER_ORDER)
 public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     // TODO: 2024-05-22 源码还在相应设置了上下文的RS，RR等属性
     /**
@@ -216,7 +211,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
             log.error("【路由过滤器】过滤器执行异常", e);
             //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
             ctx.setTerminated();
-            throw new FilterProcessingException(e, ROUTER_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
+            throw e;
         }
         /*
          * 注意，此处不要设置finally子句，没有意义。
@@ -229,7 +224,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                      注意：该方法具体执行在哪个线程，取决于是否使用了hystrix。
                      若未使用hystrix，则该方法执行在工作线程，并且只有当AsyncHttpClient接收到响应时才会被调用
                      此外，由于complete方法有可能执行在工作线程中，无法把异常抛给主线程中的相应方法，
-                     所以complete不应该向上层抛出任何异常。
+                     所以complete不应该向上层抛出任何异常，也不应该去执行异常过滤器链
 
      * @Param request:
      * @Param response:
@@ -280,10 +275,12 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 }
             }
         }catch (Exception e){
+            //注：此处不要去执行异常过滤器链
             log.error("【路由过滤器】出现内部错误，无法正常处理响应");
-            ctx.setThrowable(new FilterProcessingException(e, ROUTER_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR));
+            ctx.setThrowable(e);
         }finally {
             try{
+                // TODO: 2024-05-28 异常情况需要去构建网关响应 
                 //需将响应结果写回客户端，将上下文状态设置为written
                 ctx.setWritten();
                 /*
@@ -291,14 +288,14 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                  * 根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
                  * （这是过滤器链能够顺序执行的关键）
                  */
-                super.fireNext(ctx, filterConfig);
+                super.fireNext(ctx);
             }catch (Throwable t){
                 /*
                  * 后置过滤器执行出现异常，在打印异常日志和记录异常信息后，就不再做其他的处理
                  * 因为后置过滤器只是做一些统计分析方面的工作，出错就出错了，不用多管
                  */
                 log.error("【路由过滤器】后置过滤器组件执行异常", t);
-                ctx.setThrowable(new FilterProcessingException(t, ROUTER_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR));
+                ctx.setThrowable(t);
             }
         }
     }

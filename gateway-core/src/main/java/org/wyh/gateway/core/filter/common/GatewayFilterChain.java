@@ -38,6 +38,12 @@ public class GatewayFilterChain {
                 //该方法永远不会执行
                 return false;
             }
+
+            @Override
+            public void filter(GatewayContext ctx) throws Throwable {
+                //该方法永远不会执行
+            }
+
             @Override
             public void doFilter(GatewayContext gatewayContext, Object... args) {
                 //该方法永远不会执行
@@ -82,7 +88,4 @@ public class GatewayFilterChain {
         //激发第一个过滤器实例（不激发虚拟头节点）
         first.fireNext(ctx);
     }
-
-
-
 }

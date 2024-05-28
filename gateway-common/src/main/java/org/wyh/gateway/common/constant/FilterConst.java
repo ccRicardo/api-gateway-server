@@ -19,12 +19,6 @@ public interface FilterConst {
     String LOAD_BALANCE_STRATEGY_RANDOM = "Random";
     String LOAD_BALANCE_STRATEGY_ROUND_ROBIN = "RoundRobin";
     /*
-     * 路由过滤器相关常量
-     */
-    String ROUTER_FILTER_ID = "router_filter";
-    String ROUTER_FILTER_NAME = "router_filter";
-    int ROUTER_FILTER_ORDER = Integer.MAX_VALUE - 1;
-    /*
      * 流量控制过滤器相关常量
      */
     String FLOW_CTRL_FILTER_ID = "flow_ctrl_filter";
@@ -50,4 +44,17 @@ public interface FilterConst {
     int GRAY_FILTER_ORDER = 1;
     //请求头中灰度标记参数的key
     String GRAY_FLAG_KEY = "gray";
+    /*
+     * 路由过滤器相关常量
+     */
+    String ROUTE_FILTER_ID = "route_filter";
+    String ROUTE_FILTER_NAME = "route_filter";
+    int ROUTE_FILTER_ORDER = Integer.MAX_VALUE - 1;
+    /*
+     * 默认异常处理过滤器相关常量
+     */
+    String DEFAULT_ERROR_FILTER_ID = "default_error_filter";
+    String DEFAULT_ERROR_FILTER_NAME = "default_error_filter";
+    int DEFAULT_ERROR_FILTER_ORDER = 10;
+
 }

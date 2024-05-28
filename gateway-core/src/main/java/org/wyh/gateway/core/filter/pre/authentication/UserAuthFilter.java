@@ -4,12 +4,10 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.netty.handler.codec.http.cookie.Cookie;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.enumeration.ResponseCode;
-import org.wyh.gateway.common.exception.FilterProcessingException;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.config.ConfigLoader;
 import org.wyh.gateway.core.context.GatewayContext;
@@ -105,14 +103,14 @@ public class UserAuthFilter extends AbstractGatewayFilter<UserAuthFilter.Config>
             log.error("【用户鉴权过滤器】过滤器执行异常", e);
             //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
             ctx.setTerminated();
-            throw new FilterProcessingException(e, USER_AUTH_FILTER_ID, ResponseCode.FILTER_PROCESSING_ERROR);
+            throw e;
         } finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，
              * 根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
              * （这是过滤器链能够顺序执行的关键）
              */
-            super.fireNext(ctx, args);
+            super.fireNext(ctx);
         }
     }
 }

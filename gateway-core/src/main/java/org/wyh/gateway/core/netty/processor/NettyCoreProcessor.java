@@ -56,9 +56,6 @@ public class NettyCoreProcessor implements NettyProcessor{
             log.error("服务: {}的连接请求: {}出现异常", ce.getUniqueId(), ce.getRequestUrl(), ce);
             //写回响应。（注意：此时还不一定构建了上下文对象）
             ResponseHelper.writeResponse(requestWrapper, ce.getCode());
-        }catch(FilterProcessingException fpe){
-            log.error("过滤器组件: {}执行出现异常", fpe.getFilterId(), fpe);
-            ResponseHelper.writeResponse(requestWrapper, fpe.getCode());
         }catch (NotFoundException nfe){
             log.error("未找到服务: {}的资源实例", nfe.getUniqueId(), nfe);
             ResponseHelper.writeResponse(requestWrapper, nfe.getCode());
