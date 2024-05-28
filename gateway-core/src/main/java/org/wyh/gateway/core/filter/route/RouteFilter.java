@@ -196,8 +196,9 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                             wrapper.setResponse(response);
                         }catch (Throwable t){
                             wrapper.setThrowable(t);
+                        }finally{
+                            return wrapper;
                         }
-                        return wrapper;
                     }
                     @Override
                     protected ResponseWrapper getFallback() {
@@ -247,14 +248,14 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
         try{
             //释放FullHttpRequest请求对象
             ctx.releaseRequest();
+            String url = request.getUrl();
             /*
              * 检查请求过程中是否存在异常。若有，则进一步判断异常的类型。（getCause的作用是获取原始异常）
              * 注意：此处的异常是请求过程中产生的，而不是由网关本身抛出的
              */
             if(Objects.nonNull(throwable)){
-                String url = request.getUrl();
-                //超时异常
-                if(throwable.getCause() instanceof TimeoutException){
+                //超时异常（hystrix会对原始异常进行封装，所以需要使用getCause获取原始异常）
+                if(throwable.getCause() instanceof TimeoutException || throwable instanceof  TimeoutException){
                     log.warn("【路由过滤器】请求: {} 耗时超过{} ms", url,
                             //获取请求超时时间的配置值
                             (request.getRequestTimeout() == 0 ?
@@ -266,7 +267,8 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                     ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.REQUEST_TIMEOUT));
                 }else{
                     //其他异常情况
-                    log.warn("【路由过滤器】请求: {} 出现响应异常");
+
+                    log.warn("【路由过滤器】请求: {} 出现响应异常", url);
                     ctx.setThrowable(new ConnectException(throwable.getCause(), ctx.getUniqueId(),
                             url, ResponseCode.HTTP_RESPONSE_ERROR));
                     ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.HTTP_RESPONSE_ERROR));

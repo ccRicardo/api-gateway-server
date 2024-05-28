@@ -54,9 +54,9 @@ public class Config {
      * 以下是AsyncHttpClient的配置参数
      */
     //连接超时时间（AsyncHttpClient连接主机时可以等待的最大毫秒数）
-    private int httpConnectTimeout = 30 * 1000;
+    private int httpConnectTimeout = 3 * 1000;
     //请求超时时间（AsyncHttpClient等待响应完成的最大毫秒数）
-    private int httpRequestTimeout = 30 * 1000;
+    private int httpRequestTimeout = 3 * 1000;
     //重定向的最大次数
     private int httpMaxRedirects = 2;
     //AsyncHttpClient可以处理的最大连接数
