@@ -18,6 +18,7 @@ public class CompleteTest {
                 return null;
             }, executorService);
             cf.whenComplete((r, e)->complete());
+            Thread.sleep(3*1000);
             System.out.println(Thread.currentThread().getName() + " no error!");
         }catch(Exception e){
             System.out.println(Thread.currentThread().getName() + " error!");
