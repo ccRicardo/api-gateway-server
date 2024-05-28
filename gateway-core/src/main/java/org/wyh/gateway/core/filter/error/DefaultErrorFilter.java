@@ -20,6 +20,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
  * @Author: wyh
  * @Date: 2024-05-28 9:15
  * @Description: 默认的异常处理过滤器，负责检查上下文中的异常信息，并向客户端写回相应的响应
+                 注意：路由过滤器中的complete方法即使出现异常，也不会调用异常处理过滤器
  */
 @Slf4j
 @FilterAspect(id=DEFAULT_ERROR_FILTER_ID,
