@@ -35,7 +35,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
                  注意：发送请求和接收响应的工作都是在工作线程中执行的。
                  而处理响应的complete方法具体执行在哪个线程，取决于是否使用hystrix
  */
-// TODO: 2024-05-28 关于complete的注释需要修改 
+// TODO: 2024-05-28 关于complete的注释需要修改
 @Slf4j
 @FilterAspect(id=ROUTE_FILTER_ID,
               name=ROUTE_FILTER_NAME,
@@ -76,13 +76,18 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
      * @Author: wyh
      * @Date: 2024-05-27 18:55
      * @Description: AsyncHttpClient响应的包装类，
-                     包含了AsyncHttpClient接受的响应对象和请求过程中的异常（其中有一个为空）
+                     包含了AsyncHttpClient接受的响应对象，请求过程中的异常和响应数据
+                     （其中只有一个属性不为空）
      */
     @Setter
     @Getter
     public static class ResponseWrapper{
+        //AsyncHttpClient接收到的响应对象
         private Response response = null;
+        //AsyncHttpClient请求过程中的异常
         private Throwable throwable = null;
+        //响应数据（主要用于保存降级回退时的返回消息）
+        private Object data = null;
     }
     /**
      * @date: 2024-05-22 20:16
@@ -120,13 +125,13 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                     //whenComplete使用同一个线程来负责发送请求和接收响应
                     futureResponse.whenComplete(((response, throwable) -> {
                         //调用complete完成响应的处理，并激发下一个过滤器组件
-                        complete(request, response, throwable, ctx, filterConfig);
+                        complete(request, response, throwable, ctx, null);
                     }));
                 }else{
                     //whenCompleteAsync使用一个线程来发送请求，另一个线程来接收响应
                     futureResponse.whenCompleteAsync(((response, throwable) -> {
                         //调用complete完成响应的处理，并激发下一个过滤器组件
-                        complete(request, response, throwable, ctx, filterConfig);
+                        complete(request, response, throwable, ctx, null);
                     }));
                 }
             }else{
@@ -196,17 +201,19 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                     }
                     @Override
                     protected ResponseWrapper getFallback() {
+                        ResponseWrapper wrapper = new ResponseWrapper();
                         //当服务对应的断路器熔断，线程池资源不足；run方法执行超时，出现异常时，会调用该降级回退方法
                         log.error("【路由过滤器】请求: {} 触发降级: {}",
                                 ctx.getRequest().getPath(), filterConfig.getFallbackMessage());
+                        wrapper.setData(filterConfig.getFallbackMessage());
                         //注：降级回退默认不属于异常
-                        return new ResponseWrapper();
+                        return wrapper;
                     }
                 };
                 ResponseWrapper responseWrapper = hystrixCommand.execute();
                 //调用complete方法完成响应的处理，并激发下一个过滤器组件
                 complete(request, responseWrapper.getResponse(),
-                        responseWrapper.getThrowable(), ctx, filterConfig);
+                        responseWrapper.getThrowable(), ctx, responseWrapper.getData());
             }
         }catch (Exception e){
             log.error("【路由过滤器】过滤器执行异常", e);
@@ -226,16 +233,17 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                      若未使用hystrix，则该方法执行在工作线程，并且只有当AsyncHttpClient接收到响应时才会被调用
                      此外，由于complete方法有可能执行在工作线程中，无法把异常抛给主线程中的相应方法，
                      所以complete不应该向上层抛出任何异常，也不应该去执行异常过滤器链
+                     由于不会去执行异常处理过滤器，所以出现异常时，需要自己构建对应的网关响应对象
 
      * @Param request:
      * @Param response:
      * @Param throwable:
      * @Param ctx:
-     * @Param filterConfig:
+     * @Param data:
      * @return: void
      */
     private void complete(Request request, Response response, Throwable throwable,
-                          GatewayContext ctx, RouteFilter.Config filterConfig) {
+                          GatewayContext ctx, Object data) {
         try{
             //释放FullHttpRequest请求对象
             ctx.releaseRequest();
@@ -255,33 +263,27 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                     //在上下文中设置异常信息
                     ctx.setThrowable(new ResponseException(throwable.getCause(), ctx.getUniqueId(),
                             ResponseCode.REQUEST_TIMEOUT));
-                    // TODO: 2024-05-23 这里不需要构建网关响应吗？？？？？
+                    ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.REQUEST_TIMEOUT));
                 }else{
                     //其他异常情况
                     log.warn("【路由过滤器】请求: {} 出现响应异常");
                     ctx.setThrowable(new ConnectException(throwable.getCause(), ctx.getUniqueId(),
                             url, ResponseCode.HTTP_RESPONSE_ERROR));
+                    ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.HTTP_RESPONSE_ERROR));
                 }
+            }else if(Objects.nonNull(response)){
+                ctx.setResponse(GatewayResponse.buildGatewayResponse(response));
             }else{
-                /*
-                 * 请求成功，根据AsyncHttpClient接收到的响应结果，
-                 * 或者过滤器配置中的降级返回信息，构建网关响应对象
-                 */
-                if(Objects.nonNull(response)){
-                    ctx.setResponse(GatewayResponse.buildGatewayResponse(response));
-                }else{
-                    //降级回退默认不属于异常
-                    ctx.setResponse(GatewayResponse.buildGatewayResponse(
-                            ResponseCode.SUCCESS, filterConfig.getFallbackMessage()));
-                }
+                //降级回退默认不属于异常
+                ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.SUCCESS, data));
             }
         }catch (Exception e){
             //注：此处不要去执行异常过滤器链
             log.error("【路由过滤器】出现内部错误，无法正常处理响应");
             ctx.setThrowable(e);
+            ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.INTERNAL_ERROR));
         }finally {
             try{
-                // TODO: 2024-05-28 异常情况需要去构建网关响应 
                 //需将响应结果写回客户端，将上下文状态设置为written
                 ctx.setWritten();
                 /*
