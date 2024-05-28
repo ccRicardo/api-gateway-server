@@ -47,6 +47,8 @@ public class UserAuthFilter extends AbstractGatewayFilter<UserAuthFilter.Config>
      */
     //从静态配置类中获取生成签名时使用的密钥
     private static final String SECRET_KEY = ConfigLoader.getConfig().getSecretKey();
+    //异常消息
+    private static final String EXCEPTION_MSG = "【用户鉴权过滤器】执行异常: ";
     /**
      * @BelongsProject: my-api-gateway
      * @BelongsPackage: org.wyh.core.filter.authentication
@@ -95,15 +97,10 @@ public class UserAuthFilter extends AbstractGatewayFilter<UserAuthFilter.Config>
             //设置请求对象中的userId属性，方便下游后台服务获取用户身份信息。
             ctx.getRequest().setUserId(userId);
             log.info("【用户鉴权过滤器】用户鉴权成功：{}", userId);
-        }catch(ResponseException re){
-            //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
-            ctx.setTerminated();
-            throw re;
         } catch(Exception e){
-            log.error("【用户鉴权过滤器】过滤器执行异常", e);
             //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
             ctx.setTerminated();
-            throw e;
+            throw new Exception(EXCEPTION_MSG + e.getMessage(), e);
         } finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，

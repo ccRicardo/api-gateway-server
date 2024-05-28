@@ -28,6 +28,8 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
               type= FilterType.ERROR,
               order=DEFAULT_ERROR_FILTER_ORDER)
 public class DefaultErrorFilter extends AbstractGatewayFilter<DefaultErrorFilter.Config> {
+    //异常消息
+    private static final String EXCEPTION_MSG = "【异常处理过滤器】执行异常: ";
     /**
      * @BelongsProject: api-gateway-server
      * @BelongsPackage: org.wyh.gateway.core.filter.error
@@ -50,6 +52,7 @@ public class DefaultErrorFilter extends AbstractGatewayFilter<DefaultErrorFilter
     }
     @Override
     public void doFilter(GatewayContext ctx, Object... args) throws Throwable {
+
         try{
             //args[0]其实就是该过滤器的配置类实例
             DefaultErrorFilter.Config filterConfig =  (DefaultErrorFilter.Config)args[0];
@@ -64,7 +67,7 @@ public class DefaultErrorFilter extends AbstractGatewayFilter<DefaultErrorFilter
             //构建并设置网关响应对象
             ctx.setResponse(GatewayResponse.buildGatewayResponse(responseCode));
         }catch (Exception e){
-            log.error("【异常处理过滤器】过滤器执行异常", e);
+            log.error(EXCEPTION_MSG + e.getMessage());
             //构建并设置网关响应对象
             ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.INTERNAL_ERROR));
         }finally {

@@ -34,6 +34,8 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
               type=FilterType.PRE,
               order=GRAY_FILTER_ORDER)
 public class GrayFilter extends AbstractGatewayFilter<GrayFilter.Config> {
+    //异常消息
+    private static final String EXCEPTION_MSG = "【灰度过滤器】执行异常: ";
     /**
      * @BelongsProject: my-api-gateway
      * @BelongsPackage: org.wyh.core.filter.gray
@@ -97,10 +99,9 @@ public class GrayFilter extends AbstractGatewayFilter<GrayFilter.Config> {
                 log.info("【灰度过滤器】当前流量属于灰度流量");
             }
         }catch (Exception e){
-            log.error("【灰度过滤器】过滤器执行异常", e);
             //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
             ctx.setTerminated();
-            throw e;
+            throw new Exception(EXCEPTION_MSG + e.getMessage(), e);
         }finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，

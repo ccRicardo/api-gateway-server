@@ -26,6 +26,8 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
               type=FilterType.PRE,
               order=FLOW_CTRL_FILTER_ORDER)
 public class FlowCtrlFilter extends AbstractGatewayFilter<FlowCtrlFilter.Config> {
+    //异常消息
+    private static final String EXCEPTION_MSG = "【流量控制过滤器】执行异常: ";
     /**
      * @BelongsProject: my-api-gateway
      * @BelongsPackage: org.wyh.core.filter.flowcontrol
@@ -75,13 +77,13 @@ public class FlowCtrlFilter extends AbstractGatewayFilter<FlowCtrlFilter.Config>
                     flowCtrlExecutor.doFlowCtrlFilter(filterConfig, uniqueId);
                 }else{
                     log.warn("【流量控制过滤器】不支持该限流策略: {}", filterConfig.getType());
+                    //不限流
                 }
             }
         }catch (Exception e){
-            log.error("【流量控制过滤器】过滤器执行异常", e);
             //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
             ctx.setTerminated();
-            throw e;
+            throw new Exception(EXCEPTION_MSG + e.getMessage(), e);
         }finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，

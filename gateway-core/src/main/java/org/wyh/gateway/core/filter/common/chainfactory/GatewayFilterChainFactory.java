@@ -95,7 +95,7 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
                 //将排好序的过滤器集合添加到相应的过滤器链中
                 super.buildFilterChain(filterType, filterList);
             }catch (Throwable e){
-                log.error("过滤器链构建异常: {}", e.getMessage(), e);
+                log.error("过滤器链构建异常: {}", e.getMessage());
             }
         }
 
@@ -110,7 +110,7 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
              * 这里只负责捕获前置和路由过滤器（不包括complete方法）中的异常
              * 对于后置过滤器中的异常，在complete方法中做简单处理即可
              */
-            log.error("过滤器链执行异常: {}", e.getMessage(), e);
+            log.error("过滤器链执行异常: {}", e.getMessage());
             //在网关上下文中设置异常信息
             ctx.setThrowable(e);
             //正常过滤器链执行结束后，开始执行异常过滤器链，所以要更改上下文状态
@@ -128,7 +128,7 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
             //启动异常情况下的过滤器链
             super.errorFilterChain.start(ctx);
         }catch (Throwable e){
-            log.error("异常处理过滤器链执行异常: {}", e.getMessage(), e);
+            log.error("异常处理过滤器链执行异常: {}", e.getMessage());
             // TODO: 2024-05-27 这里需要设置上下文异常吗
         }
     }

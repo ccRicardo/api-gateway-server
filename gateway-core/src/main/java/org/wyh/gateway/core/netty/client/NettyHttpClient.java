@@ -108,7 +108,7 @@ public class NettyHttpClient implements LifeCycle {
                 //释放AsyncHttpClient对象
                 this.asyncHttpClient.close();
             } catch (IOException e) {
-                log.error("NettyHttp客户端关闭异常", e);
+                log.error("NettyHttp客户端关闭异常");
             }
         }
     }

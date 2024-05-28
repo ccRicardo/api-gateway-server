@@ -174,7 +174,7 @@ public class ResponseHelper {
             //释放请求对象
             ReferenceCountUtil.release(httpRequest);
         }catch (Exception e){
-            log.error("写回失败！请求: {} 的写回过程出现异常", httpRequest, e);
+            log.error("写回失败！请求: {} 的写回过程出现异常", httpRequest);
         }
     }
 }

@@ -243,14 +243,14 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
         @Override
         public void handleOnStartException(Throwable ex) {
             //该方法用于对Disruptor启动过程中产生的异常进行处理
-            log.error("Disruptor启动异常", ex);
+            log.error("Disruptor启动异常");
             throw new RuntimeException(ex);
         }
 
         @Override
         public void handleOnShutdownException(Throwable ex) {
             //该方法用于对Disruptor关闭过程中产生的异常进行处理
-            log.error("Disruptor关闭异常", ex);
+            log.error("Disruptor关闭异常");
             throw new RuntimeException(ex);
         }
     }

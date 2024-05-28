@@ -33,6 +33,8 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
               type=FilterType.PRE,
               order=LOAD_BALANCE_FILTER_ORDER)
 public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.Config> {
+    //异常消息
+    private static final String EXCEPTION_MSG = "【负载均衡过滤器】执行异常: ";
     /**
      * @BelongsProject: api-gateway-server
      * @BelongsPackage: org.wyh.gateway.core.filter.pre.loadbalance
@@ -81,15 +83,10 @@ public class LoadBalanceFilter extends AbstractGatewayFilter<LoadBalanceFilter.C
             }
             //设置最终服务的地址（这一步非常关键！！！）
             ctx.getRequest().setModifyHost(selectedInstance.getAddress());
-        }catch(ResponseException re){
-            //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
-            ctx.setTerminated();
-            throw re;
         } catch (Exception e){
-            log.error("【负载均衡过滤器】过滤器执行异常", e);
             //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
             ctx.setTerminated();
-            throw e;
+            throw new Exception(EXCEPTION_MSG + e.getMessage(), e);
         }finally {
             /*
              * 调用父类AbstractLinkedFilter的fireNext方法，

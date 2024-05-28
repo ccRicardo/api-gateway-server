@@ -43,6 +43,8 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
               order=ROUTE_FILTER_ORDER)
 public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     // TODO: 2024-05-22 源码还在相应设置了上下文的RS，RR等属性
+    //异常消息
+    private static final String EXCEPTION_MSG = "【路由过滤器】执行异常: ";
     /**
      * @BelongsProject: api-gateway-server
      * @BelongsPackage: org.wyh.gateway.core.filter.route
@@ -217,10 +219,9 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                         responseWrapper.getThrowable(), ctx, responseWrapper.getData());
             }
         }catch (Exception e){
-            log.error("【路由过滤器】过滤器执行异常", e);
             //过滤器执行过程出现异常，（正常）过滤器链执行结束，将上下文状态设置为terminated
             ctx.setTerminated();
-            throw e;
+            throw new Exception(EXCEPTION_MSG + e.getMessage(), e);
         }
         /*
          * 注意，此处不要设置finally子句，没有意义。

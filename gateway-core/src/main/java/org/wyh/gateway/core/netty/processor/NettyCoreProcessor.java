@@ -53,21 +53,21 @@ public class NettyCoreProcessor implements NettyProcessor{
              * 所以此处捕获的实际上是RequestHelper.doContext抛出的异常
              */
         }catch (ConnectException ce){
-            log.error("服务: {}的连接请求: {}出现异常", ce.getUniqueId(), ce.getRequestUrl(), ce);
+            log.error("服务: {}的连接请求: {}出现异常", ce.getUniqueId(), ce.getRequestUrl());
             //写回响应。（注意：此时还不一定构建了上下文对象）
             ResponseHelper.writeResponse(requestWrapper, ce.getCode());
         }catch (NotFoundException nfe){
-            log.error("未找到服务: {}的资源实例", nfe.getUniqueId(), nfe);
+            log.error("未找到服务: {}的资源实例", nfe.getUniqueId());
             ResponseHelper.writeResponse(requestWrapper, nfe.getCode());
         }catch (PathNoMatchedException pe){
             log.error("请求路径: {} 与服务: {} 的规则: {} 不匹配",
-                    pe.getPath(), pe.getUniqueId(), pe.getPatternPath(), pe);
+                    pe.getPath(), pe.getUniqueId(), pe.getPatternPath());
             ResponseHelper.writeResponse(requestWrapper, pe.getCode());
         }catch (ResponseException re){
-            log.error("服务: {}响应异常 :{}", re.getUniqueId(), re.getCode().getMessage(), re);
+            log.error("服务: {}响应异常 :{}", re.getUniqueId(), re.getCode().getMessage());
             ResponseHelper.writeResponse(requestWrapper, re.getCode());
         } catch (Throwable t) {
-            log.error("网关内部出现未知异常", t);
+            log.error("网关内部出现未知异常");
             ResponseHelper.writeResponse(requestWrapper, ResponseCode.INTERNAL_ERROR);
         }
     }
