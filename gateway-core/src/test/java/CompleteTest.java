@@ -11,21 +11,26 @@ import java.util.concurrent.Executors;
 
 public class CompleteTest {
     public static void main(String[] args) {
-        try{
+
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             CompletableFuture<Void> cf = CompletableFuture.supplyAsync(()->{
                 System.out.println(Thread.currentThread().getName());
                 return null;
             }, executorService);
-            cf.whenComplete((r, e)->complete());
-            Thread.sleep(3*1000);
+            cf.whenComplete((r, e)-> complete());
+
             System.out.println(Thread.currentThread().getName() + " no error!");
-        }catch(Exception e){
-            System.out.println(Thread.currentThread().getName() + " error!");
-        }
+
     }
-    private static void complete(){
-        System.out.println(Thread.currentThread().getName() + " error exist!!!");
-        throw new RuntimeException("!!!!");
+    private static void complete() {
+        try{
+            Thread.sleep(30*1000);
+        }catch (Exception e){
+
+        }finally {
+            System.out.println(Thread.currentThread().getName() + " error exist!!!");
+            throw new RuntimeException("!!!!");
+        }
+
     }
 }
