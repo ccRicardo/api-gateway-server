@@ -6,4 +6,5 @@ org.wyh.gateway.core.filter.pre.gray.GrayFilter
 # 路由route
 org.wyh.gateway.core.filter.route.RouteFilter
 # 异常error
+org.wyh.gateway.core.filter.error.DefaultErrorFilter
 # 后置post
