@@ -104,7 +104,7 @@ public class PrometheusMonitor {
             });
             log.info("正在启动http服务器，端口: {} 路径 :{}", port, path);
             //开启一个单独的线程运行http服务器，并通过上述HttpHandler向Prometheus响应数据
-            new Thread(httpServer::start).start();
+            new Thread(httpServer::start, "监控数据拉取服务").start();
         }catch (IOException e){
             log.error("http服务器状态异常，端口: {} 路径: {}", port, path);
             throw new RuntimeException("http服务器状态异常", e);

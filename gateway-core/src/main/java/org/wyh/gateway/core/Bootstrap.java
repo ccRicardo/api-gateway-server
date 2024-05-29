@@ -44,7 +44,7 @@ public class Bootstrap {
         log.info("api网关系统ip: {} 端口号: {}", NetUtils.getLocalIp(), config.getPort());
         //二、过滤插件初始化（插件初始化工作实际上是在过滤器链工厂类中完成的）
         // TODO: 2024-05-20 未完成过滤器插件的初始化
-        //三、初始化配置中心，然后设置RulesChangeListener监听器实例，订阅规则的变更
+        //三、初始化配置中心，然后设置ConfigCenterListener监听器实例，订阅规则的变更
         ConfigCenterManager configCenterManager = ConfigCenterManager.getInstance();
         configCenterManager.init(config);
         configCenterManager.subscribeConfigCenter(ConfigCenterManager.DEFAULT_LISTENER);

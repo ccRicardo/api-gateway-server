@@ -6,16 +6,24 @@ todo 更新下整体流程说明
 （一）加载本地的静态配置信息。
 配置加载的优先级是：运行参数 > jvm参数 > 系统环境变量 > 配置文件 > 默认值
 （二）初始化配置中心
-先通过spi机制来创建配置中心的实例，然后调用init方法完成初始化。最后，传入一个RulesChangeListener实例，订阅规则的变更。
+先通过spi机制来加载配置中心的实例，然后初始化。最后，设置监听器实例，订阅规则的变更。
 （三）启动网关核心容器
 核心容器封装了网关系统的三个核心通信类：NettyHttpServer，NettyProcessor和NettyHttpClient。
 这三个类的启动又会实例化其他的核心功能类。因此，网关系统中的绝大部分核心功能类都是在这个阶段完成实例化的。
 （四）初始化注册中心
-先通过spi机制来创建注册中心的实例，然后将api网关服务也注册到注册中心。最后，传入一个RegisterCenterListener实例，订阅所有的服务。
+先通过spi机制来加载注册中心的实例，然后初始化，并将api网关服务也注册到注册中心。最后，设置监听器实例，订阅服务的变更。
 （五）服务优雅关机
-在网关系统关闭之前，在注册中心中注销掉网关服务。
+在网关系统关闭之前，关闭网关核心容器，释放资源。
 
-todo 总结一下系统中用到的各种线程池
+本系统用到的线程池主要包括：
+1、NettyHttpServer中的eventLoopGroupWorker，主要负责接收客户端的请求，并放入缓冲队列中
+2、AsyncHttpClient中的eventLoopGroupWorker，主要负责发送请求和接收响应
+3、DisruptorBufferQueue中的workerPool，主要负责从缓冲队列中取出请求进行解析和处理
+4、HystrixCommand中的线程池，主要负责执行相应的run方法
+此外，还有一些单线程：
+1、Bootstrap中的主线程，主要负责网关的初始化和启动
+2、NacosRegisterCenter.subscribeServicesChange方法中的scheduledThreadPool，主要负责定期执行doSubscribeServicesChange
+3、PrometheusMonitor中的单线程，主要负责运行http服务器，提供api给Prometheus拉取数据
 
 二、模块详情
 该系统可以分为五个模块：通信模块，过滤组件模块，客户端（服务接入）模块，注册配置模块，以及云原生模块（实现中）
