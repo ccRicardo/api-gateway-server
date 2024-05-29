@@ -129,7 +129,6 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
             super.errorFilterChain.start(ctx);
         }catch (Throwable e){
             log.error("异常处理过滤器链执行异常: {}", e.getMessage());
-            // TODO: 2024-05-27 这里需要设置上下文异常吗
         }
     }
 }

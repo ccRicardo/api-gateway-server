@@ -33,10 +33,10 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
  * @Description: 路由过滤器，负责发送请求给目标服务，并接收和处理其响应结果。
                  （在此之前，已经通过负载均衡过滤器确定了要访问的服务实例）
                  该过滤器实际上是通过AsyncHttpClient框架向目标异步发送http请求的。
-                 注意：发送请求和接收响应的工作都是在工作线程中执行的。
+                 注意：发送请求和接收响应的工作都是在AsyncHttpClient的线程池中执行的。
                  而处理响应的complete方法具体执行在哪个线程，取决于是否使用hystrix
+                 若使用hystrix，则complete执行在disruptor消费者线程池，否则执行在AsyncHttpClient线程池。
  */
-// TODO: 2024-05-28 关于complete的注释需要修改
 @Slf4j
 @FilterAspect(id=ROUTE_FILTER_ID,
               name=ROUTE_FILTER_NAME,
@@ -109,16 +109,15 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
             Request request = ctx.getRequest().build();
             /*
              * 通过AsyncHttpHelper封装的AsyncHttpClient发送异步http请求。
-             * 注意：发送请求，和后续的响应接收，都是在工作线程（准确来说是AsyncHttpClient线程池中的线程）中执行的。
+             * 注意：发送请求，和后续的响应接收，都是在AsyncHttpClient线程池中执行的。
              */
             CompletableFuture<Response> futureResponse = AsyncHttpHelper.getInstance().executeRequest(request);
             /*
              * 根据过滤器配置判断是否要使用hystrix进行熔断降级
              * 注意：
-             * 若不使用hystrix，则需要将complete设置为异步回调方法。这种情况下，complete运行在工作线程中。
+             * 若不使用hystrix，则需要将complete设置为异步回调方法。这种情况下，complete运行在AsyncHttpClient线程池中。
              * 若使用hystrix，则在其run方法中，需要阻塞等待请求的响应结果，然后再调用complete方法。
-             * 这种情况下，complete运行在主线程中
-             * （在实际论文中，可以”假设“hystrix命令对象运行在工作线程中）
+             * 这种情况下，complete运行在disruptor的消费者线程池中
              */
             if(!filterConfig.isUseHystrix()){
                 //单/双异步模式的标识。单异步使用whenComplete，双异步使用whenCompleteAsync
@@ -234,8 +233,8 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
      * @date: 2024-05-23 14:48
      * @description: 负责对响应结果进行处理，并且激发下一个过滤器组件
                      注意：该方法具体执行在哪个线程，取决于是否使用了hystrix。
-                     若未使用hystrix，则该方法执行在工作线程，并且只有当AsyncHttpClient接收到响应时才会被调用
-                     此外，由于complete方法有可能执行在工作线程中，无法把异常抛给主线程中的相应方法，
+                     若未使用hystrix，则该方法执行在AsyncHttpClient线程池中，并且只有当AsyncHttpClient接收到响应时才会被调用
+                     此时，complete方法无法把异常抛给disruptor消费者线程中的相应方法（具体指FilterChainFactory.doFilterChain），
                      所以complete不应该向上层抛出任何异常，也不应该去执行异常过滤器链
                      由于不会去执行异常处理过滤器，所以出现异常时，需要自己构建对应的网关响应对象
 

@@ -118,7 +118,7 @@
 //    private void complete(Request request, Response response,
 //                          Throwable throwable, GatewayContext ctx,
 //                          Optional<Rule.HystrixConfig> hystrixConfig){
-//        // TODO: 2024-03-07 感觉这个资源释放的位置不对，应该在请求成功或者重试次数耗尽后再释放资源。
+//
 //        //释放请求对象
 //        ctx.releaseRequest();
 //        //获取当前的请求重发/重试次数
@@ -210,7 +210,7 @@
 //        //构建异步请求对象（在之前的过程中已经获取了真实的主机地址，再拼上请求路径，就获得了最终的url）
 //        Request request = ctx.getRequest().build();
 //        log.info("成功发送请求{}", request.getUrl());
-//        //TODO 感觉这里改成从NettyHttpClient获取AsyncHttpClient实例，再发送异步http请求比较好，不然体现不出客户端的作用
+//
 //        //使用AsyncHttpClient，发送异步http请求
 //        CompletableFuture<Response> future = AsyncHttpHelper.getInstance().executeRequest(request);
 //        //单/双异步标识
