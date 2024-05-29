@@ -22,6 +22,7 @@
 此外，还有一些单线程：
 1、Bootstrap中的主线程，主要负责网关的初始化和启动
 2、NacosRegisterCenter.subscribeServicesChange方法中的scheduledThreadPool，主要负责定期执行doSubscribeServicesChange
+todo 这里需要改一下
 3、PrometheusMonitor中的单线程，主要负责运行http服务器，提供api给Prometheus拉取数据
 
 二、模块详情
@@ -114,7 +115,6 @@ RedisCountLimiter：通过在redis中运行指定的lua脚本来实现的分布�
 灰度分流的策略分为两种：基于http请求头中携带的灰度标记（主要用于测试人员测试灰度服务），和基于客户端ip进行分流。
 灰度分流的主要类是GrayFilter
 
-todo 过滤器部分目前还没实现完
 5、负载均衡
 负载均衡的主要作用是根据指定的均衡策略，从匹配的服务实例集合中选择一个服务实例，作为后续真正的服务调用对象。
 负载均衡策略：随机
@@ -134,7 +134,7 @@ LoadBalanceFactory：负载均衡工厂类，负责生产（实际上是从集�
 异常处理的主要作用是检查上下文中的异常信息，并向客户端写回相应的响应
 注意：只有当前置和路由（不包括complete方法）执行异常时，才会调用异常处理过滤器来写回响应
 异常处理的主要类是DefaultErrorFilter
-
+todo 过滤器部分目前还没实现完
 8、
 
 （三）服务接入/客户端模块

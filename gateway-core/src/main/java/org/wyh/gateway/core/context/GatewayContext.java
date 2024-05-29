@@ -25,10 +25,6 @@ public class GatewayContext extends BasicContext{
     private GatewayResponse gatewayResponse;
     //规则对象
     private final Rule rule;
-    //记录当前的请求重试次数
-    @Setter
-    @Getter
-    private int currentRetryTimes;
 
 
     /**
@@ -42,11 +38,10 @@ public class GatewayContext extends BasicContext{
      * @return: null
      */
     public GatewayContext(String protocol, ChannelHandlerContext nettyCtx, boolean keepAlive,
-                          GatewayRequest gatewayRequest, Rule rule, int currentRetryTimes) {
+                          GatewayRequest gatewayRequest, Rule rule) {
         super(protocol, nettyCtx, keepAlive);
         this.gatewayRequest = gatewayRequest;
         this.rule = rule;
-        this.currentRetryTimes = currentRetryTimes;
     }
     /**
      * @BelongsProject: my-api-gateway
@@ -135,7 +130,7 @@ public class GatewayContext extends BasicContext{
             AssertUtil.notNull(nettyCtx, "nettyCtx不能为空");
             AssertUtil.notNull(gatewayRequest, "request不能为空");
             AssertUtil.notNull(rule, "rule不能为空");
-            return new GatewayContext(protocol, nettyCtx, keepAlive, gatewayRequest, rule, 0);
+            return new GatewayContext(protocol, nettyCtx, keepAlive, gatewayRequest, rule);
         }
     }
     /**
