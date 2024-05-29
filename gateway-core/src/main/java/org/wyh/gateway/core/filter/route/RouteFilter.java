@@ -194,6 +194,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                          * 若请求失败，该方法会返回一个异常对象
                          */
                         try{
+                            log.info("【路由过滤器】正在执行hystrix command run方法");
                             Response response = futureResponse.get();
                             wrapper.setResponse(response);
                         }catch (Throwable t){
