@@ -59,9 +59,9 @@ public class DefaultErrorFilter extends AbstractGatewayFilter<DefaultErrorFilter
             //异常对应的异常响应码，默认为ResponseCode.INTERNAL_ERROR
             ResponseCode responseCode = ResponseCode.INTERNAL_ERROR;
             Throwable throwable = ctx.getThrowable();
-            //判断异常对象是否属于网关定义的异常类型
-            if(throwable instanceof BaseException){
-                BaseException baseException = (BaseException) throwable;
+            //判断异常对象是否属于网关定义的异常类型（注意要使用getCause获取原始异常对象）
+            if(throwable.getCause() instanceof BaseException){
+                BaseException baseException = (BaseException) (throwable.getCause());
                 responseCode = baseException.getCode();
             }
             //构建并设置网关响应对象
