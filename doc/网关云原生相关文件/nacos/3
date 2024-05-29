@@ -1,0 +1,45 @@
+{
+    "ruleId":"3",
+    "name":"3号规则 user服务使用",
+    "protocol":"http",
+    "order":1,
+    "filterConfigs":[
+        {
+            "filterId":"user_auth_filter",
+            "config":""
+        },
+        {
+            "filterId":"flow_ctrl_filter",
+            "config":{
+                "type":"service",
+                "mode":"singleton",
+                "duration":1,
+                "permits":60
+            }
+        },
+        {
+            "filterId":"gray_filter",
+            "config":{
+                "grayIpSet":"127.0.0.2"
+            }
+        },
+        {
+            "filterId":"load_balance_filter",
+            "config":{
+                "loadBalanceStrategy":"Random"
+            }
+        },
+        {
+            "filterId":"route_filter",
+            "config":{
+                "useHystrix":false,
+                "timeoutInMilliseconds":3000,
+                "threadPoolCoreSize":3
+            }
+        },
+        {
+            "filterId":"default_error_filter",
+            "config":""
+        }
+    ]
+}
