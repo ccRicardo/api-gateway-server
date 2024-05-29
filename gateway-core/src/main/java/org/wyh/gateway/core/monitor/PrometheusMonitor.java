@@ -33,7 +33,7 @@ import java.net.InetSocketAddress;
  * 然后将该数据记录到注册中心中的指定Timer实例内。（该Timer实例其实充当了数据汇总的角色）
  * 当Prometheus访问api时，注册中心便会将Timer实例中的数据写入到响应体中。
  */
-// TODO: 2024-05-17 目前，该类还未启用
+// TODO: 2024-05-17 目前，该类还未启用，可以考虑改成后置过滤器
 @Slf4j
 public class PrometheusMonitor {
     /*
