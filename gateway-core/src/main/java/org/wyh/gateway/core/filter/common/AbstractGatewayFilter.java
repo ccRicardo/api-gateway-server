@@ -21,7 +21,6 @@ import org.wyh.gateway.core.filter.common.base.FilterAspect;
                  此外，该类主要实现的是check和filter方法，而doFilter方法是由具体过滤器来实现的。
                  注意，方法中的args参数实际上存放的是过滤器组件的配置类实例
  */
-// TODO: 2024-05-15 需要测试一下：在nacos中修改规则的过滤器配置，本地缓存中对应的原配置项会不会失效
 @Slf4j
 public abstract class AbstractGatewayFilter<C> extends AbstractLinkedFilter {
     //过滤器的注解对象
