@@ -10,6 +10,7 @@ import org.wyh.gateway.common.enumeration.ResponseCode;
 import org.wyh.gateway.common.exception.ConnectException;
 import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.core.config.ConfigLoader;
+import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
 import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
 import org.wyh.gateway.core.filter.common.base.FilterAspect;
@@ -149,17 +150,17 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 //通过Setter配置HystrixCommand实例的相关属性
                 HystrixCommand.Setter setter = HystrixCommand.Setter
                     /*
-                     * 将HystrixCommand分组的key设置为访问服务的uniqueId
-                     * 一个HystrixCommand分组对应一个服务，一个线程池（默认使用线程池隔离），以及一个断路器
+                     * 将HystrixCommand分组的key设置为要访问的服务实例的id/真实地址
+                     * 一个HystrixCommand分组对应一个服务实例，一个线程池（默认使用线程池隔离），以及一个断路器
                      * 一个HystrixCommand实例执行完毕后，其对应的断路器实例并不会跟着释放，
                      * 而是继续运行在内存中，对同一分组的后续HystrixCommand实例的执行进行控制和监控。
                      * （默认情况下分组key也是对应线程池的key）
                      */
-                    .withGroupKey(HystrixCommandGroupKey.Factory.asKey(ctx.getUniqueId()))
+                    .withGroupKey(HystrixCommandGroupKey.Factory.asKey(ctx.getAttribute(AttributeKey.SELECTED_INSTANCE).getServiceInstanceId()))
                     /*
                      * 将HystrixCommand实例的key设为请求的访问路径
                      * 一个HystrixCommand实例对应一个/一次请求。
-                     * 综上所属，可知HystrixCommand实例所属的分组，正好对应了该次请求要访问的服务
+                     * 综上所属，可知HystrixCommand实例所属的分组，正好对应了该次请求要访问的服务实例
                      */
                     .andCommandKey(HystrixCommandKey.Factory.asKey(ctx.getRequest().getPath()))
                     .andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
@@ -248,6 +249,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     private void complete(Request request, Response response, Throwable throwable,
                           GatewayContext ctx, Object data) {
         try{
+            log.info("接收到请求: {} 的响应结果", request.getUri());
             //释放FullHttpRequest请求对象
             ctx.releaseRequest();
             String url = request.getUrl();

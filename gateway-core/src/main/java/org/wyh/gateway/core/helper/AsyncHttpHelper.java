@@ -1,5 +1,6 @@
 package org.wyh.gateway.core.helper;
 
+import lombok.extern.slf4j.Slf4j;
 import org.asynchttpclient.*;
 
 import java.util.concurrent.CompletableFuture;
@@ -13,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
                  该项目底层使用了AsyncHttpClient框架来实现异步http请求的发送
                  因此该类实际上是对AsyncHttpClient中相关api的封装
  */
+@Slf4j
 public class AsyncHttpHelper {
     //本项目底层通过AsyncHttpClient框架来发送异步http请求
     private AsyncHttpClient asyncHttpClient;
@@ -56,6 +58,7 @@ public class AsyncHttpHelper {
      * @return: java.util.concurrent.CompletableFuture<org.asynchttpclient.Response>
      */
     public CompletableFuture<Response> executeRequest(Request request){
+        log.info("请求: {} 已发送", request.getUri());
         //ListenableFuture和CompletableFuture都是对java Future接口的拓展，都提供了回调功能
         //至于两者之间的差异，在该项目中可以忽略
         ListenableFuture<Response> future = asyncHttpClient.executeRequest(request);
@@ -70,6 +73,7 @@ public class AsyncHttpHelper {
      * @return: java.util.concurrent.CompletableFuture<T>
      */
     public <T> CompletableFuture<T> executeRequest(Request request, AsyncHandler<T> handler) {
+        log.info("请求: {} 已发送", request.getUri());
         //ListenableFuture和CompletableFuture都是对java Future接口的拓展，都提供了回调功能
         //至于两者之间的差异，在该项目中可以忽略
         ListenableFuture<T> future = asyncHttpClient.executeRequest(request, handler);

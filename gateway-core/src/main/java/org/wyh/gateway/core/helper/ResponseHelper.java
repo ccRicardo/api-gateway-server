@@ -131,15 +131,20 @@ public class ResponseHelper {
                     httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
                     ctx.getNettyCtx().writeAndFlush(httpResponse);
                 }
-                // TODO: 2024-05-29  打印相关日志信息
+                //打印相关日志
+                if(Objects.nonNull(ctx.getThrowable())){
+                    log.info("请求: {} 异常，已写回异常响应", ctx.getRequest().getPath());
+                }else{
+                    log.info("请求: {} 成功，已写回响应结果", ctx.getRequest().getPath());
+                }
                 //将上下文状态设置为写回完成
                 ctx.setCompleted();
                 //调用回调函数，完成相关的后处理
                 ctx.invokeCompletedCallBack();
-                // TODO: 2024-05-24 这里的逻辑改动是否合理？
-            } else {
+            } else if(ctx.isCompleted()){
                 log.warn("请求: {} 的结果已写回！", ctx.getRequest().getPath());
             }
+            //其他上下文状态不做处理
         }catch (Exception e){
             log.error("写回失败！请求: {} 的写回过程出现异常: {}",
                     ctx.getRequest().getPath(), e.getMessage(), e);
@@ -172,6 +177,8 @@ public class ResponseHelper {
                 httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
                 nettyCtx.writeAndFlush(httpResponse);
             }
+            //打印相关日志
+            log.info("请求: {} 异常，已写回异常响应", httpRequest.uri());
             //释放请求对象
             ReferenceCountUtil.release(httpRequest);
         }catch (Exception e){

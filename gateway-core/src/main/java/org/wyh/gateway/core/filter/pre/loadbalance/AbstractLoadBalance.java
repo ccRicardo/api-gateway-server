@@ -1,5 +1,6 @@
 package org.wyh.gateway.core.filter.pre.loadbalance;
 
+import lombok.extern.slf4j.Slf4j;
 import org.wyh.gateway.common.config.ServiceInstance;
 import org.wyh.gateway.common.utils.TimeUtil;
 import org.wyh.gateway.core.context.AttributeKey;
@@ -17,6 +18,7 @@ import java.util.Set;
  * @Date: 2024-05-22 9:45
  * @Description: 负载均衡抽象类，主要提供了预热权重的计算方法
  */
+@Slf4j
 public abstract class AbstractLoadBalance implements LoadBalance{
     @Override
     public ServiceInstance select(GatewayContext ctx) {
@@ -27,11 +29,13 @@ public abstract class AbstractLoadBalance implements LoadBalance{
         }
         //将服务实例set转换成对应的服务实例list，方便后续操作
         List<ServiceInstance> instanceList = new ArrayList<>(instanceSet);
+        ServiceInstance instance;
         if(instanceList.size() == 1){
-            return instanceList.get(0);
+            instance = instanceList.get(0);
+        }else{
+            //将负载均衡的具体处理逻辑委托给doSelect方法
+            instance = doSelect(ctx, instanceList);
         }
-        //将负载均衡的具体处理逻辑委托给doSelect方法
-        ServiceInstance instance = doSelect(ctx, instanceList);
         //将选中的服务实例放入相应的上下文参数中
         ctx.setAttribute(AttributeKey.SELECTED_INSTANCE, instance);
         return instance;

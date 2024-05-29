@@ -56,6 +56,7 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
         @Trace
         @Override
         public void onEvent(HttpRequestWrapper eventValue) {
+            log.info("请求: {} 已从Disrutpor缓冲队列中取出", eventValue.getFullHttpRequest().uri());
             //调用NettyCoreProcessor（请求处理器）来真正处理请求事件
             nettyCoreProcessor.process(eventValue);
         }
@@ -63,7 +64,7 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
         public void onException(Throwable ex, long sequence, HttpRequestWrapper eventValue) {
             //注意：此处还没有构建网关上下文
             FullHttpRequest httpRequest = eventValue.getFullHttpRequest();
-            log.error("Disruptor缓冲队列处理请求: {} 时出现异常！", httpRequest);
+            log.error("Disruptor缓冲队列处理请求: {} 时出现异常！", httpRequest.uri());
             //写回响应。异常类型为网关内部错误。（注意：此时还未构建上下文对象）
             ResponseHelper.writeResponse(eventValue, ResponseCode.INTERNAL_ERROR);
         }
@@ -71,8 +72,10 @@ public class DisruptorNettyCoreProcessor implements NettyProcessor{
     @Trace
     @Override
     public void process(HttpRequestWrapper requestWrapper) {
+        log.info("请求: {} 已放入Disruptor缓冲队列", requestWrapper.getFullHttpRequest().uri());
         //将请求事件（的数据）添加到缓冲队列中
         disruptorBufferQueue.add(requestWrapper);
+
     }
     @Override
     public void init() {
