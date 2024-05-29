@@ -37,7 +37,7 @@ import org.wyh.gateway.core.monitor.PrometheusMonitor;
  * Timer.Sample.stop方法会停止计时，然后计算当前时间与开始时间的差值，并将其记录到传入的Timer实例中。
  */
 public class StatisticFilter extends AbstractGatewayFilter<StatisticFilter.Config> {
-    // TODO: 2024-05-29 过滤器实例在系统中好像只有一个？
+    // TODO: 2024-05-29 过滤器实例在系统中好像只有一个，不需要加static
     //Prometheus Meter的注册中心，用于创建和管理Prometheus Meter实例
     private static PrometheusMeterRegistry registry;
     //http服务器，用于提供一个rest api，供Prometheus拉取数据
