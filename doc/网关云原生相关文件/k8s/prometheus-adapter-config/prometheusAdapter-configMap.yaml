@@ -1,5 +1,7 @@
 apiVersion: v1
 data:
+  # 需要添加的部分是rules中的内容
+  # name的作用是对指标进行重命名
   config.yaml: |-
     "rules":
     - "seriesQuery": 'gateway_request_seconds_count{namespace!="",pod!=""}'
