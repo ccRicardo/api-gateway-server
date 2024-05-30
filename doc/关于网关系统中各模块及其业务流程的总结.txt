@@ -22,8 +22,7 @@
 此外，还有一些单线程：
 1、Bootstrap中的主线程，主要负责网关的初始化和启动
 2、NacosRegisterCenter.subscribeServicesChange方法中的scheduledThreadPool，主要负责定期执行doSubscribeServicesChange
-todo 这里需要改一下
-3、PrometheusMonitor中的单线程，主要负责运行http服务器，提供api给Prometheus拉取数据
+3、StatisticFilter中的单线程，主要负责运行http服务器，提供api给Prometheus拉取数据
 
 二、模块详情
 该系统可以分为五个模块：通信模块，过滤组件模块，客户端（服务接入）模块，注册配置模块，以及云原生模块（实现中）
@@ -67,8 +66,8 @@ http协议更加简单通用，并且功能丰富，对服务的提供方和调�
 而RPC的典型特点是速度快，性能好。但是物联网业务对于高并发，高性能的需求并没有互联网那么大，所以不是一定要使用
 ）
 客户端的主要类就是NettyHttpClient，其本质就是对AsyncHttpClient的封装。
-AsyncHttpClient能够异步地发送和接收http请求（即单独创建一个工作线程来负责请求的发送和接收，而不阻塞网关主线程的运行。）
-todo 对于AsyncHttpClient的异步原理，目前还只是猜测性质的理解，因此下面的总结不一定正确
+AsyncHttpClient能够异步地发送和接收http请求
+（即通过线程池中的工作线程来负责请求的发送和接收，而不阻塞消费者线程的运行。）
 当某个请求的响应数据返回后，相应的工作线程（也就是发送该请求的工作线程）就会接收结果，并调用预设好的异步回调函数，完成处理操作。
 （注意：
 * 上述过程是单异步的情况。如果是双异步，则会存在两个工作线程，一个负责发送请求，另一个负责接收其接收响应，这会导致线程上下文切换更加频繁，效率可能反而更低。
@@ -92,9 +91,10 @@ NettyRequestSender：发送http异步请求
 若后置过滤器执行异常，则仅做一些简单的日志打印和异常记录工作，不再进行过多的处理。
 
 1、过滤组件链工厂
-过滤组件链工厂类的主要作用是通过spi机制加载各组件的实例，然后根据上下文中携带的规则配置，构建相应的过滤器链实例。
+过滤组件链工厂类的主要作用是通过spi机制加载各组件的实例，然后根据过滤器类型和执行优先级，构建相应的过滤器链实例。
 过滤组件链工厂类的主要类是FilterChainFactory，AbstractFilterChainFactory和GatewayFilterChainFactory
 
+前置：
 2、用户鉴权
 用户鉴权的主要作用是从请求中获取jwt cookie，然后解析出相应的用户信息（即用户id）
 用户鉴权的主要类是UserAuthFilter
@@ -125,17 +125,23 @@ AbstractLoadBalance：提供了预热权重的计算
 RandomLoadBalanceRule：随机负载均衡
 LoadBalanceFactory：负载均衡工厂类，负责生产（实际上是从集合中获取）指定负载均衡策略的实例
 
+路由：
 6、路由
 路由的主要作用是通过AsyncHttpClient异步发送请求和接收响应，并使用complete方法对响应结果进行处理。
 路由部分可以启用hystrix进行熔断降级，但是必须阻塞等待请求的响应结果。
 路由的主要类是RouterFilter
 
+异常：
 7、异常处理
 异常处理的主要作用是检查上下文中的异常信息，并向客户端写回相应的响应
 注意：只有当前置和路由（不包括complete方法）执行异常时，才会调用异常处理过滤器来写回响应
 异常处理的主要类是DefaultErrorFilter
-todo 过滤器部分目前还没实现完
-8、
+
+后置：
+8、统计
+统计的主要作用是统计请求的数量以及各请求的处理时间，并且提供一个rest api，供Prometheus拉取数据
+统计的主要类是StatisticFilter
+
 
 （三）服务接入/客户端模块
 Q：为什么需要开发一个客户端模块，为什么只开发了spring boot的客户端模块？
