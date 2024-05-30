@@ -36,6 +36,10 @@
         {
             "filterId":"default_error_filter",
             "config":""
+        },
+        {
+                    "filterId":"statistic_filter",
+                    "config":""
         }
     ]
 }
