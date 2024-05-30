@@ -2,6 +2,8 @@ apiVersion: v1
 data:
   # 需要添加的部分是rules中的内容
   # name的作用是对指标进行重命名
+  # metricsQuery是一个Go模板，他会被转化成一个Prometheus查询语句。
+  # 该语句简单理解就是查询1m内，网关每秒处理的请求数量
   config.yaml: |-
     "rules":
     - "seriesQuery": 'gateway_request_seconds_count{namespace!="",pod!=""}'
