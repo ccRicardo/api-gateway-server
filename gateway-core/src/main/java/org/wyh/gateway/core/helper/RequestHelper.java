@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static org.wyh.gateway.common.constant.FilterConst.STATISTIC_FILTER_ID;
 import static org.wyh.gateway.common.enumeration.ResponseCode.PATH_NO_MATCHED;
 
 /**
@@ -69,8 +70,10 @@ public class RequestHelper {
                 .setGatewayRequest(gatewayRequest)
                 .setRule(rule)
                 .build();
-        //开始统计（该上下文对象对应的）请求对象的处理时间
-        StatisticFilter.startSample(gatewayContext);
+        //若启用了统计过滤器，则开始统计（该上下文对象对应的）请求对象的处理时间
+        if(rule.checkFilterExist(STATISTIC_FILTER_ID)){
+            StatisticFilter.startSample(gatewayContext);
+        }
         //在网关上下文中设置“http方法调用”参数
         gatewayContext.setAttribute(AttributeKey.HTTP_INVOKER, serviceInvoker);
         return gatewayContext;
