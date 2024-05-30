@@ -129,7 +129,9 @@ public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
             //启动异常情况下的过滤器链
             super.errorFilterChain.start(ctx);
         }catch (Throwable e){
+            //实际上，异常和后置过滤器都不会向上抛异常，所以理论上该分支永远也不会执行
             log.error("异常处理过滤器链执行异常: {}", e.getMessage());
+            ctx.setThrowable(e);
         }
     }
 }

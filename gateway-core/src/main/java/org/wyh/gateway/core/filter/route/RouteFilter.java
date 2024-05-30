@@ -299,10 +299,10 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
                 super.fireNext(ctx);
             }catch (Throwable t){
                 /*
-                 * 后置过滤器执行出现异常，在打印异常日志和记录异常信息后，就不再做其他的处理
-                 * 因为后置过滤器只是做一些统计分析方面的工作，出错就出错了，不用多管
+                 * 实际上，后续的写回操作和后置过滤器都不会向上抛异常，
+                 * 所以理论上该分支永远也不会执行
                  */
-                log.error("【路由过滤器】后置过滤器组件执行异常", t);
+                log.error("【路由过滤器】fireNext执行异常: {}", t.getMessage());
                 ctx.setThrowable(t);
             }
         }

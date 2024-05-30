@@ -16,7 +16,6 @@ import org.wyh.gateway.core.filter.common.AbstractGatewayFilter;
 import org.wyh.gateway.core.filter.common.base.FilterAspect;
 import org.wyh.gateway.core.filter.common.base.FilterConfig;
 import org.wyh.gateway.core.filter.common.base.FilterType;
-import org.wyh.gateway.core.monitor.PrometheusMonitor;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -38,7 +37,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
  * 当一个请求进入网关，并开始构建上下文时，便会调用该类的startSample方法
  * 该方法会先通过Timer.start方法创建一个Timer.Sample实例，然后设置到对应的上下文对象参数中。
  * 当执行该过滤器的doFilter方法时，便会调用上下文中的Timer.Sample实例的stop方法，计算出该请求的处理时间
- * 然后将该数据记录/上报到指定的Timer实例内。（该Timer实例其实充当了数据汇总的角色）
+ * 然后将该数据上报到指定的Timer实例内。（Timer实例其实充当了数据汇总的角色）
  * 当Prometheus访问api时，注册中心便会将Timer实例中的数据写入到响应体中。
  */
 /*
@@ -49,7 +48,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
  * Meter实例还可以设置标签，以进一步指明该Meter实例采集的数据源的详细信息。
  * Timer（计时器）是Meter的一种类型，其静态内部类Timer.Sample可以用于测量某个操作的耗时时间。
  * Timer.start方法会创建一个Timer.Sample实例，并将当前时间记录为测量的开始时间。
- * Timer.Sample.stop方法会停止计时，然后计算当前时间与开始时间的差值，并将其记录到传入的Timer实例中。
+ * Timer.Sample.stop方法会停止计时，然后计算当前时间与开始时间的差值，并将其上报到传入的Timer实例中。
  */
 @Slf4j
 @FilterAspect(id=STATISTIC_FILTER_ID,
@@ -62,6 +61,11 @@ public class StatisticFilter extends AbstractGatewayFilter<StatisticFilter.Confi
     private PrometheusMeterRegistry registry;
     //http服务器，用于提供一个rest api，供Prometheus拉取数据
     private HttpServer httpServer;
+    //负责接收统计数据的Timer实例的名称
+    private final String TIMER_NAME = "gateway.request";
+    //异常信息
+    private static final String EXCEPTION_MSG = "【统计过滤器】执行异常: ";
+
     /**
      * @BelongsProject: api-gateway-server
      * @BelongsPackage: org.wyh.gateway.core.filter.post
@@ -72,7 +76,7 @@ public class StatisticFilter extends AbstractGatewayFilter<StatisticFilter.Confi
     @Setter
     @Getter
     public static class Config extends FilterConfig {
-        //
+        //暂未使用到
     }
     public StatisticFilter(){
         super(StatisticFilter.Config.class);
@@ -86,21 +90,31 @@ public class StatisticFilter extends AbstractGatewayFilter<StatisticFilter.Confi
          */
         try{
             /*
-             * 从注册中心获取指定的Timer实例（若不存在，则创建该实例），
-             * 该实例会记录上下文中Timer.Sample实例收集到的数据
+             * 根据请求要访问的服务唯一id和路径，以及访问协议信息，从注册中心获取指定的Timer实例
+             * （若对应实例不存在，则创建；若存在，则直接获取），
+             * 该实例会接收上下文参数中Timer.Sample实例统计到的数据
              * （也就是对应请求对象的处理时间）
              */
-            Timer timer = registry.timer("gateway.request",
+            Timer timer = registry.timer(TIMER_NAME,
                     //以下为标签信息，用于记录数据源的详细信息
                     "uniqueId", ctx.getUniqueId(),
-                    "protocol", ctx.getProtocol(),
-                    "path", ctx.getRequest().getPath());
+                    "path", ctx.getRequest().getPath(),
+                    "protocol", ctx.getProtocol());
+            //Timer.Sample.stop方法会停止计时，然后计算当前时间与开始时间的差值，并将其上报到上述Timer实例中。
+            long duration = ctx.getAttribute(AttributeKey.PROMETHEUS_TIMER_SAMPLE).stop(timer);
+            log.info("请求: {} 处理完毕，耗时: {}", ctx.getRequest().getPath(), duration);
         }catch (Exception e){
-
+            //后置过滤器执行出现异常时，只做简单的日志打印和异常设置，然后继续往下执行
+            log.error(EXCEPTION_MSG + e.getMessage());
+            ctx.setThrowable(e);
         }finally {
-
+            /*
+             * 调用父类AbstractLinkedFilter的fireNext方法，
+             * 根据上下文的当前状态做出相关操作，然后触发/激发下一个过滤器组件
+             * （这是过滤器链能够顺序执行的关键）
+             */
+            super.fireNext(ctx);
         }
-
     }
     /**
      * @date: 2024-05-30 9:36
@@ -166,5 +180,4 @@ public class StatisticFilter extends AbstractGatewayFilter<StatisticFilter.Confi
             throw new RuntimeException("http服务器状态异常", e);
         }
     }
-
 }

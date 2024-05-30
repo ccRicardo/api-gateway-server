@@ -68,6 +68,7 @@ public class DefaultErrorFilter extends AbstractGatewayFilter<DefaultErrorFilter
             ctx.setResponse(GatewayResponse.buildGatewayResponse(responseCode));
         }catch (Exception e){
             log.error(EXCEPTION_MSG + e.getMessage());
+            ctx.setThrowable(e);
             //构建并设置网关响应对象
             ctx.setResponse(GatewayResponse.buildGatewayResponse(ResponseCode.INTERNAL_ERROR));
         }finally {
