@@ -16,6 +16,7 @@ import org.wyh.gateway.common.exception.ResponseException;
 import org.wyh.gateway.common.utils.AntPathMatcher;
 import org.wyh.gateway.core.context.AttributeKey;
 import org.wyh.gateway.core.context.GatewayContext;
+import org.wyh.gateway.core.filter.post.StatisticFilter;
 import org.wyh.gateway.core.request.GatewayRequest;
 
 import java.net.InetSocketAddress;
@@ -32,7 +33,7 @@ import static org.wyh.gateway.common.enumeration.ResponseCode.PATH_NO_MATCHED;
  * @BelongsPackage: org.wyh.core.helper
  * @Author: wyh
  * @Date: 2024-01-17 9:45
- * @Description: 处理请求对象的辅助类
+ * @Description: 该辅助类主要负责构建网关请求对象和对应的上下文对象。
  */
 public class RequestHelper {
     //ANT路径规则匹配器
@@ -68,7 +69,9 @@ public class RequestHelper {
                 .setGatewayRequest(gatewayRequest)
                 .setRule(rule)
                 .build();
-        //在网关上下文中设置“http方法调用”（上下文）参数
+        //开始统计（该上下文对象对应的）请求对象的处理时间
+        StatisticFilter.startSample(gatewayContext);
+        //在网关上下文中设置“http方法调用”参数
         gatewayContext.setAttribute(AttributeKey.HTTP_INVOKER, serviceInvoker);
         return gatewayContext;
     }
