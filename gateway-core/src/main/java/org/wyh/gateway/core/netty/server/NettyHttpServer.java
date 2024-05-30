@@ -72,14 +72,14 @@ public class NettyHttpServer implements LifeCycle {
         if(useEpoll()){
             //使用epoll相关的api，提高性能
             //DefaultThreadFactory是线程工厂，用于创建新的线程
-            this.eventLoopGroupBoss = new EpollEventLoopGroup(config.getEventLoopGroupBossNum(),
+            this.eventLoopGroupBoss = new EpollEventLoopGroup(config.getServerBossEventLoopGroupNum(),
                     new DefaultThreadFactory("netty-server-boss"));
-            this.eventLoopGroupWorker = new EpollEventLoopGroup((config.getEventLoopGroupWorkerNum()),
+            this.eventLoopGroupWorker = new EpollEventLoopGroup((config.getServerWorkerEventLoopGroupNum()),
                     new DefaultThreadFactory("netty-server-worker"));
         }else{
-            this.eventLoopGroupBoss = new NioEventLoopGroup(config.getEventLoopGroupBossNum(),
+            this.eventLoopGroupBoss = new NioEventLoopGroup(config.getServerBossEventLoopGroupNum(),
                     new DefaultThreadFactory("netty-server-boss"));
-            this.eventLoopGroupWorker = new NioEventLoopGroup((config.getEventLoopGroupWorkerNum()),
+            this.eventLoopGroupWorker = new NioEventLoopGroup((config.getServerWorkerEventLoopGroupNum()),
                     new DefaultThreadFactory("netty-server-worker"));
         }
 

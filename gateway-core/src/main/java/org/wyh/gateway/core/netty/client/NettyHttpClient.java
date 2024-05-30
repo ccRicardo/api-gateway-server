@@ -59,10 +59,10 @@ public class NettyHttpClient implements LifeCycle {
         //根据操作系统判断是否使用epoll。具体说明见NettyHttpServer中的相关注释
         if(RemotingUtil.isLinuxPlatform() && Epoll.isAvailable()){
             //使用epoll提高性能
-            this.eventLoopGroupWorker = new EpollEventLoopGroup((config.getEventLoopGroupWorkerNum()),
+            this.eventLoopGroupWorker = new EpollEventLoopGroup((config.getClientWorkerEventLoopGroupNum()),
                     new DefaultThreadFactory("netty-client-worker"));
         }else{
-            this.eventLoopGroupWorker = new NioEventLoopGroup((config.getEventLoopGroupWorkerNum()),
+            this.eventLoopGroupWorker = new NioEventLoopGroup((config.getClientWorkerEventLoopGroupNum()),
                     new DefaultThreadFactory("netty-client-worker"));
         }
         //初始化

@@ -36,10 +36,12 @@ public class Config {
     private String env = "dev";
     //用户鉴权过滤器中，生成jwt签名使用的密钥
     private String secretKey = "amknvqo390j0oinxbhw9u10jlg3nikbn";
-    //netty eventLoopGroup配置。Boss负责处理连接请求，Worker负责处理数据读写。
-    private int eventLoopGroupBossNum = 1;
-    //本系统中，netty server和client的worker EventLoopGroup大小是相同的
-    private int eventLoopGroupWorkerNum = Runtime.getRuntime().availableProcessors();
+    //netty server的boss eventLoopGroup的数量。Boss负责处理连接请求，Worker负责处理数据读写。
+    private int serverBossEventLoopGroupNum = 1;
+    //netty server的worker eventLoopGroup的数量
+    private int serverWorkerEventLoopGroupNum = Runtime.getRuntime().availableProcessors() / 2 + 1;
+    //AsyncHttpClient的worker eventLoopGroup的数量
+    private int clientWorkerEventLoopGroupNum = Runtime.getRuntime().availableProcessors() / 2 + 1;
     //http报文中数据的最大长度
     private int maxContentLength = 64 * 1024 * 1024;
     /*
@@ -91,7 +93,7 @@ public class Config {
     //缓冲队列的大小
     private int bufferSize = 16 * 1024;
     //处理请求的消费者线程的数量
-    private int threadCount = Runtime.getRuntime().availableProcessors();
+    private int threadCount = Runtime.getRuntime().availableProcessors() / 2 + 1;
     //消费者线程的名字前缀
     private String threadNamePrefix = "缓冲队列消费者线程";
     //等待策略，默认为阻塞（目前Disruptor只针对消费者等待生产者的情况应用了等待策略）
