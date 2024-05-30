@@ -8,3 +8,4 @@ org.wyh.gateway.core.filter.route.RouteFilter
 # 异常error
 org.wyh.gateway.core.filter.error.DefaultErrorFilter
 # 后置post
+org.wyh.gateway.core.filter.post.StatisticFilter
