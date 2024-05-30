@@ -102,7 +102,8 @@ public class StatisticFilter extends AbstractGatewayFilter<StatisticFilter.Confi
                     "protocol", ctx.getProtocol());
             //Timer.Sample.stop方法会停止计时，然后计算当前时间与开始时间的差值，并将其上报到上述Timer实例中。
             long duration = ctx.getAttribute(AttributeKey.PROMETHEUS_TIMER_SAMPLE).stop(timer);
-            log.info("请求: {} 处理完毕，耗时: {}", ctx.getRequest().getPath(), duration);
+            log.info("【统计过滤器】请求: {} 处理完毕，耗时: {} ms",
+                    ctx.getRequest().getPath(), (float)duration / 1000 / 1000);
         }catch (Exception e){
             //后置过滤器执行出现异常时，只做简单的日志打印和异常设置，然后继续往下执行
             log.error(EXCEPTION_MSG + e.getMessage());
