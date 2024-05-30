@@ -1,0 +1,90 @@
+#my gateway server相关资源的配置文件
+#deployment资源
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-gateway-server
+  name: my-gateway-server-deploy
+  namespace: api-gateway
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: my-gateway-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: my-gateway-server
+    spec:
+      containers:
+        #镜像名称
+        - image: my-gateway-server:new
+          imagePullPolicy: IfNotPresent
+          name: my-gateway-server
+          ports:
+            # 网关入口
+            - containerPort: 8888
+            # Prometheus数据拉取端口
+            - containerPort: 17777
+          # 通过环境变量的方式注入参数值
+          # 此处环境变量的值是my-nacos-server-service的clusterIP:port
+          env:
+            - name: GATEWAY_registryAddress
+              value:
+            - name: GATEWAY_configAddress
+              value:
+      restartPolicy: Always
+
+#ServiceMonitor资源，负责引导Prometheus从my-gateway-server-service的相应端口中拉取数据
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: my-gateway-server-monitor
+  labels:
+    app: my-gateway-server
+    namespace: api-gateway
+spec:
+  endpoints:
+    # Prometheus每30s拉取一次数据
+    - interval: 30s
+      # 此处是my-gateway-server-service中对应端口的名称
+      port: prometheus-pull-port
+      path: /prometheus
+  namespaceSelector:
+    matchNames:
+      - api-gateway
+  selector:
+    matchLabels:
+      app: my-gateway-server
+
+# hpa资源，负责根据自定义指标gateway_request_per_second来动态调整my-gateway-server-pod的数量
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-gateway-server-hpa
+  namespace: api-gateway
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: gateway_request_per_second
+        target:
+          type: AverageValue
+          averageValue: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-gateway-server-deploy
