@@ -38,7 +38,7 @@ prometheus adapter的作用是取代k8s自带的metrics server，来给hpa提供
 
 注意：可以将二，三中涉及的所有资源配置文件放到一个目录下，然后创建相应的namespace.yaml文件
 这样就可以切换到该目录下，使用kubectl apply -f ./ 命令一键启动整个网关系统。
-不过，资源的创建是有顺序的：需要先创建命名空间，再创建service，然后修改deployment环境变量中的注册和配置中心地址
+不过，资源的创建是有顺序的：需要先创建命名空间，再创建my-nacos-server-service，然后修改deployment环境变量中的注册和配置中心地址，最后创建剩余资源。
 
 
 四、ELK日志收集平台

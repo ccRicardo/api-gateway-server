@@ -1,0 +1,58 @@
+#my gateway backend相关资源的配置文件
+# deployment资源
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-gateway-backend
+  name: my-gateway-backend-deploy
+  namespace: api-gateway
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: my-gateway-backend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: my-gateway-backend
+    spec:
+      containers:
+        #镜像名称
+        - image: my-gateway-backend:new
+          imagePullPolicy: IfNotPresent
+          name: my-gateway-backend
+          ports:
+            - containerPort: 8083
+          # 通过环境变量的方式注入参数值
+          # 此处环境变量的值是my-nacos-server-service的clusterIP:port
+          env:
+            - name: api.registerAddress
+              value:
+      restartPolicy: Always
+
+# service资源
+# 网关pod实例访问后台pod实例实际上并不需要用到service（因为网关的注册中心已经保存了各后台pod实例的ip和port）
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: my-gateway-backend
+  name: my-gateway-backend-svc
+  namespace: api-gateway
+spec:
+  selector:
+    app: my-gateway-backend
+  ports:
+    - port: 8083
+      targetPort: 8083
+      name: gateway-backend-port
+  type: NodePort

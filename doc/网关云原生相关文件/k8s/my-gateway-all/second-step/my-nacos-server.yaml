@@ -1,0 +1,45 @@
+#my nacos server相关资源的配置文件
+# deployment资源
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-nacos-server
+  name: my-nacos-server-deploy
+  namespace: api-gateway
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: my-nacos-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: my-nacos-server
+    spec:
+      containers:
+        - image: my-nacos/nacos-server:v1.4.4
+          imagePullPolicy: IfNotPresent
+          name: my-nacos-server
+          ports:
+            - containerPort: 8848
+          env:
+            - name: MODE
+              value: standalone
+          volumeMounts:
+            - mountPath: /home/nacos/data
+              name: nacos-data-volume
+      volumes:
+        - name: nacos-data-volume
+          # 注意在相应node节点上事先拷贝好my-nacos-server容器中/home/nacos/data下的内容
+          hostPath:
+            # 要挂载的目录（需要在里面事先准备好内容，因为该目录下的内容会完全覆盖/home/nacos/data下的内容）
+            path: /root/nacos/data
+      restartPolicy: Always
