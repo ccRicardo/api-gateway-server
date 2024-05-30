@@ -40,6 +40,6 @@ spec:
         - name: nacos-data-volume
           # 注意在相应node节点上事先拷贝好my-nacos-server容器中/home/nacos/data下的内容
           hostPath:
-            # 要挂载的目录（需要在里面事先准备好内容，因为该目录下的内容会完全覆盖/home/nacos/data下的内容）
+            # 主机上的挂载目录（需要在里面事先准备好内容，因为该目录下的内容会完全覆盖/home/nacos/data下的内容）
             path: /root/nacos/data
       restartPolicy: Always

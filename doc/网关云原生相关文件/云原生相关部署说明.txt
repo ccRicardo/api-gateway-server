@@ -36,12 +36,14 @@ prometheus adapter的作用是取代k8s自带的metrics server，来给hpa提供
 4、配置hpa
 在prometheus web或者grafana界面通过sum(irate(gateway_request_seconds_count[1m])) by (pod)可以查看扩容过程
 
-注意：可以将二，三中涉及的所有资源配置文件放到一个目录下，然后创建相应的namespace.yaml文件
+四、总结：
+可以将二，三中涉及的所有资源配置文件放到一个目录下，然后创建相应的namespace.yaml文件
 这样就可以切换到该目录下，使用kubectl apply -f ./ 命令一键启动整个网关系统。
 不过，资源的创建是有顺序的：需要先创建命名空间，再创建my-nacos-server-service，然后修改deployment环境变量中的注册和配置中心地址，最后创建剩余资源。
+注意：在创建my-nacos-server的deployment资源之前，需要在各node的主机挂载目录中事先准备好数据，也就是my-nacos-server容器中/home/nacos/data下的内容
 
 
-四、ELK日志收集平台
+五、ELK日志收集平台
 1、配置filebeat
 filebeat通过DaemonSet方式部署到了集群的每个节点上，用于收集该节点的日志信息，然后推送给logstash
 2、配置logstash
