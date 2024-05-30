@@ -18,19 +18,19 @@
     </appender>
 
     <!--应用日志的文件输出-->
-    <appender name="CORELOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/gateway-core.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/gateway-core-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>500MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-            <maxHistory>20</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%X{traceId}] [%20.20thread] %40.40logger{1.} : %m%n</pattern>
-        </encoder>
-    </appender>
+<!--    <appender name="CORELOG" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+<!--        <file>${LOG_HOME}/gateway-core.log</file>-->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+<!--            <fileNamePattern>${LOG_HOME}/gateway-core-%d{yyyy-MM-dd}-%i.log</fileNamePattern>-->
+<!--            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">-->
+<!--                <maxFileSize>500MB</maxFileSize>-->
+<!--            </timeBasedFileNamingAndTriggeringPolicy>-->
+<!--            <maxHistory>20</maxHistory>-->
+<!--        </rollingPolicy>-->
+<!--        <encoder>-->
+<!--            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%X{traceId}] [%20.20thread] %40.40logger{1.} : %m%n</pattern>-->
+<!--        </encoder>-->
+<!--    </appender>-->
 
     <!--访问日志的文件输出-->
 <!--    <appender name="ACCESSLOG" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
@@ -48,9 +48,9 @@
 <!--    </appender>-->
 
     <!--配置日志记录器-->
-    <logger name="org.wyh.core.*" level="info">
-        <appender-ref ref="CORELOG"/>
-    </logger>
+<!--    <logger name="org.wyh.core.*" level="info">-->
+<!--        <appender-ref ref="CORELOG"/>-->
+<!--    </logger>-->
 
 <!--    <logger name="accessLog" level="info">-->
 <!--        <appender-ref ref="ACCESSLOG"/>-->
@@ -59,7 +59,7 @@
     <!--配置根记录器-->
     <root level="info">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="CORELOG"/>
+<!--        <appender-ref ref="CORELOG"/>-->
 <!--        <appender-ref ref="ACCESSLOG"/>-->
     </root>
 </configuration>
