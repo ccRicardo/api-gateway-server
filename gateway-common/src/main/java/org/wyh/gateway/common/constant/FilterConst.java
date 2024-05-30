@@ -56,5 +56,11 @@ public interface FilterConst {
     String DEFAULT_ERROR_FILTER_ID = "default_error_filter";
     String DEFAULT_ERROR_FILTER_NAME = "default_error_filter";
     int DEFAULT_ERROR_FILTER_ORDER = 10;
+    /*
+     * 统计过滤器相关常量
+     */
+    String STATISTIC_FILTER_ID = "statistic_filter";
+    String STATISTIC_FILTER_NAME = "statistic_filter";
+    int STATISTIC_FILTER_ORDER = Integer.MAX_VALUE;
 
 }

@@ -30,7 +30,7 @@ public abstract class AttributeKey<T> {
     public static final AttributeKey<ServiceInstance> SELECTED_INSTANCE = create(ServiceInstance.class);
     //表示“http方法调用”参数的key
     public static final AttributeKey<ServiceInvoker> HTTP_INVOKER = create(ServiceInvoker.class);
-    //表示”Prometheus Timer.Sample数据采集器“参数的key
+    //表示”Prometheus Timer.Sample数据采集器实例“参数的key
     public static final AttributeKey<Timer.Sample> PROMETHEUS_TIMER_SAMPLE = create(Timer.Sample.class);
     //表示”灰度标记“参数的key
     public static final AttributeKey<Boolean> GRAY_FLAG = create(Boolean.class);

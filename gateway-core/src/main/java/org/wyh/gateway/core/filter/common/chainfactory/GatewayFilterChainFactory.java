@@ -15,6 +15,7 @@ import java.util.*;
  * @Author: wyh
  * @Date: 2024-05-15 16:56
  * @Description: 网关的过滤器链工厂类，主要负责实现过滤器实例的SPI加载和过滤器链实例的构建，以及过滤器链的执行。
+                 注意：每个过滤器组件只加载一次，所以网关系统中每个过滤器实际上都是单例的。
  */
 @Slf4j
 public class GatewayFilterChainFactory extends AbstractFilterChainFactory{
