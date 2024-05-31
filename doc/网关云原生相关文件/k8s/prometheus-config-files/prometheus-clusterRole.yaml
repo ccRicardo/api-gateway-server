@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/version: 2.32.1
   name: prometheus-k8s
   namespace: monitoring
-# 需要修改的部分主要是在resources和verbs中添加更多的项
+# 需要修改的部分主要是在apiGroups的resources和verbs中添加更多的项
 rules:
 - apiGroups:
   - ""
