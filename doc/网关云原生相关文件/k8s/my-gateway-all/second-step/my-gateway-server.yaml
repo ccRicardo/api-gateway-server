@@ -74,7 +74,7 @@ metadata:
   name: my-gateway-server-monitor
   labels:
     app: my-gateway-server
-    namespace: api-gateway
+  namespace: api-gateway
 spec:
   endpoints:
     # Prometheus每30s拉取一次数据
