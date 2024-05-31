@@ -1,0 +1,12 @@
+2024-05-31 17:48:34,221 INFO dev@@my-api-gateway is changed, add it to push queue.
+
+2024-05-31 17:51:20,099 INFO dev@@my-api-gateway is changed, add it to push queue.
+
+2024-05-31 17:51:20,101 INFO serviceName: dev@@my-api-gateway changed, schedule push for: 26.26.26.1:57845, agent: Nacos-Java-Client:v1.4.4, key: 26.26.26.1,57845,118802219909300
+
+2024-05-31 17:51:20,101 INFO send udp packet: 26.26.26.1,57845,118802219909300
+
+2024-05-31 17:51:20,105 INFO received ack: {"type": "push-ack", "lastRefTime":"118802219909300", "data":""} from: 26.26.26.1:57845, cost: 4 ms, unacked: 0, total push: 1
+
+2024-05-31 17:51:39,346 INFO dev@@my-api-gateway is changed, add it to push queue.
+

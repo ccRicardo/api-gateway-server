@@ -1,0 +1,8 @@
+2024-05-31 17:48:33,211 INFO dev@@my-api-gateway {SYNC} {IP-NEW} cluster: DEFAULT, new ips size: 1, content: [192.168.100.1:8888:unknown:DEFAULT_1.0_true_false_DEFAULT]
+
+2024-05-31 17:48:33,220 INFO [IP-UPDATED] namespace: public, service: dev@@my-api-gateway, ips: 192.168.100.1:8888_true,
+
+2024-05-31 17:51:19,092 INFO [IP-UPDATED] namespace: public, service: dev@@my-api-gateway, ips: 192.168.100.1:8888_true,
+
+2024-05-31 17:51:38,330 INFO {POS} {IP-DISABLED} valid: 192.168.100.1:8888@DEFAULT@dev@@my-api-gateway, region: unknown, msg: client timeout after 15000, last beat: 1717149079092
+
