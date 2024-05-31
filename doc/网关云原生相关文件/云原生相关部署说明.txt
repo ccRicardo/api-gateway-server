@@ -45,15 +45,17 @@ prometheus adapter的作用是取代k8s自带的metrics server，来给hpa提供
 
 
 五、ELK日志收集平台
-1、配置filebeat
+1、给节点打标签
+需要通过命令kubectl label node xxx es=data，事先给各个节点打上es=data标签
+2、配置filebeat
 filebeat通过DaemonSet方式部署到了集群的每个节点上，用于收集该节点的日志信息，然后推送给logstash
-2、配置logstash
+3、配置logstash
 logstash的作用是对filebeat推送的日志信息进行汇总和清洗过滤，然后推送给es数据库
-3、配置elasticsearch
+4、配置elasticsearch
 es数据库的作用是持久化日志信息，并提供强大的检索功能
-4、配置kibana
+5、配置kibana
 kibana的作用是对日志信息进行可视化展示和管理
-5、启动ELK日志收集平台
+6、启动ELK日志收集平台
 将上述四个组件的配置文件放到一个目录下，并创建相应的namespace.yaml文件
 切换到该目录，使用kubectl apply -f ./ 命令即可启动整个ELK日志收集平台。
 
