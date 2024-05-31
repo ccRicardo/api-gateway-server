@@ -57,7 +57,8 @@ kibana的作用是对日志信息进行可视化展示和管理
 切换到该目录，使用kubectl apply -f ./ 命令即可启动整个ELK日志收集平台。
 
 六、补充说明
-1、从外部访问nacos，Prometheus，grafana或者kibana，只需要查看对应service的port。
+1、从外部访问nacos，Prometheus，grafana或者kibana，需要查看对应service的port。
+注意：有些服务只给出ip:port是访问不到的，需要加上路径。例如访问nacos，则需要加上/nacos
 
 
 
