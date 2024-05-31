@@ -39,7 +39,7 @@ prometheus adapter的作用是取代k8s自带的metrics server，来给hpa提供
 5、配置hpa
 在prometheus web或者grafana界面通过sum(irate(gateway_request_seconds_count[1m])) by (pod)可以查看扩容过程
 
-四、总结：
+四、网关整体系统部署：
 可以将二，三中涉及的所有资源配置文件放到一个目录下，然后创建相应的namespace.yaml文件
 这样就可以切换到该目录下，使用kubectl apply -f ./ 命令一键启动整个网关系统。
 不过，资源的创建是有顺序的：需要先创建命名空间，再创建my-nacos-server-service，然后修改deployment环境变量中的注册和配置中心地址，最后创建剩余资源。
@@ -66,8 +66,8 @@ kibana的作用是对日志信息进行可视化展示和管理
 注意：有些服务只给出ip:port是访问不到的，需要加上路径。例如访问nacos，则需要加上/nacos
 2、如果使用kubectl get查不到某个资源，很可能是该资源不在default命名空间内，需要加上-n xxx或--namespace=xxx
 例如，网关系统相关资源在api-gateway，Prometheus相关资源在monitoring，而elk相关资源在kube-logging
-3、对于一些简单的应用，可以不用部署到k8s集群中占用资源
-例如后台服务，nacos服务器和redis服务器
+3、对于一些简单的应用，可以不用部署到k8s集群中占用资源，例如后台服务，nacos服务器和redis服务器。
+如果要将它们部署到集群外部，那么可能需要修改资源配置文件中的主机地址环境变量。
 
 
 
