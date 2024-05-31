@@ -17,6 +17,7 @@ spec:
   version: v1beta1
   versionPriority: 100
 ---
+# 需要添加的部分如下：
 # 自定义的APIService，用于提供自定义指标数据
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
