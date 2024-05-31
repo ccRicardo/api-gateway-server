@@ -25,6 +25,7 @@ gateway-server需要提供一个接口供prometheus拉取指标数据。
 然后在k8s deployment和service中暴露相关端口。
 2、通过kube-prometheus部署prometheus应用
 从github下载kube-prometheus-release-0.10.zip，解压后依次运行两条命令，完成prometheus启动
+（kube-prometheus的详细部署步骤可以参考b站视频）
 创建ServiceMonitor，引导prometheus从gateway-server-service暴露的相应端口中拉取数据。
 通过prometheus web的status->targets页面可以判断prometheus拉取数据是否成功
 3、配置prometheus adapter
