@@ -66,6 +66,8 @@ kibana的作用是对日志信息进行可视化展示和管理
 注意：有些服务只给出ip:port是访问不到的，需要加上路径。例如访问nacos，则需要加上/nacos
 2、如果使用kubectl get查不到某个资源，很可能是该资源不在default命名空间内，需要加上-n xxx或--namespace=xxx
 例如，网关系统相关资源在api-gateway，Prometheus相关资源在monitoring，而elk相关资源在kube-logging
+3、对于一些简单的应用，可以不用部署到k8s集群中占用资源
+例如后台服务，nacos服务器和redis服务器
 
 
 
