@@ -61,13 +61,25 @@ kibana的作用是对日志信息进行可视化展示和管理
 将上述四个组件的配置文件放到一个目录下，并创建相应的namespace.yaml文件
 切换到该目录，使用kubectl apply -f ./ 命令即可启动整个ELK日志收集平台。
 
-六、补充说明
+六、将简单应用部署到k8s集群外部：
+对于一些简单的应用，可以不用部署到k8s集群中占用资源，例如后台服务，nacos服务器和redis服务器。
+下面简单说明一下上述三个组件在Windows平台上的部署
+1、后台服务
+将后台服务打成jar包，然后切换到相应目录，运行java -jar xxx即可
+注意：后台服务通常与nacos服务器部署在同一台主机上，所以注册中心地址通常就是环回地址
+2、nacos服务器
+下载Windows版的nacos，运行bin/startup.cmd即可
+3、redis服务器
+下载Windows版的redis，然后切换到相应目录，运行redis-server ./redis.windows.conf即可
+注意：启动前需要修改redis.windows.conf，将bind 127.0.0.1注释掉，并将protected-mode的中yes改为no
+4、修改gateway-server中注册中心，配置中心和redis服务器的地址
+
+
+七、补充说明
 1、从外部访问集群内的nacos，Prometheus，grafana或者kibana，需要查看对应service的nodePort。
 注意：有些服务只给出ip:nodePort是访问不到的，需要加上路径。例如访问nacos，则需要加上/nacos
 2、如果使用kubectl get查不到某个资源，很可能是该资源不在default命名空间内，需要加上-n xxx或--namespace=xxx
 例如，网关系统相关资源在api-gateway，Prometheus相关资源在monitoring，而elk相关资源在kube-logging
-3、对于一些简单的应用，可以不用部署到k8s集群中占用资源，例如后台服务，nacos服务器和redis服务器。
-如果要将它们部署到集群外部，那么可能需要修改资源配置文件中的主机地址环境变量。
 
 
 
