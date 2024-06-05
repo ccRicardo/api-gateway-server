@@ -99,6 +99,7 @@ NettyRequestSender：发送http异步请求
 用户鉴权的主要作用是从请求中获取jwt cookie，然后解析出相应的用户信息（即用户id）
 用户鉴权的主要类是UserAuthFilter
 该类使用了Jwts库
+todo: 补充：会议之眼源码中的controller目录中，有一个JWTTokenFilter，可以参考一下它的业务逻辑
 
 3、流量控制/限流
 流量控制的主要作用是在限制一段时间内的最大访问次数
