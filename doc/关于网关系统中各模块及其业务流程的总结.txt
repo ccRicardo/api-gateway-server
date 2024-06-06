@@ -56,6 +56,7 @@ NettyHttpServerHandler：构造请求的包装类对象，并交给请求处理�
 NettyCoreProcessor：请求处理器的基本实现，主要作用是构造上下文对象，交给过滤组件链处理，并进行异常处理
 DisruptorNettyCoreProcessor：在基本实现上加了缓冲队列。其核心过程如下：
 NettyHttpServerHandler将包装类对象放入队列（生产者）。NettyCoreProcessor从中取出包装类对象进行处理（消费者）
+todo: disruptor缓冲队列可以考虑换成儒猿项目中的缓冲队列
 
 3、客户端（服务调用）
 客户端的主要作用是进行请求转发/服务调用，并返回响应结果。
