@@ -23,6 +23,7 @@
 1、Bootstrap中的主线程，主要负责网关的初始化和启动
 2、NacosRegisterCenter.subscribeServicesChange方法中的scheduledThreadPool，主要负责定期执行doSubscribeServicesChange
 3、StatisticFilter中的单线程，主要负责运行http服务器，提供api给Prometheus拉取数据
+todo 感觉可以把项目中的所有本地缓存都替换成redis缓存
 
 二、模块详情
 该系统可以分为五个模块：通信模块，过滤组件模块，客户端（服务接入）模块，注册配置模块，以及云原生模块（实现中）
