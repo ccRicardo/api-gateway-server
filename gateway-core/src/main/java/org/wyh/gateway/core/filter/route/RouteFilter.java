@@ -36,6 +36,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
                  注意：发送请求和接收响应的工作都是在AsyncHttpClient的线程池中执行的。
                  而处理响应的complete方法具体执行在哪个线程，取决于是否使用hystrix
                  若使用hystrix，则complete执行在disruptor消费者线程池，否则执行在AsyncHttpClient线程池。
+                 本系统实际上只用hystrix实现了熔断功能，所谓的降级回退实际上只是熔断时会返回的消息，并不是真正的降级功能。
  */
 @Slf4j
 @FilterAspect(id=ROUTE_FILTER_ID,
