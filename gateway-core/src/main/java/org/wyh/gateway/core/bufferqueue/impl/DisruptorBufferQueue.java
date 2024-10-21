@@ -119,6 +119,7 @@ public class DisruptorBufferQueue<E> implements BufferQueue<E> {
          * 故合理推测：netty server中的线程数越多，生产者写入事件时发生冲突的可能性就越大。
          * 因此，系统的整体吞吐量不一定会增大。
          */
+        // TODO: 2024-10-21 根据Single Writer Principle策略，好像单生产者的并发想能更好 
         private ProducerType producerType = ProducerType.MULTI;
         //RingBuffer的大小。注意必须为2的n次方。
         private int bufferSize = 16 * 1024;
