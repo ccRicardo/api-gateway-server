@@ -291,6 +291,7 @@ public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
         }finally {
             try{
                 //需将响应结果写回客户端，将上下文状态设置为written
+                //在接下来的fireNext方法中，便会检测到上下文状态变为written，于是执行结果写回方法
                 ctx.setWritten();
                 /*
                  * 调用父类AbstractLinkedFilter的fireNext方法，
