@@ -45,6 +45,7 @@ import static org.wyh.gateway.common.constant.FilterConst.*;
               order=ROUTE_FILTER_ORDER)
 public class RouteFilter extends AbstractGatewayFilter<RouteFilter.Config> {
     // TODO: 2024-05-22 源码还在相应设置了上下文的RS，RR等属性
+    // TODO: 2024-10-22 建议将这个过滤器的名称改为服务调用过滤器 
     //异常消息
     private static final String EXCEPTION_MSG = "【路由过滤器】执行异常: ";
     /**
