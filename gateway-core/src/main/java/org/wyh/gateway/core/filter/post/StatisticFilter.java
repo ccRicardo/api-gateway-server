@@ -95,6 +95,7 @@ public class StatisticFilter extends AbstractGatewayFilter<StatisticFilter.Confi
              * 该实例会接收上下文参数中Timer.Sample实例统计到的数据
              * （也就是对应请求对象的处理时间）
              */
+            // TODO: 2024-11-28 此处也可记录一下请求是否成功等其他信息 
             Timer timer = registry.timer(TIMER_NAME,
                     //以下为标签信息，用于记录数据源的详细信息
                     "uniqueId", ctx.getUniqueId(),
