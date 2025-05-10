@@ -67,6 +67,11 @@
             <version>${logback-classic.version}</version>
         </dependency>
         <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j-api.version}</version>
@@ -77,6 +82,8 @@
             <artifactId>fastjson</artifactId>
             <version>${fastjson.verson}</version>
         </dependency>
+
+
     </dependencies>
     
 </project>

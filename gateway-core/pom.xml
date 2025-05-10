@@ -98,6 +98,7 @@
             <artifactId>hystrix-core</artifactId>
             <version>${hystrix-core.version}</version>
         </dependency>
+
     </dependencies>
     <!-- 利用maven-assembly-plugin将整个项目打成一个jar包，注意要将该插件放到启动模块的pom.xml中 -->
     <build>
